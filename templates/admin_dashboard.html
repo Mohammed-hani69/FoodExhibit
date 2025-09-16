@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة تحكم المدير - معرض الأغذية{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .stats-number {
+        font-size: 3rem;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 10px;
+    }
+    
+    .stats-label {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    
+    .admin-card {
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: none;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-white text-center mb-4">
+                <i class="fas fa-tachometer-alt me-3"></i>لوحة تحكم المدير
+            </h1>
+            <p class="text-center text-white opacity-75 lead">
+                إحصائيات شاملة لمعرض الأغذية
+            </p>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stats-card">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <span class="stats-number">{{ total_users }}</span>
+                <span class="stats-label">إجمالي المستخدمين</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <i class="fas fa-store fa-3x mb-3"></i>
+                <span class="stats-number">{{ total_exhibitors }}</span>
+                <span class="stats-label">إجمالي العارضين</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <i class="fas fa-box fa-3x mb-3"></i>
+                <span class="stats-number">{{ total_products }}</span>
+                <span class="stats-label">إجمالي المنتجات</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Management Cards -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card admin-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>إدارة المستخدمين
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>إدارة حسابات المستخدمين والأدوار والصلاحيات</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="alert('قريباً...')">
+                            <i class="fas fa-list me-2"></i>عرض المستخدمين
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="alert('قريباً...')">
+                            <i class="fas fa-user-plus me-2"></i>إضافة مستخدم
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card admin-card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-store me-2"></i>إدارة العارضين
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>إدارة ملفات العارضين ومنتجاتهم</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success" onclick="alert('قريباً...')">
+                            <i class="fas fa-list me-2"></i>عرض العارضين
+                        </button>
+                        <button class="btn btn-outline-success" onclick="alert('قريباً...')">
+                            <i class="fas fa-plus me-2"></i>إضافة عارض
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card admin-card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>التقارير والإحصائيات
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>عرض التقارير التفصيلية وإحصائيات الاستخدام</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-warning" onclick="alert('قريباً...')">
+                            <i class="fas fa-chart-line me-2"></i>تقرير المبيعات
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="alert('قريباً...')">
+                            <i class="fas fa-eye me-2"></i>إحصائيات الزيارات
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card admin-card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>إعدادات النظام
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>إدارة إعدادات المعرض والنظام العام</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-info" onclick="alert('قريباً...')">
+                            <i class="fas fa-palette me-2"></i>تخصيص الواجهة
+                        </button>
+                        <button class="btn btn-outline-info" onclick="alert('قريباً...')">
+                            <i class="fas fa-database me-2"></i>إدارة قاعدة البيانات
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

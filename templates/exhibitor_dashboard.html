@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة تحكم العارض - معرض الأغذية{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 10px;
+    }
+    
+    .exhibitor-card {
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: none;
+        margin-bottom: 20px;
+    }
+    
+    .quick-action {
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.3s ease;
+    }
+    
+    .quick-action:hover {
+        transform: translateY(-5px);
+        color: inherit;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-white text-center mb-4">
+                <i class="fas fa-store me-3"></i>لوحة تحكم العارض
+            </h1>
+            <p class="text-center text-white opacity-75 lead">
+                مرحباً {{ exhibitor.company_name }}
+            </p>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stats-card">
+                <i class="fas fa-eye fa-3x mb-3"></i>
+                <span class="stats-number">{{ total_visits }}</span>
+                <span class="stats-label">إجمالي الزيارات</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <i class="fas fa-heart fa-3x mb-3"></i>
+                <span class="stats-number">{{ total_favorites }}</span>
+                <span class="stats-label">إضافات للمفضلة</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <i class="fas fa-calendar fa-3x mb-3"></i>
+                <span class="stats-number">{{ total_appointments }}</span>
+                <span class="stats-label">المواعيد المحجوزة</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Exhibitor Info Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card exhibitor-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>معلومات جناحك
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            {% if exhibitor.logo_url %}
+                                <img src="{{ exhibitor.logo_url }}" alt="{{ exhibitor.company_name }}" 
+                                     class="img-fluid rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 120px; height: 120px;">
+                                    <i class="fas fa-store fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <h4>{{ exhibitor.company_name }}</h4>
+                            <p class="text-muted">{{ exhibitor.description }}</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>الموقع:</strong> {{ exhibitor.gallery_hall.replace('hall', 'القاعة ') }}<br>
+                                    <strong>التصنيف:</strong> #{{ exhibitor.ranking }}
+                                </div>
+                                <div class="col-md-6">
+                                    {% if exhibitor.contact_email %}
+                                    <strong>البريد الإلكتروني:</strong> {{ exhibitor.contact_email }}<br>
+                                    {% endif %}
+                                    {% if exhibitor.contact_phone %}
+                                    <strong>الهاتف:</strong> {{ exhibitor.contact_phone }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-md-6">
+            <a href="/exhibitor/{{ exhibitor.id }}" class="quick-action">
+                <div class="card exhibitor-card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-eye me-2"></i>عرض جناحك
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>شاهد كيف يراك الزوار في المعرض</p>
+                        <button class="btn btn-outline-success">
+                            <i class="fas fa-external-link-alt me-2"></i>زيارة الجناح
+                        </button>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card exhibitor-card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-box me-2"></i>إدارة المنتجات
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>إضافة وتعديل منتجاتك في المعرض</p>
+                    <button class="btn btn-outline-warning" onclick="alert('قريباً...')">
+                        <i class="fas fa-plus me-2"></i>إدارة المنتجات
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card exhibitor-card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>إدارة المواعيد
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>تحديد أوقات متاحة للقاءات مع الزوار</p>
+                    <button class="btn btn-outline-info" onclick="alert('قريباً...')">
+                        <i class="fas fa-clock me-2"></i>إدارة المواعيد
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card exhibitor-card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments me-2"></i>المحادثات
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>تواصل مع الزوار المهتمين بمنتجاتك</p>
+                    <button class="btn btn-outline-danger" onclick="alert('قريباً...')">
+                        <i class="fas fa-envelope me-2"></i>عرض المحادثات
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

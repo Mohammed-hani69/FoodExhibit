@@ -132,16 +132,7 @@
                     </div>
                 </div>
                 
-                <!-- Advertisement Walls -->
-                {% for ad in ads %}
-                <div class="advertisement-wall wall-{{ ad.position }}" 
-                     onclick="openAdLink('{{ ad.link_url }}')">
-                    <div class="text-center">
-                        <div class="mb-2">{{ ad.title }}</div>
-                        <small>اضغط للمزيد</small>
-                    </div>
-                </div>
-                {% endfor %}
+                <!-- 3D Advertisement Walls are now rendered in the Three.js scene -->
             </div>
             
             <!-- Gallery Info -->
@@ -193,7 +184,270 @@
 
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// OrbitControls from Three.js examples - embedded for compatibility
+(function(){
+    'use strict';
+    THREE.OrbitControls = function ( object, domElement ) {
+        this.object = object;
+        this.domElement = ( domElement !== undefined ) ? domElement : document;
+        this.enabled = true;
+        this.target = new THREE.Vector3();
+        this.enableZoom = true;
+        this.zoomSpeed = 1.0;
+        this.enableRotate = true;
+        this.rotateSpeed = 1.0;
+        this.enablePan = true;
+        this.panSpeed = 1.0;
+        this.enableDamping = false;
+        this.dampingFactor = 0.25;
+        this.minDistance = 0;
+        this.maxDistance = Infinity;
+        this.minZoom = 0;
+        this.maxZoom = Infinity;
+        this.minPolarAngle = 0;
+        this.maxPolarAngle = Math.PI;
+        this.minAzimuthAngle = - Infinity;
+        this.maxAzimuthAngle = Infinity;
+        
+        var scope = this;
+        var changeEvent = { type: 'change' };
+        var startEvent = { type: 'start' };
+        var endEvent = { type: 'end' };
+        var STATE = { NONE: - 1, ROTATE: 0, DOLLY: 1, PAN: 2, TOUCH_ROTATE: 3, TOUCH_DOLLY_PAN: 4 };
+        var state = STATE.NONE;
+        var EPS = 0.000001;
+        var spherical = new THREE.Spherical();
+        var sphericalDelta = new THREE.Spherical();
+        var scale = 1;
+        var panOffset = new THREE.Vector3();
+        var zoomChanged = false;
+        var rotateStart = new THREE.Vector2();
+        var rotateEnd = new THREE.Vector2();
+        var rotateDelta = new THREE.Vector2();
+        var panStart = new THREE.Vector2();
+        var panEnd = new THREE.Vector2();
+        var panDelta = new THREE.Vector2();
+        var dollyStart = new THREE.Vector2();
+        var dollyEnd = new THREE.Vector2();
+        var dollyDelta = new THREE.Vector2();
+        
+        this.update = function () {
+            var offset = new THREE.Vector3();
+            var quat = new THREE.Quaternion().setFromUnitVectors( object.up, new THREE.Vector3( 0, 1, 0 ) );
+            var quatInverse = quat.clone().inverse();
+            var lastPosition = new THREE.Vector3();
+            var lastQuaternion = new THREE.Quaternion();
+            return function update() {
+                var position = scope.object.position;
+                offset.copy( position ).sub( scope.target );
+                offset.applyQuaternion( quat );
+                spherical.setFromVector3( offset );
+                if ( scope.enableDamping ) {
+                    spherical.theta += sphericalDelta.theta * scope.dampingFactor;
+                    spherical.phi += sphericalDelta.phi * scope.dampingFactor;
+                } else {
+                    spherical.theta += sphericalDelta.theta;
+                    spherical.phi += sphericalDelta.phi;
+                }
+                spherical.theta = Math.max( scope.minAzimuthAngle, Math.min( scope.maxAzimuthAngle, spherical.theta ) );
+                spherical.phi = Math.max( scope.minPolarAngle, Math.min( scope.maxPolarAngle, spherical.phi ) );
+                spherical.makeSafe();
+                spherical.radius *= scale;
+                spherical.radius = Math.max( scope.minDistance, Math.min( scope.maxDistance, spherical.radius ) );
+                scope.target.add( panOffset );
+                offset.setFromSpherical( spherical );
+                offset.applyQuaternion( quatInverse );
+                position.copy( scope.target ).add( offset );
+                scope.object.lookAt( scope.target );
+                if ( scope.enableDamping === true ) {
+                    sphericalDelta.theta *= ( 1 - scope.dampingFactor );
+                    sphericalDelta.phi *= ( 1 - scope.dampingFactor );
+                } else {
+                    sphericalDelta.set( 0, 0, 0 );
+                }
+                scale = 1;
+                panOffset.set( 0, 0, 0 );
+                if ( zoomChanged || lastPosition.distanceToSquared( scope.object.position ) > EPS || 8 * ( 1 - lastQuaternion.dot( scope.object.quaternion ) ) > EPS ) {
+                    scope.dispatchEvent( changeEvent );
+                    lastPosition.copy( scope.object.position );
+                    lastQuaternion.copy( scope.object.quaternion );
+                    zoomChanged = false;
+                    return true;
+                }
+                return false;
+            };
+        }();
+        
+        this.reset = function () {
+            state = STATE.NONE;
+            scope.target.copy( scope.target0 );
+            scope.object.position.copy( scope.position0 );
+            scope.object.zoom = scope.zoom0;
+            scope.object.updateProjectionMatrix();
+            scope.dispatchEvent( changeEvent );
+            scope.update();
+        };
+        
+        // Event handlers for mouse/touch
+        function onMouseDown( event ) {
+            if ( scope.enabled === false ) return;
+            event.preventDefault();
+            switch ( event.button ) {
+                case 0:
+                    if ( scope.enableRotate === false ) return;
+                    rotateStart.set( event.clientX, event.clientY );
+                    state = STATE.ROTATE;
+                    break;
+                case 1:
+                    if ( scope.enablePan === false ) return;
+                    panStart.set( event.clientX, event.clientY );
+                    state = STATE.PAN;
+                    break;
+                case 2:
+                    if ( scope.enableZoom === false ) return;
+                    dollyStart.set( event.clientX, event.clientY );
+                    state = STATE.DOLLY;
+                    break;
+            }
+            if ( state !== STATE.NONE ) {
+                document.addEventListener( 'mousemove', onMouseMove, false );
+                document.addEventListener( 'mouseup', onMouseUp, false );
+                scope.dispatchEvent( startEvent );
+            }
+        }
+        
+        function onMouseMove( event ) {
+            if ( scope.enabled === false ) return;
+            event.preventDefault();
+            switch ( state ) {
+                case STATE.ROTATE:
+                    if ( scope.enableRotate === false ) return;
+                    rotateEnd.set( event.clientX, event.clientY );
+                    rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
+                    scope.rotateLeft( 2 * Math.PI * rotateDelta.x / scope.domElement.clientHeight );
+                    scope.rotateUp( 2 * Math.PI * rotateDelta.y / scope.domElement.clientHeight );
+                    rotateStart.copy( rotateEnd );
+                    scope.update();
+                    break;
+                case STATE.DOLLY:
+                    if ( scope.enableZoom === false ) return;
+                    dollyEnd.set( event.clientX, event.clientY );
+                    dollyDelta.subVectors( dollyEnd, dollyStart );
+                    if ( dollyDelta.y > 0 ) {
+                        scope.dollyIn( scope.getZoomScale() );
+                    } else if ( dollyDelta.y < 0 ) {
+                        scope.dollyOut( scope.getZoomScale() );
+                    }
+                    dollyStart.copy( dollyEnd );
+                    scope.update();
+                    break;
+                case STATE.PAN:
+                    if ( scope.enablePan === false ) return;
+                    panEnd.set( event.clientX, event.clientY );
+                    panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
+                    scope.pan( panDelta.x, panDelta.y );
+                    panStart.copy( panEnd );
+                    scope.update();
+                    break;
+            }
+        }
+        
+        function onMouseUp( event ) {
+            if ( scope.enabled === false ) return;
+            document.removeEventListener( 'mousemove', onMouseMove, false );
+            document.removeEventListener( 'mouseup', onMouseUp, false );
+            scope.dispatchEvent( endEvent );
+            state = STATE.NONE;
+        }
+        
+        function onMouseWheel( event ) {
+            if ( scope.enabled === false || scope.enableZoom === false || ( state !== STATE.NONE && state !== STATE.ROTATE ) ) return;
+            event.preventDefault();
+            event.stopPropagation();
+            scope.dispatchEvent( startEvent );
+            if ( event.deltaY < 0 ) {
+                scope.dollyOut( scope.getZoomScale() );
+            } else if ( event.deltaY > 0 ) {
+                scope.dollyIn( scope.getZoomScale() );
+            }
+            scope.update();
+            scope.dispatchEvent( endEvent );
+        }
+        
+        this.rotateLeft = function ( angle ) {
+            sphericalDelta.theta -= angle;
+        };
+        
+        this.rotateUp = function ( angle ) {
+            sphericalDelta.phi -= angle;
+        };
+        
+        this.dollyIn = function ( dollyScale ) {
+            scale /= dollyScale;
+        };
+        
+        this.dollyOut = function ( dollyScale ) {
+            scale *= dollyScale;
+        };
+        
+        this.getZoomScale = function () {
+            return Math.pow( 0.95, scope.zoomSpeed );
+        };
+        
+        this.pan = function ( deltaX, deltaY ) {
+            var element = scope.domElement === document ? scope.domElement.body : scope.domElement;
+            var targetDistance = scope.object.position.distanceTo( scope.target );
+            targetDistance *= Math.tan( ( scope.object.fov / 2 ) * Math.PI / 180.0 );
+            scope.panLeft( 2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix );
+            scope.panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
+        };
+        
+        this.panLeft = function ( distance, objectMatrix ) {
+            var v = new THREE.Vector3();
+            v.setFromMatrixColumn( objectMatrix, 0 );
+            v.multiplyScalar( - distance );
+            panOffset.add( v );
+        };
+        
+        this.panUp = function ( distance, objectMatrix ) {
+            var v = new THREE.Vector3();
+            if ( scope.screenSpacePanning === true ) {
+                v.setFromMatrixColumn( objectMatrix, 1 );
+            } else {
+                v.setFromMatrixColumn( objectMatrix, 0 );
+                v.crossVectors( scope.object.up, v );
+            }
+            v.multiplyScalar( distance );
+            panOffset.add( v );
+        };
+        
+        this.dispose = function () {
+            scope.domElement.removeEventListener( 'contextmenu', onContextMenu, false );
+            scope.domElement.removeEventListener( 'mousedown', onMouseDown, false );
+            scope.domElement.removeEventListener( 'wheel', onMouseWheel, false );
+            document.removeEventListener( 'mousemove', onMouseMove, false );
+            document.removeEventListener( 'mouseup', onMouseUp, false );
+        };
+        
+        function onContextMenu( event ) {
+            if ( scope.enabled === false ) return;
+            event.preventDefault();
+        }
+        
+        this.domElement.addEventListener( 'contextmenu', onContextMenu, false );
+        this.domElement.addEventListener( 'mousedown', onMouseDown, false );
+        this.domElement.addEventListener( 'wheel', onMouseWheel, false );
+        
+        this.target0 = this.target.clone();
+        this.position0 = this.object.position.clone();
+        this.zoom0 = this.object.zoom;
+    };
+    
+    THREE.OrbitControls.prototype = Object.create( THREE.EventDispatcher.prototype );
+    THREE.OrbitControls.prototype.constructor = THREE.OrbitControls;
+})();
+</script>
 
 <script>
 let scene, camera, renderer, controls;
@@ -313,6 +567,124 @@ function createGalleryWalls() {
     rightWall.rotation.y = -Math.PI / 2;
     rightWall.position.set(50, 10, 0);
     scene.add(rightWall);
+    
+    // Create 3D Advertisement walls
+    create3DAdvertisementWalls();
+}
+
+// Advertisement data from backend - fallback if no ads provided
+const adsData = [
+    {% for ad in ads %}
+    {
+        title: "{{ ad.title }}",
+        description: "{{ ad.description|default('اضغط للمزيد') }}",
+        link_url: "{{ ad.link_url }}",
+        position: "{{ ad.position }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+// If no ads from backend, create sample ads
+if (adsData.length === 0) {
+    adsData.push(
+        { title: "إعلان ترحيبي", description: "مرحباً بكم في معرض الأغذية", link_url: "#", position: "back" },
+        { title: "عروض خاصة", description: "احصل على خصومات حصرية", link_url: "#", position: "left" },
+        { title: "منتجات جديدة", description: "اكتشف أحدث المنتجات", link_url: "#", position: "right" }
+    );
+}
+
+let advertisementObjects = [];
+
+function create3DAdvertisementWalls() {
+    advertisementObjects.forEach(obj => scene.remove(obj));
+    advertisementObjects = [];
+    
+    adsData.forEach(ad => {
+        createAdvertisementPlane(ad);
+    });
+}
+
+function createAdvertisementPlane(adData) {
+    // Create canvas for advertisement texture
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 256;
+    const context = canvas.getContext('2d');
+    
+    // Create gradient background
+    const gradient = context.createLinearGradient(0, 0, 512, 256);
+    gradient.addColorStop(0, '#667eea');
+    gradient.addColorStop(1, '#764ba2');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 512, 256);
+    
+    // Add border
+    context.strokeStyle = '#ffffff';
+    context.lineWidth = 4;
+    context.strokeRect(0, 0, 512, 256);
+    
+    // Add title text
+    context.fillStyle = '#ffffff';
+    context.font = 'bold 32px Arial, sans-serif';
+    context.textAlign = 'center';
+    context.fillText(adData.title, 256, 80);
+    
+    // Add description text
+    context.font = '20px Arial, sans-serif';
+    context.fillText(adData.description, 256, 120);
+    
+    // Add call to action
+    context.font = '16px Arial, sans-serif';
+    context.fillText('اضغط للمزيد', 256, 180);
+    
+    // Add decorative elements
+    context.beginPath();
+    context.arc(50, 50, 20, 0, 2 * Math.PI);
+    context.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    context.fill();
+    
+    context.beginPath();
+    context.arc(462, 206, 15, 0, 2 * Math.PI);
+    context.fill();
+    
+    // Create texture and material
+    const texture = new THREE.CanvasTexture(canvas);
+    const adGeometry = new THREE.PlaneGeometry(15, 7.5);
+    const adMaterial = new THREE.MeshLambertMaterial({ 
+        map: texture,
+        transparent: true,
+        side: THREE.DoubleSide
+    });
+    
+    const advertisementPlane = new THREE.Mesh(adGeometry, adMaterial);
+    
+    // Position based on ad position
+    switch (adData.position) {
+        case 'back':
+            advertisementPlane.position.set(0, 12, -49);
+            break;
+        case 'left':
+            advertisementPlane.position.set(-49, 12, 0);
+            advertisementPlane.rotation.y = Math.PI / 2;
+            break;
+        case 'right':
+            advertisementPlane.position.set(49, 12, 0);
+            advertisementPlane.rotation.y = -Math.PI / 2;
+            break;
+        default:
+            // Default to back wall
+            advertisementPlane.position.set(0, 12, -49);
+    }
+    
+    // Store ad data for click interaction
+    advertisementPlane.userData = adData;
+    advertisementPlane.name = 'advertisement';
+    
+    // Add hover effect properties
+    advertisementPlane.originalScale = advertisementPlane.scale.clone();
+    
+    scene.add(advertisementPlane);
+    advertisementObjects.push(advertisementPlane);
 }
 
 function loadHall(hallName) {
@@ -395,10 +767,31 @@ function onMouseClick(event) {
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
     
-    const intersects = raycaster.intersectObjects(exhibitorObjects, true);
+    // Check for advertisement clicks first
+    const adIntersects = raycaster.intersectObjects(advertisementObjects, false);
+    if (adIntersects.length > 0) {
+        const clickedAd = adIntersects[0].object;
+        if (clickedAd.userData && clickedAd.userData.link_url) {
+            // Add click animation
+            clickedAd.scale.set(1.1, 1.1, 1.1);
+            setTimeout(() => {
+                clickedAd.scale.copy(clickedAd.originalScale);
+            }, 200);
+            
+            // Open advertisement link
+            if (clickedAd.userData.link_url !== '#') {
+                window.open(clickedAd.userData.link_url, '_blank');
+            } else {
+                alert(`إعلان: ${clickedAd.userData.title}\n${clickedAd.userData.description}`);
+            }
+        }
+        return;
+    }
     
-    if (intersects.length > 0) {
-        const clickedExhibitor = intersects[0].object.parent;
+    // Check for exhibitor clicks
+    const exhibitorIntersects = raycaster.intersectObjects(exhibitorObjects, true);
+    if (exhibitorIntersects.length > 0) {
+        const clickedExhibitor = exhibitorIntersects[0].object.parent;
         if (clickedExhibitor.userData) {
             showExhibitorInfo(clickedExhibitor.userData);
             selectedExhibitor = clickedExhibitor.userData;

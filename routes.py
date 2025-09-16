@@ -6,6 +6,8 @@ from models import *
 from replit_auth import require_login, make_replit_blueprint
 from datetime import datetime, timedelta
 import logging
+from sqlalchemy.exc import OperationalError
+from functools import wraps
 
 # Register Replit Auth blueprint
 app.register_blueprint(make_replit_blueprint(), url_prefix="/auth")
@@ -207,30 +209,156 @@ def book_appointment():
     slot_id = data.get('slot_id')
     notes = data.get('notes', '')
     
-    slot = AvailableSlot.query.get_or_404(slot_id)
+    if not slot_id:
+        return jsonify({'status': 'error', 'message': 'معرف الموعد مطلوب'})
     
-    if not slot.is_available:
-        return jsonify({'status': 'error', 'message': 'هذا الموعد غير متاح'})
+    try:
+        # Use database transaction with proper locking to prevent race conditions
+        with db.session.begin():
+            # Re-check availability with row-level lock
+            slot = AvailableSlot.query.with_for_update().get(slot_id)
+            
+            if not slot:
+                return jsonify({'status': 'error', 'message': 'الموعد غير موجود'})
+                
+            if not slot.is_available:
+                return jsonify({'status': 'error', 'message': 'هذا الموعد غير متاح'})
+            
+            # Create appointment
+            appointment = Appointment()
+            appointment.user_id = current_user.id
+            appointment.exhibitor_id = slot.exhibitor_id
+            appointment.slot_id = slot_id
+            appointment.appointment_date = slot.start_time
+            appointment.duration_minutes = slot.duration_minutes
+            appointment.notes = notes
+            
+            # Mark slot as unavailable
+            slot.is_available = False
+            
+            db.session.add(appointment)
+        
+        # Track appointment booking (outside transaction)
+        track_user_action('appointment', 'booking', exhibitor_id=slot.exhibitor_id)
+        
+        return jsonify({'status': 'success', 'message': 'تم حجز الموعد بنجاح'})
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error booking appointment: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'حدث خطأ في حجز الموعد'})
+
+# API Routes for JavaScript functionality
+
+@app.route('/api/chat-history/<int:exhibitor_id>')
+@require_login
+def get_chat_history(exhibitor_id):
+    """Get chat history for an exhibitor"""
+    try:
+        messages = ChatMessage.query.filter_by(
+            exhibitor_id=exhibitor_id,
+            user_id=current_user.id
+        ).order_by(ChatMessage.created_at).limit(50).all()
+        
+        chat_data = []
+        for message in messages:
+            chat_data.append({
+                'message': message.message,
+                'sender_type': 'exhibitor' if message.is_from_exhibitor else 'user',
+                'timestamp': message.created_at.isoformat()
+            })
+        
+        return jsonify({
+            'status': 'success',
+            'messages': chat_data
+        })
+    except Exception as e:
+        logging.error(f"Error loading chat history: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'حدث خطأ في تحميل المحادثة'})
+
+@app.route('/api/product/<int:product_id>')
+@require_login
+def get_product_details(product_id):
+    """Get product details for modal display"""
+    try:
+        product = Product.query.get_or_404(product_id)
+        
+        product_data = {
+            'id': product.id,
+            'name': product.name,
+            'description': product.description,
+            'price': product.price,
+            'currency': product.currency,
+            'image_url': product.image_url,
+            'exhibitor_id': product.exhibitor_id,
+            'is_featured': product.is_featured
+        }
+        
+        return jsonify({
+            'status': 'success',
+            'product': product_data
+        })
+    except Exception as e:
+        logging.error(f"Error loading product details: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'حدث خطأ في تحميل المنتج'})
+
+@app.route('/api/available-slots/<int:exhibitor_id>')
+@require_login
+def get_available_slots(exhibitor_id):
+    """Get available appointment slots for calendar"""
+    try:
+        date_filter = request.args.get('date')
+        
+        query = AvailableSlot.query.filter_by(
+            exhibitor_id=exhibitor_id,
+            is_available=True
+        )
+        
+        if date_filter:
+            # Filter by specific date
+            from datetime import datetime as dt
+            target_date = dt.strptime(date_filter, '%Y-%m-%d').date()
+            query = query.filter(db.func.date(AvailableSlot.start_time) == target_date)
+        else:
+            # Get next 30 days
+            end_date = datetime.now() + timedelta(days=30)
+            query = query.filter(AvailableSlot.start_time >= datetime.now())
+            query = query.filter(AvailableSlot.start_time <= end_date)
+        
+        slots = query.order_by(AvailableSlot.start_time).all()
+        
+        if date_filter:
+            # Return slots for specific date
+            slot_data = []
+            for slot in slots:
+                slot_data.append({
+                    'id': slot.id,
+                    'start_time': slot.start_time.strftime('%H:%M'),
+                    'end_time': (slot.start_time + timedelta(minutes=slot.duration_minutes)).strftime('%H:%M'),
+                    'duration_minutes': slot.duration_minutes
+                })
+            
+            return jsonify({
+                'status': 'success',
+                'slots': slot_data
+            })
+        else:
+            # Return events for calendar
+            events = []
+            for slot in slots:
+                events.append({
+                    'id': slot.id,
+                    'title': f'موعد متاح ({slot.duration_minutes} دقيقة)',
+                    'start': slot.start_time.isoformat(),
+                    'end': (slot.start_time + timedelta(minutes=slot.duration_minutes)).isoformat(),
+                    'color': '#28a745'
+                })
+            
+            return events
     
-    # Create appointment
-    appointment = Appointment()
-    appointment.user_id = current_user.id
-    appointment.exhibitor_id = slot.exhibitor_id
-    appointment.slot_id = slot_id
-    appointment.appointment_date = slot.start_time
-    appointment.duration_minutes = slot.duration_minutes
-    appointment.notes = notes
-    
-    # Mark slot as unavailable
-    slot.is_available = False
-    
-    db.session.add(appointment)
-    db.session.commit()
-    
-    # Track appointment booking
-    track_user_action('appointment', 'booking', exhibitor_id=slot.exhibitor_id)
-    
-    return jsonify({'status': 'success', 'message': 'تم حجز الموعد بنجاح'})
+    except Exception as e:
+        logging.error(f"Error loading available slots: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'حدث خطأ في تحميل المواعيد المتاحة'})
 
 # Socket.IO events for chat system
 @socketio.on('join_chat')
