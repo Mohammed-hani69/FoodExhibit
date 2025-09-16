@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}معرض الأغذية - الصفحة الرئيسية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row align-items-center min-vh-100">
+        <div class="col-lg-6">
+            <div class="text-center text-lg-start text-white">
+                <h1 class="display-4 fw-bold mb-4">
+                    مرحباً بكم في معرض الأغذية
+                </h1>
+                <p class="lead mb-4">
+                    اكتشف أفضل العارضين والمنتجات الغذائية في تجربة ثلاثية الأبعاد فريدة
+                </p>
+                <a href="{{ url_for('replit_auth.login') }}" class="btn btn-primary btn-lg px-5 py-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    ابدأ التجربة
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="text-center">
+                <div class="gallery-3d">
+                    <div class="card bg-white bg-opacity-10 backdrop-blur p-4">
+                        <h3 class="text-white mb-3">المعايير المميزة</h3>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="feature-card text-center text-white">
+                                    <i class="fas fa-cube fa-2x mb-2"></i>
+                                    <p>تجربة ثلاثية الأبعاد</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="feature-card text-center text-white">
+                                    <i class="fas fa-comments fa-2x mb-2"></i>
+                                    <p>تواصل مباشر</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="feature-card text-center text-white">
+                                    <i class="fas fa-calendar fa-2x mb-2"></i>
+                                    <p>حجز المواعيد</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="feature-card text-center text-white">
+                                    <i class="fas fa-heart fa-2x mb-2"></i>
+                                    <p>قائمة المفضلة</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Products -->
+    {% if featured_products %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="text-white text-center mb-4">المنتجات المميزة</h2>
+            <div class="row g-4">
+                {% for product in featured_products %}
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.description[:100] }}...</p>
+                            <a href="{{ url_for('replit_auth.login') }}" class="btn btn-primary">
+                                اكتشف المزيد
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}غير مصرح - 403{% endblock %}
+
+{% block content %}
+<div class="container text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <i class="fas fa-ban fa-5x text-danger mb-4"></i>
+                    <h1 class="h2 mb-4">غير مصرح لك بالوصول</h1>
+                    <p class="lead mb-4">عذراً، ليس لديك صلاحية للوصول لهذه الصفحة</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        العودة للرئيسية
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

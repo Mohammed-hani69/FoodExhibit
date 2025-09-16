@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}معرض الأغذية - الرئيسية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center text-white mb-5">
+                <h1 class="display-4 fw-bold">
+                    أهلاً وسهلاً {{ user.first_name }}
+                </h1>
+                <p class="lead">اكتشف معرض الأغذية الآن</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-building fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">قاعات المعرض</h5>
+                    <p class="card-text">استكشف القاعات ثلاثية الأبعاد</p>
+                    <a href="{{ url_for('gallery') }}" class="btn btn-primary">
+                        دخول القاعات
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-box fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">صندوقي</h5>
+                    <p class="card-text">العارضين والمنتجات المفضلة</p>
+                    <a href="{{ url_for('my_box') }}" class="btn btn-success">
+                        عرض الصندوق
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-chart-bar fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">لوحة التحكم</h5>
+                    <p class="card-text">إدارة حسابك ومواعيدك</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-warning">
+                        لوحة التحكم
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Halls Info -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-white text-center mb-4">قاعات المعرض</h2>
+            <div class="row g-4">
+                {% for hall, count in halls.items() %}
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-warehouse fa-2x text-primary mb-3"></i>
+                            <h5 class="card-title">{{ hall.replace('hall', 'القاعة ') }}</h5>
+                            <p class="card-text">{{ count }} عارض</p>
+                            <a href="{{ url_for('gallery_hall', hall=hall) }}" class="btn btn-outline-primary">
+                                زيارة القاعة
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Products -->
+    {% if featured_products %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="text-white text-center mb-4">المنتجات المميزة</h2>
+            <div class="row g-4">
+                {% for product in featured_products %}
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <i class="fas fa-utensils fa-2x text-primary mb-3"></i>
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.description[:100] }}...</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">{{ product.price }} {{ product.currency }}</span>
+                                <button onclick="toggleFavoriteProduct({{ product.id }})" 
+                                        class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleFavoriteProduct(productId) {
+    fetch(`/toggle-favorite-product/${productId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update UI feedback
+            alert(data.action === 'added' ? 'تم إضافة المنتج للمفضلة' : 'تم إزالة المنتج من المفضلة');
+        }
+    });
+}
+</script>
+{% endblock %}
