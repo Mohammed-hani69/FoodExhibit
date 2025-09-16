@@ -1,0 +1,484 @@
+{% extends "base.html" %}
+
+{% block title %}معرض الأغذية - القاعات ثلاثية الأبعاد{% endblock %}
+
+{% block extra_css %}
+<style>
+    #gallery-3d {
+        width: 100%;
+        height: 600px;
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .hall-selector {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 100;
+    }
+    
+    .exhibitor-info {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        max-width: 300px;
+        display: none;
+        z-index: 100;
+    }
+    
+    .gallery-controls {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 100;
+    }
+    
+    .control-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin: 5px;
+        background: rgba(255,255,255,0.9);
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .advertisement-wall {
+        position: fixed;
+        width: 200px;
+        height: 150px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        z-index: 50;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+    
+    .advertisement-wall:hover {
+        transform: scale(1.05);
+    }
+    
+    .wall-left {
+        left: 50px;
+        top: 50%;
+        transform: translateY(-50%) rotateY(90deg);
+    }
+    
+    .wall-right {
+        right: 50px;
+        top: 50%;
+        transform: translateY(-50%) rotateY(-90deg);
+    }
+    
+    .wall-back {
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-white text-center mb-4">قاعات المعرض ثلاثية الأبعاد</h1>
+            
+            <!-- 3D Gallery Container -->
+            <div id="gallery-3d" class="position-relative">
+                <!-- Hall Selector -->
+                <div class="hall-selector">
+                    <select class="form-select" id="hallSelector" onchange="changeHall()">
+                        <option value="hall1">القاعة الأولى</option>
+                        <option value="hall2">القاعة الثانية</option>
+                        <option value="hall3">القاعة الثالثة</option>
+                    </select>
+                </div>
+                
+                <!-- Gallery Controls -->
+                <div class="gallery-controls">
+                    <button class="control-btn" onclick="resetCamera()" title="إعادة تعيين الكاميرا">
+                        <i class="fas fa-home"></i>
+                    </button>
+                    <button class="control-btn" onclick="toggleFullscreen()" title="ملء الشاشة">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="control-btn" onclick="toggleWireframe()" title="الإطار الشبكي">
+                        <i class="fas fa-cube"></i>
+                    </button>
+                </div>
+                
+                <!-- Exhibitor Info Panel -->
+                <div id="exhibitor-info" class="exhibitor-info">
+                    <h5 id="exhibitor-name">اسم العارض</h5>
+                    <p id="exhibitor-description">وصف العارض</p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" onclick="visitExhibitor()">
+                            زيارة العارض
+                        </button>
+                        <button class="btn btn-outline-light btn-sm" onclick="toggleFavoriteExhibitor()">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Advertisement Walls -->
+                {% for ad in ads %}
+                <div class="advertisement-wall wall-{{ ad.position }}" 
+                     onclick="openAdLink('{{ ad.link_url }}')">
+                    <div class="text-center">
+                        <div class="mb-2">{{ ad.title }}</div>
+                        <small>اضغط للمزيد</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Gallery Info -->
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">كيفية التنقل في المعرض</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-mouse me-2 text-primary"></i>انقر واسحب للنظر حولك</li>
+                                        <li><i class="fas fa-scroll me-2 text-primary"></i>استخدم العجلة للتكبير والتصغير</li>
+                                        <li><i class="fas fa-hand-pointer me-2 text-primary"></i>انقر على العارضين لعرض المعلومات</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-arrows-alt me-2 text-success"></i>استخدم مفاتيح WASD للحركة</li>
+                                        <li><i class="fas fa-expand me-2 text-success"></i>استخدم وضع ملء الشاشة للتجربة الكاملة</li>
+                                        <li><i class="fas fa-heart me-2 text-danger"></i>أضف العارضين المفضلين لصندوقك</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">إحصائيات المعرض</h5>
+                            <ul class="list-unstyled">
+                                {% for hall, exhibitors in exhibitors_by_hall.items() %}
+                                <li class="d-flex justify-content-between">
+                                    <span>{{ hall.replace('hall', 'القاعة ') }}</span>
+                                    <span class="badge bg-primary">{{ exhibitors|length }} عارض</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+let scene, camera, renderer, controls;
+let exhibitorObjects = [];
+let selectedExhibitor = null;
+let currentHall = 'hall1';
+
+// Exhibitor data from backend
+const exhibitorsData = {
+    {% for hall, exhibitors in exhibitors_by_hall.items() %}
+    "{{ hall }}": [
+        {% for exhibitor in exhibitors %}
+        {
+            id: {{ exhibitor.id }},
+            name: "{{ exhibitor.company_name }}",
+            description: "{{ exhibitor.description[:100] }}...",
+            position: {
+                x: {{ exhibitor.position_x }},
+                y: {{ exhibitor.position_y }},
+                z: {{ exhibitor.position_z }}
+            },
+            ranking: {{ exhibitor.ranking }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]{% if not loop.last %},{% endif %}
+    {% endfor %}
+};
+
+function initGallery() {
+    // Scene setup
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB); // Sky blue
+    
+    // Camera setup
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / 600, 0.1, 1000);
+    camera.position.set(0, 5, 15);
+    
+    // Renderer setup
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(document.getElementById('gallery-3d').offsetWidth, 600);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
+    document.getElementById('gallery-3d').appendChild(renderer.domElement);
+    
+    // Controls
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.enableZoom = true;
+    
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(50, 50, 50);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+    
+    // Create gallery floor
+    createGalleryFloor();
+    
+    // Create walls
+    createGalleryWalls();
+    
+    // Load current hall
+    loadHall(currentHall);
+    
+    // Animation loop
+    animate();
+    
+    // Event listeners
+    window.addEventListener('resize', onWindowResize, false);
+    renderer.domElement.addEventListener('click', onMouseClick, false);
+}
+
+function createGalleryFloor() {
+    const floorGeometry = new THREE.PlaneGeometry(100, 100);
+    const floorMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.8
+    });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+    
+    // Add grid
+    const gridHelper = new THREE.GridHelper(100, 50, 0x888888, 0xcccccc);
+    scene.add(gridHelper);
+}
+
+function createGalleryWalls() {
+    const wallGeometry = new THREE.PlaneGeometry(100, 20);
+    const wallMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0xe6e6e6,
+        transparent: true,
+        opacity: 0.7
+    });
+    
+    // Back wall
+    const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    backWall.position.set(0, 10, -50);
+    scene.add(backWall);
+    
+    // Left wall
+    const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    leftWall.rotation.y = Math.PI / 2;
+    leftWall.position.set(-50, 10, 0);
+    scene.add(leftWall);
+    
+    // Right wall
+    const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    rightWall.rotation.y = -Math.PI / 2;
+    rightWall.position.set(50, 10, 0);
+    scene.add(rightWall);
+}
+
+function loadHall(hallName) {
+    // Clear existing exhibitors
+    exhibitorObjects.forEach(obj => scene.remove(obj));
+    exhibitorObjects = [];
+    
+    // Load exhibitors for this hall
+    const exhibitors = exhibitorsData[hallName] || [];
+    
+    exhibitors.forEach((exhibitor, index) => {
+        createExhibitorStand(exhibitor, index);
+    });
+}
+
+function createExhibitorStand(exhibitor, index) {
+    // Create exhibitor stand
+    const standGroup = new THREE.Group();
+    
+    // Base platform
+    const baseGeometry = new THREE.CylinderGeometry(3, 3, 0.5, 8);
+    const baseMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0x8B4513 // Brown
+    });
+    const base = new THREE.Mesh(baseGeometry, baseMaterial);
+    base.castShadow = true;
+    standGroup.add(base);
+    
+    // Exhibitor booth
+    const boothGeometry = new THREE.BoxGeometry(4, 4, 2);
+    const boothMaterial = new THREE.MeshLambertMaterial({ 
+        color: `hsl(${(exhibitor.ranking * 137.5) % 360}, 70%, 60%)`
+    });
+    const booth = new THREE.Mesh(boothGeometry, boothMaterial);
+    booth.position.y = 2.5;
+    booth.castShadow = true;
+    standGroup.add(booth);
+    
+    // Name plate
+    const nameGeometry = new THREE.PlaneGeometry(3, 0.5);
+    const nameMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
+    const nameplate = new THREE.Mesh(nameGeometry, nameMaterial);
+    nameplate.position.set(0, 1, 2.1);
+    standGroup.add(nameplate);
+    
+    // Position the stand
+    const angle = (index / exhibitorsData[currentHall].length) * Math.PI * 2;
+    const radius = 20 - (exhibitor.ranking * 2); // Closer to center = higher ranking
+    
+    standGroup.position.x = Math.cos(angle) * radius;
+    standGroup.position.z = Math.sin(angle) * radius;
+    standGroup.position.y = 0.25;
+    
+    // Store exhibitor data
+    standGroup.userData = exhibitor;
+    
+    scene.add(standGroup);
+    exhibitorObjects.push(standGroup);
+}
+
+function onMouseClick(event) {
+    const mouse = new THREE.Vector2();
+    const rect = renderer.domElement.getBoundingClientRect();
+    
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    
+    const intersects = raycaster.intersectObjects(exhibitorObjects, true);
+    
+    if (intersects.length > 0) {
+        const clickedExhibitor = intersects[0].object.parent;
+        if (clickedExhibitor.userData) {
+            showExhibitorInfo(clickedExhibitor.userData);
+            selectedExhibitor = clickedExhibitor.userData;
+        }
+    } else {
+        hideExhibitorInfo();
+        selectedExhibitor = null;
+    }
+}
+
+function showExhibitorInfo(exhibitor) {
+    document.getElementById('exhibitor-name').textContent = exhibitor.name;
+    document.getElementById('exhibitor-description').textContent = exhibitor.description;
+    document.getElementById('exhibitor-info').style.display = 'block';
+}
+
+function hideExhibitorInfo() {
+    document.getElementById('exhibitor-info').style.display = 'none';
+}
+
+function visitExhibitor() {
+    if (selectedExhibitor) {
+        window.location.href = `/exhibitor/${selectedExhibitor.id}`;
+    }
+}
+
+function toggleFavoriteExhibitor() {
+    if (selectedExhibitor) {
+        fetch(`/toggle-favorite-exhibitor/${selectedExhibitor.id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.action === 'added' ? 'تم إضافة العارض للمفضلة' : 'تم إزالة العارض من المفضلة');
+            }
+        });
+    }
+}
+
+function changeHall() {
+    const hallSelector = document.getElementById('hallSelector');
+    currentHall = hallSelector.value;
+    loadHall(currentHall);
+}
+
+function resetCamera() {
+    camera.position.set(0, 5, 15);
+    controls.reset();
+}
+
+function toggleFullscreen() {
+    const galleryContainer = document.getElementById('gallery-3d');
+    if (document.fullscreenElement) {
+        document.exitFullscreen();
+    } else {
+        galleryContainer.requestFullscreen();
+    }
+}
+
+function toggleWireframe() {
+    exhibitorObjects.forEach(obj => {
+        obj.children.forEach(child => {
+            if (child.material) {
+                child.material.wireframe = !child.material.wireframe;
+            }
+        });
+    });
+}
+
+function openAdLink(url) {
+    if (url) {
+        window.open(url, '_blank');
+    }
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / 600;
+    camera.updateProjectionMatrix();
+    renderer.setSize(document.getElementById('gallery-3d').offsetWidth, 600);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+// Initialize gallery when page loads
+document.addEventListener('DOMContentLoaded', initGallery);
+</script>
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}{{ hall.replace('hall', 'القاعة ') }} - معرض الأغذية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-white">{{ hall.replace('hall', 'القاعة ') }}</h1>
+                <a href="{{ url_for('gallery') }}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-right me-2"></i>العودة للقاعات
+                </a>
+            </div>
+            
+            <!-- Exhibitors Grid -->
+            <div class="row g-4">
+                {% for exhibitor in exhibitors %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 exhibitor-card" data-ranking="{{ exhibitor.ranking }}">
+                        <div class="card-header bg-primary text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ exhibitor.company_name }}</h5>
+                                <span class="badge bg-light text-dark">المرتبة {{ exhibitor.ranking }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            {% if exhibitor.logo_url %}
+                            <img src="{{ exhibitor.logo_url }}" class="card-img-top mb-3" alt="{{ exhibitor.company_name }}" style="height: 120px; object-fit: cover;">
+                            {% else %}
+                            <div class="text-center mb-3">
+                                <i class="fas fa-store fa-4x text-muted"></i>
+                            </div>
+                            {% endif %}
+                            
+                            <p class="card-text">{{ exhibitor.description[:150] }}...</p>
+                            
+                            <div class="row text-center mb-3">
+                                <div class="col-4">
+                                    <i class="fas fa-box fa-lg text-primary"></i>
+                                    <small class="d-block">{{ exhibitor.products|length }} منتج</small>
+                                </div>
+                                <div class="col-4">
+                                    <i class="fas fa-eye fa-lg text-info"></i>
+                                    <small class="d-block">زيارات</small>
+                                </div>
+                                <div class="col-4">
+                                    <i class="fas fa-star fa-lg text-warning"></i>
+                                    <small class="d-block">تقييم</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('exhibitor_profile', exhibitor_id=exhibitor.id) }}" 
+                                   class="btn btn-primary flex-fill">
+                                    زيارة الجناح
+                                </a>
+                                <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }})" 
+                                        class="btn btn-outline-danger" title="إضافة للمفضلة">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- No Exhibitors Message -->
+            {% if not exhibitors %}
+            <div class="text-center text-white">
+                <i class="fas fa-store fa-5x mb-4 opacity-50"></i>
+                <h3>لا توجد عارضين في هذه القاعة حالياً</h3>
+                <p class="lead">تفقد القاعات الأخرى أو عد لاحقاً</p>
+                <a href="{{ url_for('gallery') }}" class="btn btn-primary">
+                    استكشاف القاعات الأخرى
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Hall Info -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">معلومات القاعة</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><strong>عدد العارضين:</strong> {{ exhibitors|length }}</li>
+                                <li><strong>نوع القاعة:</strong> أغذية ومشروبات</li>
+                                <li><strong>المساحة:</strong> واسعة للتنقل الحر</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><strong>الإعلانات:</strong> {{ ads|length }} إعلان</li>
+                                <li><strong>التفاعل:</strong> متاح</li>
+                                <li><strong>التجربة:</strong> ثلاثية الأبعاد</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.exhibitor-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.exhibitor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+
+.exhibitor-card[data-ranking="1"] {
+    border-left: 5px solid #FFD700; /* Gold for rank 1 */
+}
+
+.exhibitor-card[data-ranking="2"] {
+    border-left: 5px solid #C0C0C0; /* Silver for rank 2 */
+}
+
+.exhibitor-card[data-ranking="3"] {
+    border-left: 5px solid #CD7F32; /* Bronze for rank 3 */
+}
+</style>
+
+<script>
+function toggleFavoriteExhibitor(exhibitorId) {
+    fetch(`/toggle-favorite-exhibitor/${exhibitorId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update button state
+            const button = event.target.closest('button');
+            if (data.action === 'added') {
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-danger');
+                alert('تم إضافة العارض للمفضلة');
+            } else {
+                button.classList.remove('btn-danger');
+                button.classList.add('btn-outline-danger');
+                alert('تم إزالة العارض من المفضلة');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ، حاول مرة أخرى');
+    });
+}
+</script>
+{% endblock %}
