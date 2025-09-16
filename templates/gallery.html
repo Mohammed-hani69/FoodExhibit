@@ -50,7 +50,7 @@
     }
     
     .advertisement-wall {
-        position: fixed;
+        position: absolute;
         width: 200px;
         height: 150px;
         background: linear-gradient(45deg, #667eea, #764ba2);
@@ -63,6 +63,7 @@
         z-index: 50;
         cursor: pointer;
         transition: transform 0.3s ease;
+        perspective: 1000px;
     }
     
     .advertisement-wall:hover {
@@ -70,19 +71,17 @@
     }
     
     .wall-left {
-        left: 50px;
-        top: 50%;
-        transform: translateY(-50%) rotateY(90deg);
+        left: 10px;
+        top: 200px;
     }
     
     .wall-right {
-        right: 50px;
-        top: 50%;
-        transform: translateY(-50%) rotateY(-90deg);
+        right: 10px;
+        top: 200px;
     }
     
     .wall-back {
-        top: 50px;
+        top: 10px;
         left: 50%;
         transform: translateX(-50%);
     }
@@ -161,7 +160,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <ul class="list-unstyled">
-                                        <li><i class="fas fa-arrows-alt me-2 text-success"></i>استخدم مفاتيح WASD للحركة</li>
+                                        <li><i class="fas fa-mouse me-2 text-success"></i>استخدم الماوس للدوران والحركة</li>
                                         <li><i class="fas fa-expand me-2 text-success"></i>استخدم وضع ملء الشاشة للتجربة الكاملة</li>
                                         <li><i class="fas fa-heart me-2 text-danger"></i>أضف العارضين المفضلين لصندوقك</li>
                                     </ul>
@@ -229,7 +228,8 @@ function initGallery() {
     scene.background = new THREE.Color(0x87CEEB); // Sky blue
     
     // Camera setup
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / 600, 0.1, 1000);
+    const container = document.getElementById('gallery-3d');
+    camera = new THREE.PerspectiveCamera(75, container.offsetWidth / 600, 0.1, 1000);
     camera.position.set(0, 5, 15);
     
     // Renderer setup
@@ -351,16 +351,28 @@ function createExhibitorStand(exhibitor, index) {
     booth.castShadow = true;
     standGroup.add(booth);
     
-    // Name plate
-    const nameGeometry = new THREE.PlaneGeometry(3, 0.5);
-    const nameMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
+    // Name plate with text
+    const nameCanvas = document.createElement('canvas');
+    nameCanvas.width = 512;
+    nameCanvas.height = 128;
+    const nameContext = nameCanvas.getContext('2d');
+    nameContext.fillStyle = '#ffffff';
+    nameContext.fillRect(0, 0, 512, 128);
+    nameContext.fillStyle = '#000000';
+    nameContext.font = 'bold 32px Arial';
+    nameContext.textAlign = 'center';
+    nameContext.fillText(exhibitor.name, 256, 80);
+    
+    const nameTexture = new THREE.CanvasTexture(nameCanvas);
+    const nameGeometry = new THREE.PlaneGeometry(3, 0.75);
+    const nameMaterial = new THREE.MeshLambertMaterial({ map: nameTexture });
     const nameplate = new THREE.Mesh(nameGeometry, nameMaterial);
     nameplate.position.set(0, 1, 2.1);
     standGroup.add(nameplate);
     
     // Position the stand
     const angle = (index / exhibitorsData[currentHall].length) * Math.PI * 2;
-    const radius = 20 - (exhibitor.ranking * 2); // Closer to center = higher ranking
+    const radius = Math.max(8, 20 - (exhibitor.ranking * 1.5)); // Prevent negative radius, closer to center = higher ranking
     
     standGroup.position.x = Math.cos(angle) * radius;
     standGroup.position.z = Math.sin(angle) * radius;
@@ -467,9 +479,10 @@ function openAdLink(url) {
 }
 
 function onWindowResize() {
-    camera.aspect = window.innerWidth / 600;
+    const container = document.getElementById('gallery-3d');
+    camera.aspect = container.offsetWidth / 600;
     camera.updateProjectionMatrix();
-    renderer.setSize(document.getElementById('gallery-3d').offsetWidth, 600);
+    renderer.setSize(container.offsetWidth, 600);
 }
 
 function animate() {

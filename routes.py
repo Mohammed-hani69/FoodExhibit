@@ -17,7 +17,7 @@ def make_session_permanent():
 
 # Track user analytics
 def track_user_action(action_type, page_visited=None, exhibitor_id=None, product_id=None):
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and exhibitor_id is not None:
         analytics = ExhibitorAnalytics()
         analytics.exhibitor_id = exhibitor_id
         analytics.user_id = current_user.id

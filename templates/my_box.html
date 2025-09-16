@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block title %}صندوقي - معرض الأغذية{% endblock %}
+
+{% block extra_css %}
+<style>
+    .nav-tabs .nav-link {
+        border-radius: 10px 10px 0 0;
+        border: none;
+        background: transparent;
+        color: #666;
+        font-weight: 600;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+    }
+    
+    .favorite-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .favorite-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    
+    .favorite-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .counter {
+        font-size: 2.5rem;
+        font-weight: bold;
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-white text-center mb-4">
+                <i class="fas fa-box me-3"></i>صندوقي المفضل
+            </h1>
+            <p class="text-center text-white opacity-75 lead">
+                العارضين والمنتجات التي أضفتها لقائمة المفضلة
+            </p>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="counter">{{ favorite_exhibitors|length }}</span>
+                        <span class="h5">عارض مفضل</span>
+                    </div>
+                    <i class="fas fa-store fa-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="counter">{{ favorite_products|length }}</span>
+                        <span class="h5">منتج مفضل</span>
+                    </div>
+                    <i class="fas fa-heart fa-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs justify-content-center mb-4" id="myBoxTabs">
+        <li class="nav-item">
+            <a class="nav-link active px-4 py-3" id="exhibitors-tab" data-bs-toggle="tab" href="#exhibitors" role="tab">
+                <i class="fas fa-store me-2"></i>العارضين المفضلين
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link px-4 py-3" id="products-tab" data-bs-toggle="tab" href="#products" role="tab">
+                <i class="fas fa-box me-2"></i>المنتجات المفضلة
+            </a>
+        </li>
+    </ul>
+    
+    <!-- Tab Content -->
+    <div class="tab-content" id="myBoxTabContent">
+        <!-- Favorite Exhibitors Tab -->
+        <div class="tab-pane fade show active" id="exhibitors" role="tabpanel">
+            {% if favorite_exhibitors %}
+                <div class="row g-4">
+                    {% for exhibitor in favorite_exhibitors %}
+                    <div class="col-lg-6 col-xl-4">
+                        <div class="card favorite-card h-100" onclick="visitExhibitor({{ exhibitor.id }})">
+                            <!-- Favorite Badge -->
+                            <div class="favorite-badge">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            
+                            <!-- Card Header -->
+                            <div class="card-header bg-primary text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">{{ exhibitor.company_name }}</h5>
+                                    <span class="badge bg-light text-dark">{{ exhibitor.gallery_hall.replace('hall', 'القاعة ') }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Card Body -->
+                            <div class="card-body">
+                                {% if exhibitor.logo_url %}
+                                    <img src="{{ exhibitor.logo_url }}" class="card-img-top mb-3" alt="{{ exhibitor.company_name }}" style="height: 120px; object-fit: cover; border-radius: 10px;">
+                                {% else %}
+                                    <div class="text-center mb-3">
+                                        <i class="fas fa-store fa-4x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <p class="card-text">{{ exhibitor.description[:120] }}...</p>
+                                
+                                <!-- Exhibitor Stats -->
+                                <div class="row text-center mb-3">
+                                    <div class="col-4">
+                                        <i class="fas fa-box fa-lg text-primary"></i>
+                                        <small class="d-block">{{ exhibitor.products|length }} منتج</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="fas fa-star fa-lg text-warning"></i>
+                                        <small class="d-block">المرتبة {{ exhibitor.ranking }}</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="fas fa-calendar fa-lg text-info"></i>
+                                        <small class="d-block">مواعيد متاحة</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card Footer -->
+                            <div class="card-footer">
+                                <div class="d-flex gap-2">
+                                    <button onclick="visitExhibitor({{ exhibitor.id }}); event.stopPropagation();" 
+                                            class="btn btn-primary flex-fill">
+                                        زيارة الجناح
+                                    </button>
+                                    <button onclick="removeFavoriteExhibitor({{ exhibitor.id }}); event.stopPropagation();" 
+                                            class="btn btn-outline-danger" title="إزالة من المفضلة">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-store"></i>
+                    <h4>لا توجد عارضين مفضلين</h4>
+                    <p>ابدأ بتصفح القاعات وإضافة العارضين المفضلين إليك</p>
+                    <a href="{{ url_for('gallery') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-search me-2"></i>استكشف القاعات
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Favorite Products Tab -->
+        <div class="tab-pane fade" id="products" role="tabpanel">
+            {% if favorite_products %}
+                <div class="row g-4">
+                    {% for product in favorite_products %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card favorite-card h-100" onclick="viewProduct({{ product.id }})">
+                            <!-- Favorite Badge -->
+                            <div class="favorite-badge">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            
+                            <!-- Product Image -->
+                            {% if product.image_url %}
+                                <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                    <i class="fas fa-utensils fa-4x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Product Info -->
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <p class="card-text">{{ product.description[:100] }}...</p>
+                                
+                                <!-- Price and Category -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="h5 text-primary mb-0">{{ product.price }} {{ product.currency }}</span>
+                                    {% if product.category %}
+                                        <span class="badge bg-secondary">{{ product.category }}</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Exhibitor Info -->
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-store me-2 text-muted"></i>
+                                    <small class="text-muted">{{ product.exhibitor.company_name }}</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Card Footer -->
+                            <div class="card-footer">
+                                <div class="d-flex gap-2">
+                                    <button onclick="visitExhibitor({{ product.exhibitor.id }}); event.stopPropagation();" 
+                                            class="btn btn-outline-primary flex-fill">
+                                        زيارة العارض
+                                    </button>
+                                    <button onclick="removeFavoriteProduct({{ product.id }}); event.stopPropagation();" 
+                                            class="btn btn-outline-danger" title="إزالة من المفضلة">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-heart"></i>
+                    <h4>لا توجد منتجات مفضلة</h4>
+                    <p>ابدأ بتصفح العارضين وإضافة المنتجات المفضلة إليك</p>
+                    <a href="{{ url_for('gallery') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-search me-2"></i>استكشف المنتجات
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">إجراءات سريعة</h5>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{{ url_for('gallery') }}" class="btn btn-primary">
+                            <i class="fas fa-building me-2"></i>تصفح القاعات
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-home me-2"></i>الصفحة الرئيسية
+                        </a>
+                        <button onclick="exportFavorites()" class="btn btn-outline-success">
+                            <i class="fas fa-download me-2"></i>تصدير القائمة
+                        </button>
+                        <button onclick="shareFavorites()" class="btn btn-outline-info">
+                            <i class="fas fa-share me-2"></i>مشاركة القائمة
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function visitExhibitor(exhibitorId) {
+    window.location.href = `/exhibitor/${exhibitorId}`;
+}
+
+function viewProduct(productId) {
+    // For now, redirect to the exhibitor profile
+    // In a full implementation, this could go to a dedicated product page
+    console.log('Viewing product:', productId);
+}
+
+function removeFavoriteExhibitor(exhibitorId) {
+    if (confirm('هل أنت متأكد من إزالة هذا العارض من المفضلة؟')) {
+        fetch(`/toggle-favorite-exhibitor/${exhibitorId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Remove the card from the DOM
+                event.target.closest('.col-lg-6, .col-xl-4').remove();
+                
+                // Update counter
+                updateCounters();
+                
+                // Show empty state if no more items
+                checkEmptyState('exhibitors');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ، حاول مرة أخرى');
+        });
+    }
+}
+
+function removeFavoriteProduct(productId) {
+    if (confirm('هل أنت متأكد من إزالة هذا المنتج من المفضلة؟')) {
+        fetch(`/toggle-favorite-product/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Remove the card from the DOM
+                event.target.closest('.col-lg-4, .col-md-6').remove();
+                
+                // Update counter
+                updateCounters();
+                
+                // Show empty state if no more items
+                checkEmptyState('products');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ، حاول مرة أخرى');
+        });
+    }
+}
+
+function updateCounters() {
+    // Update the counters in the stats cards
+    const exhibitorCards = document.querySelectorAll('#exhibitors .favorite-card').length;
+    const productCards = document.querySelectorAll('#products .favorite-card').length;
+    
+    document.querySelector('.stats-card .counter').textContent = exhibitorCards;
+    document.querySelectorAll('.stats-card .counter')[1].textContent = productCards;
+}
+
+function checkEmptyState(tabType) {
+    const tabPane = document.getElementById(tabType);
+    const cards = tabPane.querySelectorAll('.favorite-card');
+    
+    if (cards.length === 0) {
+        const emptyStateHTML = tabType === 'exhibitors' 
+            ? `<div class="empty-state">
+                <i class="fas fa-store"></i>
+                <h4>لا توجد عارضين مفضلين</h4>
+                <p>ابدأ بتصفح القاعات وإضافة العارضين المفضلين إليك</p>
+                <a href="/gallery" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search me-2"></i>استكشف القاعات
+                </a>
+              </div>`
+            : `<div class="empty-state">
+                <i class="fas fa-heart"></i>
+                <h4>لا توجد منتجات مفضلة</h4>
+                <p>ابدأ بتصفح العارضين وإضافة المنتجات المفضلة إليك</p>
+                <a href="/gallery" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search me-2"></i>استكشف المنتجات
+                </a>
+              </div>`;
+        
+        tabPane.innerHTML = emptyStateHTML;
+    }
+}
+
+function exportFavorites() {
+    // Simple export functionality - could be enhanced to generate PDF/CSV
+    const exhibitors = document.querySelectorAll('#exhibitors .card-title');
+    const products = document.querySelectorAll('#products .card-title');
+    
+    let exportData = 'قائمة المفضلة\n================\n\n';
+    
+    if (exhibitors.length > 0) {
+        exportData += 'العارضين المفضلين:\n';
+        exhibitors.forEach((exhibitor, index) => {
+            exportData += `${index + 1}. ${exhibitor.textContent}\n`;
+        });
+        exportData += '\n';
+    }
+    
+    if (products.length > 0) {
+        exportData += 'المنتجات المفضلة:\n';
+        products.forEach((product, index) => {
+            exportData += `${index + 1}. ${product.textContent}\n`;
+        });
+    }
+    
+    // Create download link
+    const blob = new Blob([exportData], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'my_favorites.txt';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function shareFavorites() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'قائمة المفضلة - معرض الأغذية',
+            text: 'شاهد قائمة العارضين والمنتجات المفضلة لدي في معرض الأغذية',
+            url: window.location.href
+        });
+    } else {
+        // Fallback - copy to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('تم نسخ الرابط إلى الحافظة');
+        });
+    }
+}
+</script>
+{% endblock %}

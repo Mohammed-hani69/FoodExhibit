@@ -1,0 +1,558 @@
+{% extends "base.html" %}
+
+{% block title %}{{ exhibitor.company_name }} - معرض الأغذية{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+<style>
+    .exhibitor-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 30px;
+    }
+    
+    .exhibitor-logo {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid white;
+        margin-bottom: 20px;
+    }
+    
+    .product-card {
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .chat-container {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 350px;
+        height: 500px;
+        z-index: 1050;
+        display: none;
+    }
+    
+    .chat-header {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        cursor: pointer;
+    }
+    
+    .chat-body {
+        background: white;
+        height: 350px;
+        overflow-y: auto;
+        padding: 15px;
+        border: 1px solid #ddd;
+    }
+    
+    .chat-footer {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 0 0 10px 10px;
+        border: 1px solid #ddd;
+        border-top: none;
+    }
+    
+    .message {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 10px;
+        max-width: 80%;
+    }
+    
+    .message.user {
+        background: #667eea;
+        color: white;
+        margin-left: auto;
+    }
+    
+    .message.exhibitor {
+        background: #e9ecef;
+        color: #333;
+    }
+    
+    .calendar-container {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .favorite-btn.favorited {
+        background: #dc3545 !important;
+        border-color: #dc3545 !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Exhibitor Banner -->
+<div class="exhibitor-banner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center">
+                {% if exhibitor.logo_url %}
+                    <img src="{{ exhibitor.logo_url }}" alt="{{ exhibitor.company_name }}" class="exhibitor-logo">
+                {% else %}
+                    <div class="exhibitor-logo mx-auto d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.2);">
+                        <i class="fas fa-store fa-3x"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-7">
+                <h1 class="display-4 fw-bold mb-3">{{ exhibitor.company_name }}</h1>
+                <p class="lead mb-4">{{ exhibitor.description }}</p>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h3>{{ products|length }}</h3>
+                        <small>منتج</small>
+                    </div>
+                    <div class="col-4">
+                        <h3>{{ exhibitor.ranking }}</h3>
+                        <small>التصنيف</small>
+                    </div>
+                    <div class="col-4">
+                        <h3>{{ exhibitor.gallery_hall.replace('hall', '') }}</h3>
+                        <small>القاعة</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 text-center">
+                <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }})" 
+                        class="btn btn-outline-light btn-lg favorite-btn {{ 'favorited' if is_favorited }}" 
+                        id="favorite-btn">
+                    <i class="fas fa-heart fa-2x"></i>
+                    <div class="mt-2">{{ 'مُضاف للمفضلة' if is_favorited else 'إضافة للمفضلة' }}</div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Left Column: Products & Info -->
+        <div class="col-lg-8">
+            <!-- Products Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-box me-2"></i>منتجات العارض
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if products %}
+                        <div class="row g-4">
+                            {% for product in products %}
+                            <div class="col-md-6">
+                                <div class="card product-card h-100" onclick="viewProduct({{ product.id }})">
+                                    {% if product.image_url %}
+                                        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                            <i class="fas fa-utensils fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ product.name }}</h5>
+                                        <p class="card-text">{{ product.description[:100] }}...</p>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="h5 text-primary mb-0">{{ product.price }} {{ product.currency }}</span>
+                                            {% if product.is_featured %}
+                                                <span class="badge bg-warning">مميز</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-footer">
+                                        <button onclick="toggleFavoriteProduct({{ product.id }}); event.stopPropagation();" 
+                                                class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-heart"></i> إضافة للمفضلة
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-box fa-4x text-muted mb-3"></i>
+                            <h5>لا توجد منتجات متاحة حالياً</h5>
+                            <p class="text-muted">سيتم إضافة المنتجات قريباً</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Company Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>معلومات الشركة
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>معلومات الاتصال</h6>
+                            <ul class="list-unstyled">
+                                {% if exhibitor.contact_email %}
+                                <li><i class="fas fa-envelope me-2"></i>{{ exhibitor.contact_email }}</li>
+                                {% endif %}
+                                {% if exhibitor.contact_phone %}
+                                <li><i class="fas fa-phone me-2"></i>{{ exhibitor.contact_phone }}</li>
+                                {% endif %}
+                                {% if exhibitor.website %}
+                                <li><i class="fas fa-globe me-2"></i><a href="{{ exhibitor.website }}" target="_blank">الموقع الإلكتروني</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>تفاصيل المعرض</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-building me-2"></i>{{ exhibitor.gallery_hall.replace('hall', 'القاعة ') }}</li>
+                                <li><i class="fas fa-star me-2"></i>التصنيف: {{ exhibitor.ranking }}</li>
+                                <li><i class="fas fa-calendar me-2"></i>نشط منذ {{ exhibitor.created_at.strftime('%Y') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Chat & Booking -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">إجراءات سريعة</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button onclick="openChat()" class="btn btn-primary">
+                            <i class="fas fa-comments me-2"></i>بدء محادثة
+                        </button>
+                        <button onclick="showBookingCalendar()" class="btn btn-success">
+                            <i class="fas fa-calendar-plus me-2"></i>حجز موعد
+                        </button>
+                        <a href="{{ url_for('gallery_hall', hall=exhibitor.gallery_hall) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>العودة للقاعة
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Appointment Booking Calendar -->
+            <div class="card calendar-container" id="booking-calendar" style="display: none;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">حجز موعد</h5>
+                    <button onclick="hideBookingCalendar()" class="btn-close"></button>
+                </div>
+                <div class="card-body">
+                    <div id="calendar"></div>
+                    <div class="mt-3">
+                        <label for="appointment-notes" class="form-label">ملاحظات إضافية:</label>
+                        <textarea id="appointment-notes" class="form-control" rows="3" placeholder="اذكر أي متطلبات خاصة للموعد..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Available Slots (fallback) -->
+            <div class="card" id="available-slots">
+                <div class="card-header">
+                    <h5 class="mb-0">المواعيد المتاحة</h5>
+                </div>
+                <div class="card-body">
+                    {% if available_slots %}
+                        {% for slot in available_slots[:5] %}
+                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                            <div>
+                                <strong>{{ slot.start_time.strftime('%Y-%m-%d') }}</strong><br>
+                                <small>{{ slot.start_time.strftime('%H:%M') }} - {{ (slot.start_time + timedelta(minutes=slot.duration_minutes)).strftime('%H:%M') }}</small>
+                            </div>
+                            <button onclick="bookSlot({{ slot.id }})" class="btn btn-sm btn-primary">
+                                حجز
+                            </button>
+                        </div>
+                        {% endfor %}
+                        {% if available_slots|length > 5 %}
+                        <div class="text-center mt-3">
+                            <button onclick="showBookingCalendar()" class="btn btn-outline-primary btn-sm">
+                                عرض المزيد من المواعيد
+                            </button>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                            <p>لا توجد مواعيد متاحة حالياً</p>
+                            <small class="text-muted">تواصل مع العارض مباشرة</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Container -->
+<div id="chat-container" class="chat-container">
+    <div class="chat-header" onclick="toggleChat()">
+        <div class="d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-comments me-2"></i>محادثة مع {{ exhibitor.company_name }}</span>
+            <span id="chat-close" onclick="closeChat(); event.stopPropagation();">×</span>
+        </div>
+    </div>
+    <div class="chat-body" id="chat-messages">
+        <!-- Messages will be loaded here -->
+    </div>
+    <div class="chat-footer">
+        <div class="input-group">
+            <input type="text" id="message-input" class="form-control" placeholder="اكتب رسالتك...">
+            <button onclick="sendMessage()" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script>
+let calendar;
+let socket;
+let chatOpen = false;
+
+// Initialize Socket.IO for chat
+document.addEventListener('DOMContentLoaded', function() {
+    socket = io();
+    
+    socket.on('connect', function() {
+        console.log('Connected to chat server');
+    });
+    
+    socket.on('chat_joined', function(data) {
+        console.log('Joined chat room:', data.room);
+    });
+    
+    socket.on('new_message', function(data) {
+        addMessageToChat(data.message, data.user_name, data.is_from_exhibitor);
+    });
+});
+
+function toggleFavoriteExhibitor(exhibitorId) {
+    fetch(`/toggle-favorite-exhibitor/${exhibitorId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const btn = document.getElementById('favorite-btn');
+            if (data.action === 'added') {
+                btn.classList.add('favorited');
+                btn.innerHTML = '<i class="fas fa-heart fa-2x"></i><div class="mt-2">مُضاف للمفضلة</div>';
+                alert('تم إضافة العارض للمفضلة');
+            } else {
+                btn.classList.remove('favorited');
+                btn.innerHTML = '<i class="fas fa-heart fa-2x"></i><div class="mt-2">إضافة للمفضلة</div>';
+                alert('تم إزالة العارض من المفضلة');
+            }
+        }
+    });
+}
+
+function toggleFavoriteProduct(productId) {
+    fetch(`/toggle-favorite-product/${productId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.action === 'added' ? 'تم إضافة المنتج للمفضلة' : 'تم إزالة المنتج من المفضلة');
+        }
+    });
+}
+
+function viewProduct(productId) {
+    // Could navigate to a detailed product page
+    console.log('Viewing product:', productId);
+}
+
+function openChat() {
+    const chatContainer = document.getElementById('chat-container');
+    chatContainer.style.display = 'block';
+    chatOpen = true;
+    
+    // Join chat room
+    socket.emit('join_chat', {exhibitor_id: {{ exhibitor.id }}});
+    
+    // Load chat history (would typically fetch from backend)
+    loadChatHistory();
+}
+
+function closeChat() {
+    const chatContainer = document.getElementById('chat-container');
+    chatContainer.style.display = 'none';
+    chatOpen = false;
+}
+
+function toggleChat() {
+    if (chatOpen) {
+        // Minimize/maximize chat
+        const chatBody = document.querySelector('.chat-body');
+        const chatFooter = document.querySelector('.chat-footer');
+        
+        if (chatBody.style.display === 'none') {
+            chatBody.style.display = 'block';
+            chatFooter.style.display = 'block';
+        } else {
+            chatBody.style.display = 'none';
+            chatFooter.style.display = 'none';
+        }
+    }
+}
+
+function sendMessage() {
+    const messageInput = document.getElementById('message-input');
+    const message = messageInput.value.trim();
+    
+    if (message) {
+        socket.emit('send_message', {
+            exhibitor_id: {{ exhibitor.id }},
+            message: message
+        });
+        
+        messageInput.value = '';
+    }
+}
+
+function addMessageToChat(message, userName, isFromExhibitor) {
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isFromExhibitor ? 'exhibitor' : 'user'}`;
+    messageDiv.innerHTML = `<strong>${userName}:</strong> ${message}`;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function loadChatHistory() {
+    // This would typically fetch chat history from the backend
+    // For now, show a welcome message
+    addMessageToChat('مرحباً! كيف يمكنني مساعدتك؟', '{{ exhibitor.company_name }}', true);
+}
+
+function showBookingCalendar() {
+    document.getElementById('booking-calendar').style.display = 'block';
+    document.getElementById('available-slots').style.display = 'none';
+    
+    if (!calendar) {
+        initializeCalendar();
+    }
+}
+
+function hideBookingCalendar() {
+    document.getElementById('booking-calendar').style.display = 'none';
+    document.getElementById('available-slots').style.display = 'block';
+}
+
+function initializeCalendar() {
+    const calendarEl = document.getElementById('calendar');
+    
+    // Convert available slots to calendar events
+    const events = [
+        {% for slot in available_slots %}
+        {
+            id: '{{ slot.id }}',
+            title: 'متاح ({{ slot.duration_minutes }} دقيقة)',
+            start: '{{ slot.start_time.strftime("%Y-%m-%dT%H:%M:%S") }}',
+            end: '{{ (slot.start_time + timedelta(minutes=slot.duration_minutes)).strftime("%Y-%m-%dT%H:%M:%S") }}',
+            backgroundColor: '#28a745',
+            borderColor: '#28a745'
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        locale: 'ar',
+        direction: 'rtl',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'timeGridWeek,timeGridDay'
+        },
+        events: events,
+        eventClick: function(info) {
+            if (confirm('هل تريد حجز هذا الموعد؟')) {
+                bookSlot(info.event.id);
+            }
+        },
+        slotMinTime: '08:00:00',
+        slotMaxTime: '20:00:00',
+        allDaySlot: false,
+        height: 400
+    });
+    
+    calendar.render();
+}
+
+function bookSlot(slotId) {
+    const notes = document.getElementById('appointment-notes')?.value || '';
+    
+    fetch('/book-appointment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            slot_id: slotId,
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('تم حجز الموعد بنجاح!');
+            // Refresh calendar or remove booked slot
+            if (calendar) {
+                calendar.getEventById(slotId).remove();
+            }
+            hideBookingCalendar();
+        } else {
+            alert(data.message || 'حدث خطأ أثناء حجز الموعد');
+        }
+    });
+}
+
+// Handle Enter key in message input
+document.addEventListener('DOMContentLoaded', function() {
+    const messageInput = document.getElementById('message-input');
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+});
+</script>
+{% endblock %}

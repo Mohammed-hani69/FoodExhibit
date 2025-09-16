@@ -58,7 +58,7 @@
                                    class="btn btn-primary flex-fill">
                                     زيارة الجناح
                                 </a>
-                                <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }})" 
+                                <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }}, this)" 
                                         class="btn btn-outline-danger" title="إضافة للمفضلة">
                                     <i class="fas fa-heart"></i>
                                 </button>
@@ -137,7 +137,7 @@
 </style>
 
 <script>
-function toggleFavoriteExhibitor(exhibitorId) {
+function toggleFavoriteExhibitor(exhibitorId, buttonElement) {
     fetch(`/toggle-favorite-exhibitor/${exhibitorId}`, {
         method: 'POST',
         headers: {
@@ -148,7 +148,7 @@ function toggleFavoriteExhibitor(exhibitorId) {
     .then(data => {
         if (data.status === 'success') {
             // Update button state
-            const button = event.target.closest('button');
+            const button = buttonElement || event.target.closest('button');
             if (data.action === 'added') {
                 button.classList.remove('btn-outline-danger');
                 button.classList.add('btn-danger');
