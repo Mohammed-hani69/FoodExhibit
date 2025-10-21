@@ -1,9 +1,14 @@
-from app import app, db
+from app import create_app, db
 from models import User, Package, Specialization, Exhibitor, Product, Banner, ChatMessage, Visit
 from werkzeug.security import generate_password_hash
+import os
 
 def init_db():
+    app = create_app()
     with app.app_context():
+        # Create database directory if it doesn't exist
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "instance", "food_exhibit.db")
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
         # Create all tables
         db.create_all()
         

@@ -40,6 +40,23 @@ def create_app():
     migrate.init_app(app, db)
     socketio.init_app(app)
 
+    # Create database directory if it doesn't exist
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    
+    # Create database and tables if they don't exist
+    with app.app_context():
+        try:
+            if not os.path.exists(db_path):
+                db.create_all()
+                app.logger.info("Database created successfully!")
+            else:
+                # Verify database connection and create tables if needed
+                db.engine.connect()
+                db.create_all()
+                app.logger.info("Database verified and tables updated if needed!")
+        except Exception as e:
+            app.logger.error(f"Error initializing database: {str(e)}")
+
     # Initialize LoginManager
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"

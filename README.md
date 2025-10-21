@@ -84,7 +84,7 @@ git pull origin main
 git add .
 
 # Commit changes | تأكيد التغييرات
-git commit -m "ADD requirements.txt"
+git commit -m "v 1.0.1"
 
 # Push changes | رفع التغييرات
 git push origin main
