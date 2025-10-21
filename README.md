@@ -84,7 +84,7 @@ git pull origin main
 git add .
 
 # Commit changes | تأكيد التغييرات
-git commit -m "v 1.0.2"
+git commit -m "v 1.0.3"
 
 # Push changes | رفع التغييرات
 git push origin main

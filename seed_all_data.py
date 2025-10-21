@@ -90,17 +90,36 @@ def seed_all_data():
 
         # Create products for exhibitors
         products = []
-        for exhibitor in exhibitors:
+        product_images = [
+            "static/images/products/568b3a94-13d6-4b7f-8668-7a44102af8a5.png",
+            "static/images/products/Gemini_Generated_Image_ifog0sifog0sifog_1.png",
+            "static/images/products/Gemini_Generated_Image_ls5452ls5452ls54.png"
+        ]
+        
+        product_names = {
+            0: ["عصير طبيعي", "مشروب الطاقة", "عصير فواكه"],
+            1: ["شوكولاتة داكنة", "حلوى بالفواكه", "بسكويت محشو"],
+            2: ["معدات تقطيع", "فرن صناعي", "خلاط صناعي"]
+        }
+        
+        product_descriptions = {
+            0: ["عصير طبيعي 100٪ من الفواكه الطازجة", "مشروب طاقة طبيعي من الأعشاب", "مزيج من الفواكه الطازجة"],
+            1: ["شوكولاتة داكنة فاخرة 70٪ كاكاو", "حلوى طبيعية محشوة بالفواكه", "بسكويت محشو بالشوكولاتة"],
+            2: ["معدات تقطيع احترافية للمطاعم", "فرن صناعي متعدد الاستخدامات", "خلاط صناعي قوي للمطاعم"]
+        }
+
+        for i, exhibitor in enumerate(exhibitors):
             for j in range(3):  # 3 products per exhibitor
                 product = Product(
-                    name=f"منتج {j+1} - {exhibitor.company_name}",
-                    name_en=f"Product {j+1} - {exhibitor.company_name}",
-                    description=f"وصف المنتج {j+1} من {exhibitor.company_name}",
-                    description_en=f"Description of product {j+1} from {exhibitor.company_name}",
+                    name=product_names[i][j],
+                    description=product_descriptions[i][j],
                     price=random.randint(100, 1000),
-                    user_id=exhibitor.id,
+                    exhibitor_id=exhibitor.id,
                     is_active=True,
-                    image_path="static/images/products/product1.png"  # Default image
+                    is_featured=random.choice([True, False]),
+                    category=exhibitor.specialization.name,
+                    currency="EGP",
+                    image_url=product_images[j]  # Use real product images
                 )
                 products.append(product)
         
