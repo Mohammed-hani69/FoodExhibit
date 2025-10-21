@@ -1,0 +1,18 @@
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.5
+Flask-SocketIO==5.3.6
+Flask-Login==0.6.3
+SQLAlchemy==2.0.22
+python-socketio==5.10.0
+python-engineio==4.8.0
+Werkzeug==3.0.1
+alembic==1.12.1
+Jinja2==3.1.2
+click==8.1.7
+itsdangerous==2.1.2
+pytz==2023.3.post1
+python-dotenv==1.0.0
+email-validator==2.1.0.post1
+Pillow==10.1.0  # For image handling
+bcrypt==4.0.1   # For password hashing

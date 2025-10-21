@@ -84,7 +84,7 @@ git pull origin main
 git add .
 
 # Commit changes | تأكيد التغييرات
-git commit -m "EDIT LICENSE"
+git commit -m "ADD requirements.txt"
 
 # Push changes | رفع التغييرات
 git push origin main
