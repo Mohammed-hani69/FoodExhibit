@@ -1,45 +1,79 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_socketio import SocketIO
-from sqlalchemy.orm import DeclarativeBase
+from flask import Flask, session, request
+from flask_login import LoginManager
+from flask_wtf.csrf import CSRFProtect
 import os
 from werkzeug.middleware.proxy_fix import ProxyFix
 import logging
+from extensions import db, migrate, socketio
+from flask_migrate import Migrate
+import socket_handlers  # Import socket handlers
+
+# Initialize CSRF protection
+csrf = CSRFProtect()
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-class Base(DeclarativeBase):
-    pass
-
-# Initialize Flask app
-app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET")
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1) # needed for url_for to generate with https
-
-# Database configuration with enhanced stability
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    'pool_pre_ping': True,          # Verify connections before use
-    'pool_recycle': 300,            # Recycle connections every 5 minutes
-    'pool_size': 10,                # Maintain 10 connections in pool
-    'max_overflow': 20,             # Allow up to 20 additional connections
-    'pool_timeout': 30,             # Timeout after 30 seconds
-    'pool_reset_on_return': 'commit',  # Reset connections on return
-    'connect_args': {
-        'connect_timeout': 10,      # Connection timeout
-        'application_name': 'food_exhibition_app',
-        'sslmode': 'prefer'         # Handle SSL gracefully
+def create_app():
+    # Initialize Flask app
+    app = Flask(__name__)
+    app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+    
+    # Initialize CSRF protection
+    csrf.init_app(app)
+    
+    # Set up database configuration
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "instance", "food_exhibit.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_pre_ping": True,
+        "pool_recycle": 300,
+        "pool_timeout": 30,
+        "pool_size": 10,
+        "max_overflow": 20
     }
-}
 
-# Initialize extensions
-db = SQLAlchemy(app, model_class=Base)
-socketio = SocketIO(app, cors_allowed_origins="*")
+    # Initialize extensions with app
+    db.init_app(app)
+    migrate.init_app(app, db)
+    socketio.init_app(app)
 
-# Create tables
-with app.app_context():
-    import models  # noqa: F401
-    db.create_all()
-    logging.info("Database tables created")
+    # Initialize LoginManager
+    login_manager = LoginManager()
+    login_manager.login_view = "auth.login"
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        from models import User
+        return User.query.get(int(user_id))
+
+    # Register blueprints
+    with app.app_context():
+        from admin_routes import admin as admin_blueprint
+        from exhibitor_routes import exhibitor as exhibitor_blueprint
+        from auth import auth as auth_blueprint
+        
+        app.register_blueprint(admin_blueprint)
+        app.register_blueprint(exhibitor_blueprint)
+        app.register_blueprint(auth_blueprint)
+
+    # Language settings
+    @app.before_request
+    def before_request():
+        if "language" not in session:
+            session["language"] = request.accept_languages.best_match(["en", "ar", "fr"]) or "en"
+
+    @app.context_processor
+    def inject_language():
+        return {"current_language": session.get("language", "en")}
+
+    return app
+
+# Create the app instance for direct running
+app = create_app()
+
+if __name__ == "__main__":
+    socketio.run(app, debug=True)

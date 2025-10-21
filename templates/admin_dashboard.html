@@ -1,159 +1,561 @@
 {% extends "base.html" %}
 
-{% block title %}لوحة تحكم المدير - معرض الأغذية{% endblock %}
+{% block title %}
+    {% if current_language == 'en' %}
+        Admin Dashboard - Food Exhibition
+    {% elif current_language == 'ar' %}
+        لوحة تحكم المدير - معرض الأغذية
+    {% else %}
+        Tableau de Bord Admin - Exposition Alimentaire
+    {% endif %}
+{% endblock %}
 
 {% block extra_css %}
 <style>
+    .dashboard-section {
+        padding: 2rem 0;
+        background: #f8f9fa;
+    }
+
     .stats-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 15px;
-        padding: 30px;
-        margin-bottom: 30px;
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
         text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .stats-icon {
+        color: #95c11f;
+        margin-bottom: 1rem;
     }
     
     .stats-number {
-        font-size: 3rem;
+        font-size: 2rem;
         font-weight: bold;
-        display: block;
-        margin-bottom: 10px;
+        color: #333;
     }
     
     .stats-label {
-        font-size: 1.2rem;
-        opacity: 0.9;
+        color: #666;
     }
     
     .admin-card {
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        border: none;
-        margin-bottom: 20px;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .admin-menu-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #333;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+    
+    .admin-menu-item:hover {
+        background-color: #f8f9fa;
+        color: #95c11f;
+    }
+    
+    .admin-menu-item i {
+        margin-right: 0.5rem;
+        color: #95c11f;
+    }
+
+    .admin-card .card-header {
+        background: #95c11f;
+        color: white;
+        padding: 1rem;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .admin-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .admin-button {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        color: #95c11f;
+        background: white;
+        border: 1px solid #95c11f;
+        border-radius: 4px;
+        text-decoration: none;
+        margin: 0.25rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .admin-button:hover {
+        background: #95c11f;
+        color: white;
+    }
+
+    .dashboard-title {
+        color: #333;
+        margin-bottom: 2rem;
+        text-align: center;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="text-white text-center mb-4">
-                <i class="fas fa-tachometer-alt me-3"></i>لوحة تحكم المدير
-            </h1>
-            <p class="text-center text-white opacity-75 lead">
-                إحصائيات شاملة لمعرض الأغذية
-            </p>
-        </div>
-    </div>
-    
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="stats-card">
-                <i class="fas fa-users fa-3x mb-3"></i>
-                <span class="stats-number">{{ total_users }}</span>
-                <span class="stats-label">إجمالي المستخدمين</span>
+<div class="dashboard-section">
+
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-tachometer-alt me-3"></i>
+                    {% if current_language == 'en' %}
+                        Admin Dashboard
+                    {% elif current_language == 'ar' %}
+                        لوحة تحكم المدير
+                    {% else %}
+                        Tableau de Bord Admin
+                    {% endif %}
+                </h1>
+                <p class="dashboard-subtitle">
+                    {% if current_language == 'en' %}
+                        Comprehensive Statistics for Food Exhibition
+                    {% elif current_language == 'ar' %}
+                        إحصائيات شاملة لمعرض الأغذية
+                    {% else %}
+                        Statistiques Complètes pour l'Exposition Alimentaire
+                    {% endif %}
+                </p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="stats-card">
-                <i class="fas fa-store fa-3x mb-3"></i>
-                <span class="stats-number">{{ total_exhibitors }}</span>
-                <span class="stats-label">إجمالي العارضين</span>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stats-card">
-                <i class="fas fa-box fa-3x mb-3"></i>
-                <span class="stats-number">{{ total_products }}</span>
-                <span class="stats-label">إجمالي المنتجات</span>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Management Cards -->
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card admin-card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-users me-2"></i>إدارة المستخدمين
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p>إدارة حسابات المستخدمين والأدوار والصلاحيات</p>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary" onclick="alert('قريباً...')">
-                            <i class="fas fa-list me-2"></i>عرض المستخدمين
-                        </button>
-                        <button class="btn btn-outline-primary" onclick="alert('قريباً...')">
-                            <i class="fas fa-user-plus me-2"></i>إضافة مستخدم
-                        </button>
+        
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-users fa-3x"></i>
                     </div>
+                    <span class="stats-number">{{ total_users }}</span>
+                    <span class="stats-label">
+                        {% if current_language == 'en' %}
+                            Total Users
+                        {% elif current_language == 'ar' %}
+                            إجمالي المستخدمين
+                        {% else %}
+                            Total Utilisateurs
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-store fa-3x"></i>
+                    </div>
+                    <span class="stats-number">{{ total_exhibitors }}</span>
+                    <span class="stats-label">
+                        {% if current_language == 'en' %}
+                            Total Exhibitors
+                        {% elif current_language == 'ar' %}
+                            إجمالي العارضين
+                        {% else %}
+                            Total Exposants
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-box fa-3x"></i>
+                    </div>
+                    <span class="stats-number">{{ total_products }}</span>
+                    <span class="stats-label">
+                        {% if current_language == 'en' %}
+                            Total Products
+                        {% elif current_language == 'ar' %}
+                            إجمالي المنتجات
+                        {% else %}
+                            Total Produits
+                        {% endif %}
+                    </span>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-6">
-            <div class="card admin-card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-store me-2"></i>إدارة العارضين
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p>إدارة ملفات العارضين ومنتجاتهم</p>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-success" onclick="alert('قريباً...')">
-                            <i class="fas fa-list me-2"></i>عرض العارضين
-                        </button>
-                        <button class="btn btn-outline-success" onclick="alert('قريباً...')">
-                            <i class="fas fa-plus me-2"></i>إضافة عارض
-                        </button>
+        <!-- Management Cards -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i>
+                            {% if current_language == 'en' %}
+                                User Management
+                            {% elif current_language == 'ar' %}
+                                إدارة المستخدمين
+                            {% else %}
+                                Gestion des Utilisateurs
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            {% if current_language == 'en' %}
+                                Manage user accounts, roles and permissions
+                            {% elif current_language == 'ar' %}
+                                إدارة حسابات المستخدمين والأدوار والصلاحيات
+                            {% else %}
+                                Gérer les comptes utilisateurs, les rôles et les permissions
+                            {% endif %}
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin.users') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-list me-2"></i>
+                                {% if current_language == 'en' %}
+                                    View Users
+                                {% elif current_language == 'ar' %}
+                                    عرض المستخدمين
+                                {% else %}
+                                    Voir les Utilisateurs
+                                {% endif %}
+                            </a>
+                            <a href="{{ url_for('admin.add_user') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-user-plus me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Add User
+                                {% elif current_language == 'ar' %}
+                                    إضافة مستخدم
+                                {% else %}
+                                    Ajouter Utilisateur
+                                {% endif %}
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card admin-card">
-                <div class="card-header bg-warning text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i>التقارير والإحصائيات
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p>عرض التقارير التفصيلية وإحصائيات الاستخدام</p>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-warning" onclick="alert('قريباً...')">
-                            <i class="fas fa-chart-line me-2"></i>تقرير المبيعات
-                        </button>
-                        <button class="btn btn-outline-warning" onclick="alert('قريباً...')">
-                            <i class="fas fa-eye me-2"></i>إحصائيات الزيارات
-                        </button>
+            
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-store me-2"></i>
+                            {% if current_language == 'en' %}
+                                Exhibitor Management
+                            {% elif current_language == 'ar' %}
+                                إدارة العارضين
+                            {% else %}
+                                Gestion des Exposants
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            {% if current_language == 'en' %}
+                                Manage exhibitor profiles and their products
+                            {% elif current_language == 'ar' %}
+                                إدارة ملفات العارضين ومنتجاتهم
+                            {% else %}
+                                Gérer les profils des exposants et leurs produits
+                            {% endif %}
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin.exhibitors') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-list me-2"></i>
+                                {% if current_language == 'en' %}
+                                    View Exhibitors
+                                {% elif current_language == 'ar' %}
+                                    عرض العارضين
+                                {% else %}
+                                    Voir les Exposants
+                                {% endif %}
+                            </a>
+                            <a href="{{ url_for('admin.add_exhibitor') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-plus me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Add Exhibitor
+                                {% elif current_language == 'ar' %}
+                                    إضافة عارض
+                                {% else %}
+                                    Ajouter Exposant
+                                {% endif %}
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card admin-card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-cog me-2"></i>إعدادات النظام
-                    </h5>
+            
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            {% if current_language == 'en' %}
+                                Product Management
+                            {% elif current_language == 'ar' %}
+                                إدارة المنتجات
+                            {% else %}
+                                Gestion des Produits
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            {% if current_language == 'en' %}
+                                Manage products and featured items
+                            {% elif current_language == 'ar' %}
+                                إدارة المنتجات والعناصر المميزة
+                            {% else %}
+                                Gérer les produits et les articles en vedette
+                            {% endif %}
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin.manage_products') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-box me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Manage Products
+                                {% elif current_language == 'ar' %}
+                                    إدارة المنتجات
+                                {% else %}
+                                    Gérer les Produits
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p>إدارة إعدادات المعرض والنظام العام</p>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-info" onclick="alert('قريباً...')">
-                            <i class="fas fa-palette me-2"></i>تخصيص الواجهة
-                        </button>
-                        <button class="btn btn-outline-info" onclick="alert('قريباً...')">
-                            <i class="fas fa-database me-2"></i>إدارة قاعدة البيانات
-                        </button>
+            </div>
+            
+            <!-- Video Management Card -->
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-video me-2"></i>
+                            {% if current_language == 'en' %}
+                                Video Management
+                            {% elif current_language == 'ar' %}
+                                إدارة الفيديوهات
+                            {% else %}
+                                Gestion des Vidéos
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            {% if current_language == 'en' %}
+                                Manage exhibitor videos and media content
+                            {% elif current_language == 'ar' %}
+                                إدارة فيديوهات العارضين والمحتوى المرئي
+                            {% else %}
+                                Gérer les vidéos des exposants et le contenu multimédia
+                            {% endif %}
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin.manage_videos') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-film me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Manage Videos
+                                {% elif current_language == 'ar' %}
+                                    إدارة الفيديوهات
+                                {% else %}
+                                    Gérer les Vidéos
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner Management Card -->
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-image me-2"></i>
+                            {% if current_language == 'en' %}
+                                Banner Management
+                            {% elif current_language == 'ar' %}
+                                إدارة البانرات
+                            {% else %}
+                                Gestion des Bannières
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            {% if current_language == 'en' %}
+                                Manage exhibitor banners and promotional images
+                            {% elif current_language == 'ar' %}
+                                إدارة بانرات العارضين والصور الترويجية
+                            {% else %}
+                                Gérer les bannières et images promotionnelles des exposants
+                            {% endif %}
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin.manage_exhibitor_banners') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-images me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Manage Banners
+                                {% elif current_language == 'ar' %}
+                                    إدارة البانرات
+                                {% else %}
+                                    Gérer les Bannières
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            {% if current_language == 'en' %}
+                                Reports & Statistics
+                            {% elif current_language == 'ar' %}
+                                التقارير والإحصائيات
+                            {% else %}
+                                Rapports et Statistiques
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            {% if current_language == 'en' %}
+                                View detailed reports and usage statistics
+                            {% elif current_language == 'ar' %}
+                                عرض التقارير التفصيلية وإحصائيات الاستخدام
+                            {% else %}
+                                Voir les rapports détaillés et les statistiques d'utilisation
+                            {% endif %}
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin.sales_report') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-chart-line me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Sales Report
+                                {% elif current_language == 'ar' %}
+                                    تقرير المبيعات
+                                {% else %}
+                                    Rapport des Ventes
+                                {% endif %}
+                            </a>
+                            <a href="{{ url_for('admin.visit_statistics') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-eye me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Visit Statistics
+                                {% elif current_language == 'ar' %}
+                                    إحصائيات الزيارات
+                                {% else %}
+                                    Statistiques des Visites
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-box me-2"></i>
+                            {% if current_language == 'en' %}
+                                Package Management
+                            {% elif current_language == 'ar' %}
+                                إدارة الباقات
+                            {% else %}
+                                Gestion des Forfaits
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            {% if current_language == 'en' %}
+                                Manage exhibitor packages and pricing
+                            {% elif current_language == 'ar' %}
+                                إدارة باقات العارضين والأسعار
+                            {% else %}
+                                Gérer les forfaits et prix des exposants
+                            {% endif %}
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin.packages') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-list me-2"></i>
+                                {% if current_language == 'en' %}
+                                    View Packages
+                                {% elif current_language == 'ar' %}
+                                    عرض الباقات
+                                {% else %}
+                                    Voir les Forfaits
+                                {% endif %}
+                            </a>
+                            <a href="{{ url_for('admin.add_package') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-plus me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Add Package
+                                {% elif current_language == 'ar' %}
+                                    إضافة باقة
+                                {% else %}
+                                    Ajouter Forfait
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>
+                            {% if current_language == 'en' %}
+                                System Settings
+                            {% elif current_language == 'ar' %}
+                                إعدادات النظام
+                            {% else %}
+                                Paramètres Système
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            {% if current_language == 'en' %}
+                                Manage exhibition and general system settings
+                            {% elif current_language == 'ar' %}
+                                إدارة إعدادات المعرض والنظام العام
+                            {% else %}
+                                Gérer les paramètres de l'exposition et du système
+                            {% endif %}
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin.settings') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-cog me-2"></i>
+                                {% if current_language == 'en' %}
+                                    System Settings
+                                {% elif current_language == 'ar' %}
+                                    إعدادات النظام
+                                {% else %}
+                                    Paramètres du Système
+                                {% endif %}
+                            </a>
+                            <a href="{{ url_for('admin.settings') }}#exhibition" class="admin-button text-decoration-none">
+                                <i class="fas fa-database me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Database Management
+                                {% elif current_language == 'ar' %}
+                                    إدارة قاعدة البيانات
+                                {% else %}
+                                    Gestion de la Base de Données
+                                {% endif %}
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

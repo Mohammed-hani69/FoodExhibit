@@ -4,117 +4,485 @@
 
 {% block extra_css %}
 <style>
+    /* تنسيقات عامة */
+    body {
+        background-color: #fff;
+        color: #333;
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    /* تنسيقات البطاقات الإحصائية */
     .stats-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-color: #95c11f;
         color: white;
         border-radius: 15px;
         padding: 25px;
         margin-bottom: 30px;
         text-align: center;
+        transition: transform 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(149, 193, 31, 0.3);
     }
     
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
+        z-index: 1;
+    }
+
     .stats-number {
         font-size: 2.5rem;
         font-weight: bold;
         display: block;
         margin-bottom: 10px;
+        position: relative;
+        z-index: 2;
     }
     
+    .stats-label {
+        font-size: 1.1rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* تنسيقات بطاقة العارض */
     .exhibitor-card {
         border-radius: 15px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         border: none;
         margin-bottom: 20px;
+        transition: all 0.3s ease;
+        background: white;
     }
     
+    .exhibitor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(149, 193, 31, 0.2);
+    }
+
+    .card-header {
+        background-color: #95c11f !important;
+        border-top-left-radius: 15px !important;
+        border-top-right-radius: 15px !important;
+        border: none;
+    }
+
+    /* تنسيقات الأزرار والروابط */
     .quick-action {
         text-decoration: none;
         color: inherit;
-        transition: transform 0.3s ease;
+        transition: all 0.3s ease;
+        display: block;
+        padding: 20px;
+        border-radius: 15px;
+        background: white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     
     .quick-action:hover {
         transform: translateY(-5px);
         color: inherit;
+        box-shadow: 0 10px 25px rgba(149, 193, 31, 0.2);
+    }
+
+    /* تنسيقات العناوين */
+    .section-heading {
+        color: #95c11f;
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+    }
+
+    /* تأثيرات الخلفية */
+    .decorated-section {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+    }
+
+    .circle-group {
+        position: absolute;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        z-index: 1;
+    }
+
+    .circle {
+        width: 18px;
+        height: 18px;
+        background: #95c11f;
+        border-radius: 50%;
+        opacity: 0.15;
+    }
+
+    /* تنسيقات متجاوبة للموبايل */
+    @media (max-width: 768px) {
+        /* تحسينات العناوين */
+        .section-heading {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-heading i {
+            font-size: 1.5rem;
+        }
+
+        /* تحسينات بطاقات الإحصائيات */
+        .stats-card {
+            padding: 20px 15px;
+            margin: 0 10px 20px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stats-number {
+            font-size: 2.25rem;
+            margin-bottom: 5px;
+        }
+        
+        .stats-label {
+            font-size: 1rem;
+        }
+
+        .stats-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        /* تحسينات بطاقة معلومات العارض */
+        .exhibitor-card {
+            margin: 0 10px 20px;
+        }
+
+        .exhibitor-card .card-body {
+            padding: 15px;
+        }
+
+        .exhibitor-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .exhibitor-card .lead {
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        /* تحسين أيقونات المعلومات */
+        .exhibitor-card .d-flex {
+            margin-bottom: 10px;
+        }
+
+        .exhibitor-card i {
+            width: 20px;
+            text-align: center;
+            margin-right: 8px;
+        }
+
+        /* تحسينات الإجراءات السريعة */
+        .quick-action {
+            padding: 20px 15px;
+            margin: 0 10px 20px;
+            height: auto;
+        }
+
+        .quick-action .feature-icon {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 15px;
+        }
+
+        .quick-action .feature-icon i {
+            font-size: 1.75rem;
+        }
+
+        .quick-action h4 {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+
+        .quick-action p {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .cta-button-outline {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+        }
+
+        /* تحسين المسافات بين الأقسام */
+        .decorated-section {
+            padding: 40px 0;
+        }
+
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .row {
+            margin-left: -10px;
+            margin-right: -10px;
+        }
+
+        /* تحسين صورة العارض */
+        .exhibitor-card img,
+        .exhibitor-card .bg-light {
+            width: 120px !important;
+            height: 120px !important;
+            margin-bottom: 20px;
+        }
+    }
+
+    /* تحسينات إضافية للشاشات الصغيرة جداً */
+    @media (max-width: 576px) {
+        /* تحسينات العناوين */
+        .section-heading {
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        /* تنظيم بطاقات الإحصائيات */
+        .stats-card {
+            min-height: 150px;
+            margin-bottom: 15px;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+        }
+
+        .stats-card i {
+            font-size: 2.25rem;
+            margin-bottom: 10px;
+        }
+
+        /* تحسين تخطيط معلومات العارض */
+        .exhibitor-card .row {
+            flex-direction: column;
+        }
+
+        .exhibitor-card .col-md-3 {
+            margin-bottom: 15px;
+        }
+
+        .exhibitor-card .col-md-9 {
+            text-align: center;
+        }
+
+        .exhibitor-card .d-flex {
+            justify-content: center;
+        }
+
+        /* تنظيم الإجراءات السريعة */
+        .quick-action {
+            margin-bottom: 15px;
+        }
+
+        .quick-action .feature-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .quick-action .feature-icon i {
+            font-size: 1.5rem;
+        }
+
+        .quick-action h4 {
+            font-size: 1.1rem;
+        }
+
+        /* تحسين المسافات */
+        .decorated-section {
+            padding: 30px 0;
+        }
+
+        /* تعديل أحجام الخط */
+        .lead {
+            font-size: 0.9rem !important;
+        }
+
+        /* تحسين الأزرار */
+        .cta-button-outline {
+            width: 100%;
+            text-align: center;
+            padding: 8px 15px;
+        }
+
+        /* تنظيم عناصر الخلفية */
+        .circle {
+            width: 15px;
+            height: 15px;
+        }
+
+        .circle-group {
+            gap: 4px;
+        }
+    }
+
+    /* تحسينات للهواتف الصغيرة جداً */
+    @media (max-width: 375px) {
+        /* تصغير العناوين */
+        .section-heading {
+            font-size: 1.25rem;
+        }
+
+        /* تقليل حجم الإحصائيات */
+        .stats-number {
+            font-size: 1.75rem;
+        }
+
+        .stats-label {
+            font-size: 0.9rem;
+        }
+
+        /* تصغير أيقونات الميزات */
+        .quick-action .feature-icon {
+            width: 50px;
+            height: 50px;
+        }
+
+        /* تحسين المسافات */
+        .decorated-section {
+            padding: 25px 0;
+        }
+
+        .container {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="text-white text-center mb-4">
-                <i class="fas fa-store me-3"></i>لوحة تحكم العارض
-            </h1>
-            <p class="text-center text-white opacity-75 lead">
-                مرحباً {{ exhibitor.company_name }}
-            </p>
-        </div>
+<!-- قسم الترحيب -->
+<section class="decorated-section py-5">
+    <!-- عناصر الخلفية -->
+    <div class="circle-group top-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
     </div>
-    
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="stats-card">
-                <i class="fas fa-eye fa-3x mb-3"></i>
-                <span class="stats-number">{{ total_visits }}</span>
-                <span class="stats-label">إجمالي الزيارات</span>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stats-card">
-                <i class="fas fa-heart fa-3x mb-3"></i>
-                <span class="stats-number">{{ total_favorites }}</span>
-                <span class="stats-label">إضافات للمفضلة</span>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stats-card">
-                <i class="fas fa-calendar fa-3x mb-3"></i>
-                <span class="stats-number">{{ total_appointments }}</span>
-                <span class="stats-label">المواعيد المحجوزة</span>
-            </div>
-        </div>
+
+    <div class="circle-group middle-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
     </div>
-    
-    <!-- Exhibitor Info Card -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card exhibitor-card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>معلومات جناحك
-                    </h5>
+
+    <div class="container position-relative">
+        <h1 class="section-heading">
+            <i class="fas fa-store me-3"></i>لوحة تحكم العارض
+        </h1>
+        <p class="text-center mb-5 lead">
+            مرحباً {{ exhibitor.company_name }}
+        </p>
+        
+        <!-- بطاقات الإحصائيات -->
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <i class="fas fa-eye fa-3x mb-3"></i>
+                    <span class="stats-number">{{ total_visits }}</span>
+                    <span class="stats-label">إجمالي الزيارات</span>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 text-center">
-                            {% if exhibitor.logo_url %}
-                                <img src="{{ exhibitor.logo_url }}" alt="{{ exhibitor.company_name }}" 
-                                     class="img-fluid rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
-                            {% else %}
-                                <div class="bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
-                                     style="width: 120px; height: 120px;">
-                                    <i class="fas fa-store fa-3x text-muted"></i>
-                                </div>
-                            {% endif %}
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <i class="fas fa-heart fa-3x mb-3"></i>
+                    <span class="stats-number">{{ total_favorites }}</span>
+                    <span class="stats-label">إضافات للمفضلة</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <i class="fas fa-calendar fa-3x mb-3"></i>
+                    <span class="stats-number">{{ total_bookings }}</span>
+                    <span class="stats-label">المواعيد المحجوزة</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+    
+<!-- قسم معلومات العارض -->
+<section class="decorated-section py-5">
+    <div class="circle-group middle-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group bottom-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="container position-relative">
+        <h2 class="section-heading">
+            <i class="fas fa-info-circle me-2"></i>معلومات جناحك
+        </h2>
+        
+        <div class="card exhibitor-card">
+            <div class="card-body p-4">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-3 col-md-4 text-center">
+                        {% if exhibitor.logo_url %}
+                            <img src="{{ exhibitor.logo_url }}" alt="{{ exhibitor.company_name }}" 
+                                 class="img-fluid rounded-circle mb-3 mx-auto d-block" 
+                                 style="width: 150px; height: 150px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        {% else %}
+                            <div class="bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                 style="width: 150px; height: 150px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                                <i class="fas fa-store fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-lg-9 col-md-8">
+                        <div class="text-center text-md-start">
+                            <h3 class="mb-3" style="color: #95c11f;">{{ exhibitor.company_name }}</h3>
+                            <p class="lead mb-4">{{ exhibitor.description }}</p>
                         </div>
-                        <div class="col-md-9">
-                            <h4>{{ exhibitor.company_name }}</h4>
-                            <p class="text-muted">{{ exhibitor.description }}</p>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong>الموقع:</strong> {{ exhibitor.gallery_hall.replace('hall', 'القاعة ') }}<br>
-                                    <strong>التصنيف:</strong> #{{ exhibitor.ranking }}
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="info-card p-3 bg-light rounded-3 mb-2">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-map-marker-alt me-2" style="color: #95c11f;"></i>
+                                        <span><strong>الموقع:</strong> {{ exhibitor.hall.replace('hall', 'القاعة ') if exhibitor.hall else 'غير محدد' }}</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-star me-2" style="color: #95c11f;"></i>
+                                        <span><strong>التصنيف:</strong> #{{ exhibitor.ranking }}</span>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="info-card p-3 bg-light rounded-3">
                                     {% if exhibitor.contact_email %}
-                                    <strong>البريد الإلكتروني:</strong> {{ exhibitor.contact_email }}<br>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-envelope me-2" style="color: #95c11f;"></i>
+                                        <span class="text-truncate"><strong>البريد:</strong> {{ exhibitor.contact_email }}</span>
+                                    </div>
                                     {% endif %}
                                     {% if exhibitor.contact_phone %}
-                                    <strong>الهاتف:</strong> {{ exhibitor.contact_phone }}
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-phone me-2" style="color: #95c11f;"></i>
+                                        <span><strong>الهاتف:</strong> {{ exhibitor.contact_phone }}</span>
+                                    </div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -124,29 +492,61 @@
             </div>
         </div>
     </div>
+</section>
     
-    <!-- Quick Actions -->
-    <div class="row">
-        <div class="col-md-6">
-            <a href="/exhibitor/{{ exhibitor.id }}" class="quick-action">
-                <div class="card exhibitor-card">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-eye me-2"></i>عرض جناحك
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <p>شاهد كيف يراك الزوار في المعرض</p>
-                        <button class="btn btn-outline-success">
-                            <i class="fas fa-external-link-alt me-2"></i>زيارة الجناح
-                        </button>
-                    </div>
-                </div>
-            </a>
-        </div>
+<!-- قسم الإجراءات السريعة -->
+<section class="decorated-section py-5">
+    <div class="circle-group top-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group bottom-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="container position-relative">
+        <h2 class="section-heading">
+            <i class="fas fa-tasks me-2"></i>الإجراءات السريعة
+        </h2>
         
-        <div class="col-md-6">
-            <div class="card exhibitor-card">
+        <div class="row g-4 justify-content-center">
+            <!-- عرض الجناح -->
+            <div class="col-md-4">
+                <a href="{{ url_for('exhibitor.profile', exhibitor_id=exhibitor.id) }}" class="text-decoration-none">
+                    <div class="quick-action text-center h-100">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h4 class="mb-3">عرض جناحك</h4>
+                        <p class="text-muted mb-4">شاهد كيف يراك الزوار في المعرض</p>
+                        <span class="cta-button-outline d-inline-block">
+                            <i class="fas fa-external-link-alt me-2"></i>زيارة الجناح
+                        </span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- تعديل الملف الشخصي -->
+            <div class="col-md-4">
+                <a href="{{ url_for('edit_exhibitor_profile') }}" class="text-decoration-none">
+                    <div class="quick-action text-center h-100">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h4 class="mb-3">تعديل الملف الشخصي</h4>
+                        <p class="text-muted mb-4">تحديث معلومات وصور جناحك</p>
+                        <span class="cta-button-outline d-inline-block">
+                            <i class="fas fa-cog me-2"></i>تعديل الملف
+                        </span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- إدارة المواعيد -->
+            <div class="col-md-4">
+                <div class="quick-action text-center h-100">
                 <div class="card-header bg-warning text-white">
                     <h5 class="mb-0">
                         <i class="fas fa-box me-2"></i>إدارة المنتجات
@@ -170,9 +570,9 @@
                 </div>
                 <div class="card-body">
                     <p>تحديد أوقات متاحة للقاءات مع الزوار</p>
-                    <button class="btn btn-outline-info" onclick="alert('قريباً...')">
+                    <a href="{{ url_for('manage_schedule') }}" class="btn btn-outline-info">
                         <i class="fas fa-clock me-2"></i>إدارة المواعيد
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

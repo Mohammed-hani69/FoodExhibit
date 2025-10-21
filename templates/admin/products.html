@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+
+{% block title %}إدارة المنتجات{% endblock %}
+
+{% block extra_css %}
+<!-- Add Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container {
+        width: 100% !important;
+    }
+    .select2-results__option {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+    }
+    .exhibitor-option {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .exhibitor-name {
+        font-weight: bold;
+    }
+    .exhibitor-email {
+        color: #666;
+        font-size: 0.9em;
+        margin-right: 10px;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">إدارة المنتجات</h2>
+    
+    <!-- Add Product Button -->
+    <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        إضافة منتج جديد
+    </button>
+
+    <!-- Products Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>الصورة</th>
+                            <th>اسم المنتج</th>
+                            <th>العارض</th>
+                            <th>السعر</th>
+                            <th>مميز في الصفحة الرئيسية</th>
+                            <th>مميز في صفحة العارض</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr data-product-id="{{ product.id }}">
+                            <td>
+                                <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover;">
+                            </td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.exhibitor.company_name }}</td>
+                            <td>{{ product.price }} {{ product.currency }}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" 
+                                           id="homepageFeatured{{ product.id }}"
+                                           {% if product.is_homepage_featured %}checked{% endif %}
+                                           onchange="updateProductFeature({{ product.id }}, 'homepage', this.checked)">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" 
+                                           id="exhibitorFeatured{{ product.id }}"
+                                           {% if product.is_featured %}checked{% endif %}
+                                           onchange="updateProductFeature({{ product.id }}, 'exhibitor', this.checked)">
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if product.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ 'نشط' if product.is_active else 'غير نشط' }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="editProduct({{ product.id }})">
+                                    تعديل
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteProduct({{ product.id }})">
+                                    حذف
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة منتج جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm" action="{{ url_for('admin.add_product') }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label for="exhibitor_id" class="form-label">اختر العارض</label>
+                        <select class="form-control" id="exhibitor_id" name="user_id" required>
+                            <option value="">-- اختر العارض --</option>
+                            {% for exhibitor in exhibitors %}
+                            <option value="{{ exhibitor.id }}" 
+                                    data-email="{{ exhibitor.email }}"
+                                    data-name="{{ exhibitor.company_name }}"
+                                    data-specialization="{{ exhibitor.specialization }}">
+                                {{ exhibitor.company_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">يمكنك البحث باسم العارض أو البريد الإلكتروني</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">اسم المنتج</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">وصف المنتج</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="price" class="form-label">السعر</label>
+                                <input type="number" class="form-control" id="price" name="price" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="currency" class="form-label">العملة</label>
+                                <select class="form-control" id="currency" name="currency">
+                                    <option value="USD">دولار أمريكي</option>
+                                    <option value="EUR">يورو</option>
+                                    <option value="EGP">جنية</option>
+                                    <option value="SAR">ريال سعودي</option>
+                                    <option value="AED">درهم إماراتي</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="image" class="form-label">صورة المنتج</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" id="is_featured" name="is_featured">
+                                <label class="form-check-label" for="is_featured">
+                                    مميز في صفحة العارض
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" id="is_homepage_featured" name="is_homepage_featured">
+                                <label class="form-check-label" for="is_homepage_featured">
+                                    مميز في الصفحة الرئيسية
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">حفظ المنتج</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل المنتج</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Similar form to add product, but with id="editProductForm" -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Add Select2 JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Initialize Select2
+    $('#exhibitor_id').select2({
+        placeholder: 'اختر العارض',
+        allowClear: true,
+        templateResult: formatExhibitor,
+        templateSelection: formatExhibitorSelection,
+        language: {
+            noResults: function() {
+                return "لا يوجد عارضين";
+            },
+            searching: function() {
+                return "جاري البحث...";
+            }
+        }
+    }).on('select2:select', function(e) {
+        // Get the selected option
+        var selectedOption = $(e.params.data.element);
+        // Get the specialization from the data attribute
+        var specialization = selectedOption.data('specialization');
+        // Set the category field value
+        $('#category').val(specialization);
+    });
+
+    // Custom format for dropdown options
+    function formatExhibitor(exhibitor) {
+        if (!exhibitor.id) {
+            return exhibitor.text;
+        }
+        
+        var email = $(exhibitor.element).data('email');
+        var $container = $(
+            '<div class="exhibitor-option">' +
+                '<div class="exhibitor-name">' + exhibitor.text + '</div>' +
+                '<div class="exhibitor-email">' + email + '</div>' +
+            '</div>'
+        );
+        
+        return $container;
+    }
+
+    // Custom format for selected option
+    function formatExhibitorSelection(exhibitor) {
+        if (!exhibitor.id) {
+            return exhibitor.text;
+        }
+        return exhibitor.text;
+    }
+});
+
+// Feature toggle functionality
+function updateProductFeature(productId, featureType, isEnabled) {
+    fetch('/admin/update-product-feature', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            feature_type: featureType,
+            is_enabled: isEnabled
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            alert('تم تحديث حالة المنتج بنجاح');
+        } else {
+            // Revert the toggle if failed
+            const checkbox = document.getElementById(`${featureType}Featured${productId}`);
+            checkbox.checked = !isEnabled;
+            alert('حدث خطأ أثناء تحديث حالة المنتج');
+        }
+    });
+}
+
+// Delete product functionality
+function deleteProduct(productId) {
+    if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        fetch(`/admin/delete-product/${productId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const row = document.querySelector(`tr[data-product-id="${productId}"]`);
+                if (row) {
+                    // Fade out animation before removal
+                    row.style.transition = 'opacity 0.5s';
+                    row.style.opacity = '0';
+                    setTimeout(() => {
+                        row.remove();
+                        // Show Bootstrap alert for success
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                        alertDiv.role = 'alert';
+                        alertDiv.innerHTML = `
+                            تم حذف المنتج بنجاح
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.card'));
+                        
+                        // Auto-dismiss the alert after 3 seconds
+                        setTimeout(() => {
+                            alertDiv.remove();
+                        }, 3000);
+                    }, 500);
+                }
+            } else {
+                throw new Error(data.message || 'فشل حذف المنتج');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Show Bootstrap alert for error
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                حدث خطأ أثناء حذف المنتج: ${error.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.card'));
+        });
+    }
+}
+
+// Edit product functionality
+function editProduct(productId) {
+    // Fetch product details and populate the edit form
+    fetch(`/admin/get-product/${productId}`)
+        .then(response => response.json())
+        .then(product => {
+            // Populate form fields
+            document.getElementById('editProductForm').elements['name'].value = product.name;
+            // ... populate other fields
+            
+            // Show the modal
+            const editModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+            editModal.show();
+        });
+}
+</script>
+{% endblock %}

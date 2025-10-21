@@ -84,7 +84,7 @@ git pull origin main
 git add .
 
 # Commit changes | تأكيد التغييرات
-git commit -m "Description of changes"
+git commit -m "ADD LICENSE"
 
 # Push changes | رفع التغييرات
 git push origin main
@@ -127,10 +127,11 @@ FoodExhibit/
 
 ## 📄 License | الترخيص
 
-[MIT License](LICENSE)
+This is proprietary software. All rights reserved. | هذا برنامج مملوك. جميع الحقوق محفوظة.
+See [LICENSE](LICENSE) file for details. | انظر ملف الترخيص للتفاصيل.
 
 ## 📞 Contact | التواصل
 
-For support or inquiries, please contact [Your Contact Information]
+For support or inquiries, please contact [zezohani72@gmail.com OR +201145425207]
 
-للدعم أو الاستفسارات، يرجى التواصل مع [معلومات التواصل الخاصة بك]
+للدعم أو الاستفسارات، يرجى التواصل مع [zezohani72@gmail.com OR +201145425207]

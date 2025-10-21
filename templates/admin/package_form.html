@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+    
+    .form-title {
+        color: #95c11f;
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        color: #666;
+        font-weight: 500;
+    }
+    
+    .submit-btn {
+        background-color: #95c11f;
+        color: white;
+        padding: 10px 30px;
+        border-radius: 30px;
+    }
+    
+    .submit-btn:hover {
+        background-color: #7a9f19;
+        color: white;
+    }
+    
+    .cancel-btn {
+        background-color: #f8f9fa;
+        color: #666;
+        padding: 10px 30px;
+        border-radius: 30px;
+        margin-right: 10px;
+    }
+    
+    .cancel-btn:hover {
+        background-color: #e9ecef;
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="form-section">
+        <h2 class="form-title">
+            {% if package %}
+                {% if current_language == 'ar' %}تعديل الباقة{% elif current_language == 'fr' %}Modifier le forfait{% else %}Edit Package{% endif %}
+            {% else %}
+                {% if current_language == 'ar' %}إضافة باقة جديدة{% elif current_language == 'fr' %}Ajouter un nouveau forfait{% else %}Add New Package{% endif %}
+            {% endif %}
+        </h2>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">{% if current_language == 'ar' %}اسم الباقة (عربي){% elif current_language == 'fr' %}Nom du forfait (arabe){% else %}Package Name (Arabic){% endif %}</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ package.name if package else '' }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="name_en" class="form-label">{% if current_language == 'ar' %}اسم الباقة (إنجليزي){% elif current_language == 'fr' %}Nom du forfait (anglais){% else %}Package Name (English){% endif %}</label>
+                    <input type="text" class="form-control" id="name_en" name="name_en" value="{{ package.name_en if package else '' }}" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="description" class="form-label">{% if current_language == 'ar' %}الوصف (عربي){% elif current_language == 'fr' %}Description (arabe){% else %}Description (Arabic){% endif %}</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" required>{{ package.description if package else '' }}</textarea>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="description_en" class="form-label">{% if current_language == 'ar' %}الوصف (إنجليزي){% elif current_language == 'fr' %}Description (anglais){% else %}Description (English){% endif %}</label>
+                    <textarea class="form-control" id="description_en" name="description_en" rows="4" required>{{ package.description_en if package else '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="price" class="form-label">{% if current_language == 'ar' %}السعر{% elif current_language == 'fr' %}Prix{% else %}Price{% endif %} (EGP)</label>
+                    <input type="number" class="form-control" id="price" name="price" value="{{ package.price if package else '' }}" step="0.01" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="features" class="form-label">{% if current_language == 'ar' %}المميزات{% elif current_language == 'fr' %}Caractéristiques{% else %}Features{% endif %}</label>
+                    <textarea class="form-control" id="features" name="features" rows="4" placeholder="{% if current_language == 'ar' %}أدخل كل ميزة في سطر جديد{% elif current_language == 'fr' %}Entrez chaque fonctionnalité sur une nouvelle ligne{% else %}Enter each feature on a new line{% endif %}">{{ package.features if package else '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if package and package.is_active %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">
+                        {% if current_language == 'ar' %}نشط{% elif current_language == 'fr' %}Actif{% else %}Active{% endif %}
+                    </label>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{{ url_for('admin.packages') }}" class="btn cancel-btn">
+                    {% if current_language == 'ar' %}إلغاء{% elif current_language == 'fr' %}Annuler{% else %}Cancel{% endif %}
+                </a>
+                <button type="submit" class="btn submit-btn">
+                    {% if package %}
+                        {% if current_language == 'ar' %}حفظ التغييرات{% elif current_language == 'fr' %}Enregistrer les modifications{% else %}Save Changes{% endif %}
+                    {% else %}
+                        {% if current_language == 'ar' %}إضافة الباقة{% elif current_language == 'fr' %}Ajouter le forfait{% else %}Add Package{% endif %}
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

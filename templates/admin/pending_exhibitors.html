@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #fff;
+        color: #333;
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    .pending-section {
+        position: relative;
+        min-height: 100vh;
+        background: #fff;
+        overflow: hidden;
+        padding: 40px 0;
+    }
+
+    .pending-title {
+        color: #95c11f;
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .admin-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: none;
+        margin-bottom: 30px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead {
+        background-color: #95c11f;
+        color: white;
+    }
+
+    .table thead th {
+        padding: 15px;
+        font-weight: 600;
+        border: none;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(149, 193, 31, 0.05);
+    }
+
+    .table td {
+        padding: 15px;
+        vertical-align: middle;
+    }
+
+    .action-button {
+        background: transparent;
+        border: 2px solid #95c11f;
+        color: #95c11f;
+        padding: 8px 20px;
+        border-radius: 30px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .action-button:hover {
+        background: #95c11f;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .action-button.approve {
+        background: #95c11f;
+        color: white;
+    }
+
+    .action-button.approve:hover {
+        background: #7a9f19;
+    }
+
+    .empty-message {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+
+    .empty-message i {
+        font-size: 4rem;
+        color: #95c11f;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .badge-specialization {
+        background: rgba(149, 193, 31, 0.1);
+        color: #95c11f;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+
+    /* Decorative Circles */
+    .circle-group {
+        position: absolute;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        z-index: 1;
+    }
+
+    .circle {
+        width: 18px;
+        height: 18px;
+        background: #95c11f;
+        border-radius: 50%;
+        opacity: 0.15;
+    }
+
+    .top-left { top: 20px; left: 20px; width: 80px; }
+    .middle-left { top: 40%; left: 5%; width: 80px; }
+    .middle-right { top: 50%; right: 5%; width: 80px; }
+    .bottom-right { bottom: 20px; right: 20px; width: 80px; }
+
+    @media (max-width: 768px) {
+        .pending-title {
+            font-size: 1.8rem;
+        }
+        .table {
+            font-size: 0.9rem;
+        }
+        .action-button {
+            padding: 6px 15px;
+            font-size: 0.9rem;
+        }
+    }
+
+    .alert {
+        border-radius: 15px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border: none;
+        background-color: rgba(149, 193, 31, 0.1);
+        color: #95c11f;
+    }
+
+    .alert-success {
+        background-color: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pending-section">
+    <!-- Decorative Circles -->
+    <div class="circle-group top-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+    <div class="circle-group middle-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+    <div class="circle-group middle-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+    <div class="circle-group bottom-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pending-title">
+                    {% if current_language == 'en' %}
+                        Pending Exhibitors
+                    {% elif current_language == 'ar' %}
+                        العارضون المعلقون
+                    {% else %}
+                        Exposants en Attente
+                    {% endif %}
+                </h2>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} text-center">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            
+            <div class="admin-card">
+                <div class="table-responsive">
+                    {% if exhibitors %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {% if current_language == 'en' %}Full Name
+                                    {% elif current_language == 'ar' %}الاسم الكامل
+                                    {% else %}Nom Complet{% endif %}
+                                </th>
+                                <th>
+                                    {% if current_language == 'en' %}Email
+                                    {% elif current_language == 'ar' %}البريد الإلكتروني
+                                    {% else %}Email{% endif %}
+                                </th>
+                                <th>
+                                    {% if current_language == 'en' %}Company Name
+                                    {% elif current_language == 'ar' %}اسم الشركة
+                                    {% else %}Nom de l'Entreprise{% endif %}
+                                </th>
+                                <th>
+                                    {% if current_language == 'en' %}Phone
+                                    {% elif current_language == 'ar' %}الهاتف
+                                    {% else %}Téléphone{% endif %}
+                                </th>
+                                <th>
+                                    {% if current_language == 'en' %}Specialization
+                                    {% elif current_language == 'ar' %}التخصص
+                                    {% else %}Spécialisation{% endif %}
+                                </th>
+                                <th>
+                                    {% if current_language == 'en' %}Package
+                                    {% elif current_language == 'ar' %}نوع الباقة
+                                    {% else %}Forfait{% endif %}
+                                </th>
+                                <th>
+                                    {% if current_language == 'en' %}Actions
+                                    {% elif current_language == 'ar' %}الإجراءات
+                                    {% else %}Actions{% endif %}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exhibitor in exhibitors %}
+                            <tr data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                                <td>{{ exhibitor.first_name }} {{ exhibitor.last_name }}</td>
+                                <td>{{ exhibitor.email }}</td>
+                                <td>{{ exhibitor.company_name }}</td>
+                                <td>{{ exhibitor.phone }}</td>
+                                <td>
+                                    <span class="badge-specialization{% if not exhibitor.specialization_id %} text-muted{% endif %}">
+                                        {% if exhibitor.specialization_id %}
+                                            {% set spec = get_specialization(exhibitor.specialization_id) %}
+                                            {{ spec.name if spec else 'N/A' }}
+                                        {% else %}
+                                            {% if current_language == 'en' %}Not specified
+                                            {% elif current_language == 'ar' %}غير محدد
+                                            {% else %}Non spécifié{% endif %}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge-specialization">
+                                        {% if exhibitor.package_id %}
+                                            {% if exhibitor.package %}
+                                                {{ exhibitor.package.name }}
+                                            {% else %}
+                                                {% if current_language == 'en' %}Not found
+                                                {% elif current_language == 'ar' %}غير موجود
+                                                {% else %}Non trouvé{% endif %}
+                                            {% endif %}
+                                        {% else %}
+                                            {% if current_language == 'en' %}Not selected
+                                            {% elif current_language == 'ar' %}غير محدد
+                                            {% else %}Non sélectionné{% endif %}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <form action="{{ url_for('approve_exhibitor', id=exhibitor.id) }}" method="POST">
+                                            <button type="submit" class="action-button approve">
+                                                {% if current_language == 'en' %}Approve
+                                                {% elif current_language == 'ar' %}موافقة
+                                                {% else %}Approuver{% endif %}
+                                            </button>
+                                        </form>
+                                        <form action="{{ url_for('reject_exhibitor', id=exhibitor.id) }}" method="POST">
+                                            <button type="submit" class="action-button">
+                                                {% if current_language == 'en' %}Reject
+                                                {% elif current_language == 'ar' %}رفض
+                                                {% else %}Rejeter{% endif %}
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-message">
+                        <i class="fas fa-clipboard-check"></i>
+                        <p class="mt-3">
+                            {% if current_language == 'en' %}
+                                No pending exhibitors at this time.
+                            {% elif current_language == 'ar' %}
+                                لا يوجد عارضين معلقين في الوقت الحالي.
+                            {% else %}
+                                Aucun exposant en attente pour le moment.
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize AOS animation library
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 50
+        });
+    });
+</script>
+{% endblock %}

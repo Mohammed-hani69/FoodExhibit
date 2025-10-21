@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}إدارة الفيديوهات{% endblock %}
+
+{% block extra_css %}
+<!-- Add Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container {
+        width: 100% !important;
+    }
+    .select2-results__option {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+    }
+    .exhibitor-option {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .exhibitor-name {
+        font-weight: bold;
+    }
+    .exhibitor-email {
+        color: #666;
+        font-size: 0.9em;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="mb-0">إدارة الفيديوهات</h3>
+                        </div>
+                        <div class="col text-end">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addVideoModal">
+                                إضافة فيديو جديد
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table align-items-center table-flush">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>العنوان</th>
+                                    <th>الوصف</th>
+                                    <th>العارض</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for video in videos %}
+                                <tr>
+                                    <td>{{ video.title }}</td>
+                                    <td>{{ video.description[:100] }}{% if video.description|length > 100 %}...{% endif %}</td>
+                                    <td>{{ video.exhibitor.company_name }}</td>
+                                    <td>
+                                        <span class="badge {% if video.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ 'نشط' if video.is_active else 'غير نشط' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="editVideo({{ video.id }})">
+                                            تعديل
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteVideo({{ video.id }})">
+                                            حذف
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Video Modal -->
+<div class="modal fade" id="addVideoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة فيديو جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addVideoForm" action="{{ url_for('admin.add_video') }}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="exhibitor_id" class="form-label">اختر العارض</label>
+                        <select class="form-control" id="exhibitor_id" name="user_id" required>
+                            <option value="">-- اختر العارض --</option>
+                            {% for exhibitor in exhibitors %}
+                            <option value="{{ exhibitor.id }}">{{ exhibitor.company_name }} ({{ exhibitor.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label">عنوان الفيديو</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">وصف الفيديو</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="video" class="form-label">الفيديو</label>
+                        <input type="file" class="form-control" id="video" name="video" accept="video/*" required>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="is_active" name="is_active" checked>
+                            <label class="form-check-label" for="is_active">نشط</label>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary">حفظ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Video Modal -->
+<div class="modal fade" id="editVideoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل الفيديو</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editVideoForm" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" id="edit_video_id" name="video_id">
+                    <div class="mb-3">
+                        <label for="edit_title" class="form-label">عنوان الفيديو</label>
+                        <input type="text" class="form-control" id="edit_title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label">وصف الفيديو</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_video" class="form-label">الفيديو</label>
+                        <input type="file" class="form-control" id="edit_video" name="video" accept="video/*">
+                        <small class="text-muted">اترك هذا الحقل فارغاً إذا كنت لا تريد تغيير الفيديو</small>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="edit_is_active" name="is_active">
+                            <label class="form-check-label" for="edit_is_active">نشط</label>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Add Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize Select2
+        $('#exhibitor_id').select2({
+            dropdownParent: $('#addVideoModal'),
+            placeholder: "اختر العارض"
+        });
+
+        // Add CSRF token to all AJAX requests
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRF-Token", "{{ csrf_token() }}");
+                }
+            }
+        });
+    });
+
+    // Edit video function
+    function editVideo(videoId) {
+        // Fetch video details
+        $.get(`/admin/get-video/${videoId}`, function(response) {
+            $('#edit_video_id').val(response.id);
+            $('#edit_title').val(response.title);
+            $('#edit_description').val(response.description);
+            $('#edit_is_active').prop('checked', response.is_active);
+            
+            // Update form action
+            $('#editVideoForm').attr('action', `/admin/update-video/${videoId}`);
+            
+            // Show modal
+            $('#editVideoModal').modal('show');
+        });
+    }
+
+    // Delete video function
+    function deleteVideo(videoId) {
+        if (confirm('هل أنت متأكد من حذف هذا الفيديو؟')) {
+            $.ajax({
+                url: `/admin/delete-video/${videoId}`,
+                method: 'DELETE',
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('حدث خطأ أثناء حذف الفيديو');
+                    }
+                },
+                error: function() {
+                    alert('حدث خطأ أثناء حذف الفيديو');
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

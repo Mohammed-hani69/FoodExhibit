@@ -1,118 +1,588 @@
 {% extends "base.html" %}
 
-{% block title %}صندوقي - معرض الأغذية{% endblock %}
+{% block title %}
+    {% if current_language == 'en' %}
+        My Box - Food Exhibition
+    {% elif current_language == 'ar' %}
+        صندوقي - معرض الأغذية
+    {% else %}
+        Ma Boîte - Exposition Alimentaire
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/my_box.js') }}"></script>
+{% endblock %}
 
 {% block extra_css %}
 <style>
-    .nav-tabs .nav-link {
-        border-radius: 10px 10px 0 0;
-        border: none;
-        background: transparent;
-        color: #666;
-        font-weight: 600;
+    :root {
+        --primary-color: #95C11F;
+        --text-primary: #2C3E50;
+        --text-secondary: #596475;
+        --bg-light: #f8f9fa;
+        --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --hover-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+        --border-radius: 20px;
     }
-    
-    .nav-tabs .nav-link.active {
-        background: linear-gradient(45deg, #667eea, #764ba2);
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #7a9f19 100%);
         color: white;
-        border: none;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+        border-radius: 0 0 40px 40px;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
-    
-    .favorite-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        cursor: pointer;
-        border: none;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+    .page-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .decorated-section {
+        position: relative;
+        padding: 3rem 0;
+        isolation: isolate;
         overflow: hidden;
     }
-    
+
+    .circle-decoration {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        opacity: 0.05;
+        z-index: -1;
+    }
+
+    .circle-top-right {
+        top: -200px;
+        right: -200px;
+    }
+
+    .circle-bottom-left {
+        bottom: -200px;
+        left: -200px;
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #7a9f19 100%);
+        border-radius: var(--border-radius);
+        padding: 2.5rem 2rem;
+        height: 100%;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        transition: transform 0.3s ease;
+        text-align: center;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stats-card i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stats-card .counter {
+        font-size: 3rem;
+        font-weight: 800;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-card .label {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    .favorite-card {
+        background: white;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+        height: 100%;
+        border: none;
+    }
+
     .favorite-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        box-shadow: var(--hover-shadow);
     }
-    
-    .favorite-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: rgba(220, 53, 69, 0.9);
+
+    .favorite-card .card-body {
+        padding: 2rem;
+    }
+
+    .favorite-card .card-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .favorite-card .card-text {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    .custom-tabs {
+        border: none;
+        margin: 2rem 0 3rem;
+        justify-content: center;
+        gap: 1.5rem;
+        padding: 0.5rem;
+        background: var(--bg-light);
+        border-radius: 50px;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .custom-tabs .nav-link {
+        border: none;
+        border-radius: 50px;
+        padding: 1rem 2.5rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+    }
+
+    .custom-tabs .nav-link.active {
+        background: var(--primary-color);
         color: white;
-        border-radius: 50%;
+        box-shadow: 0 4px 15px rgba(149, 193, 31, 0.2);
+    }
+
+    .custom-tabs .nav-link:hover:not(.active) {
+        color: var(--primary-color);
+        background: rgba(149, 193, 31, 0.1);
+    }
+
+    .action-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-button:hover {
+        background: #7a9f19;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .btn-outline-danger {
+        border-width: 2px;
         width: 40px;
         height: 40px;
+        padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        transition: all 0.3s ease;
     }
-    
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #6c757d;
+
+    .btn-outline-danger:hover {
+        transform: rotate(90deg);
     }
-    
-    .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 20px;
-        opacity: 0.5;
+
+    [dir="rtl"] .circle-top-right {
+        right: auto;
+        left: -200px;
     }
-    
-    .stats-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 30px;
+
+    [dir="rtl"] .circle-bottom-left {
+        left: auto;
+        right: -200px;
     }
-    
-    .counter {
-        font-size: 2.5rem;
-        font-weight: bold;
-        display: block;
+
+    [dir="rtl"] .action-button {
+        flex-direction: row-reverse;
+    }
+
+    @media (max-width: 991px) {
+        .page-header h1 {
+            font-size: 2.5rem;
+        }
+        .stats-card {
+            margin-bottom: 1.5rem;
+        }
+        .favorite-card .card-body {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 3rem 0;
+        }
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        .stats-card .counter {
+            font-size: 2.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .page-header h1 {
+            font-size: 1.75rem;
+        }
+        .stats-card {
+            padding: 1.5rem;
+        }
+        .custom-tabs {
+            flex-wrap: wrap;
+        }
+        .custom-tabs .nav-link {
+            width: 100%;
+            text-align: center;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="text-white text-center mb-4">
-                <i class="fas fa-box me-3"></i>صندوقي المفضل
-            </h1>
-            <p class="text-center text-white opacity-75 lead">
-                العارضين والمنتجات التي أضفتها لقائمة المفضلة
-            </p>
-        </div>
+<div class="page-header">
+    <div class="container">
+        <h1>
+            {% if current_language == 'en' %}
+                My Box
+            {% elif current_language == 'ar' %}
+                صندوقي
+            {% else %}
+                Ma Boîte
+            {% endif %}
+        </h1>
     </div>
+</div>
+
+<div class="decorated-section">
+    <div class="circle-decoration circle-top-right"></div>
+    <div class="circle-decoration circle-bottom-left"></div>
     
-    <!-- Statistics Cards -->
+    <div class="container">
+    
+    <!-- Stats Cards -->
     <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="stats-card">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="counter">{{ favorite_exhibitors|length }}</span>
-                        <span class="h5">عارض مفضل</span>
-                    </div>
-                    <i class="fas fa-store fa-3x opacity-75"></i>
-                </div>
+                <i class="fas fa-heart mb-3"></i>
+                <span class="counter">{{ favorites_count }}</span>
+                <span class="label">
+                    {% if current_language == 'en' %}
+                        Favorites
+                    {% elif current_language == 'ar' %}
+                        المفضلة
+                    {% else %}
+                        Favoris
+                    {% endif %}
+                </span>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="stats-card">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="counter">{{ favorite_products|length }}</span>
-                        <span class="h5">منتج مفضل</span>
+                <i class="fas fa-history mb-3"></i>
+                <span class="counter">{{ visited_count }}</span>
+                <span class="label">
+                    {% if current_language == 'en' %}
+                        Visited Stands
+                    {% elif current_language == 'ar' %}
+                        الأجنحة المزارة
+                    {% else %}
+                        Stands Visités
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <i class="fas fa-calendar-check mb-3"></i>
+                <span class="counter">{{ meetings_count }}</span>
+                <span class="label">
+                    {% if current_language == 'en' %}
+                        Scheduled Meetings
+                    {% elif current_language == 'ar' %}
+                        المواعيد المجدولة
+                    {% else %}
+                        Rendez-vous Programmés
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="col-12">
+        <ul class="nav nav-tabs custom-tabs" id="myBoxTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="favorites-tab" data-bs-toggle="tab" data-bs-target="#favorites-content" type="button" role="tab" aria-controls="favorites-content" aria-selected="true">
+                    {% if current_language == 'en' %}
+                        Favorites
+                    {% elif current_language == 'ar' %}
+                        المفضلة
+                    {% else %}
+                        Favoris
+                    {% endif %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="visited-tab" data-bs-toggle="tab" data-bs-target="#visited-content" type="button" role="tab" aria-controls="visited-content" aria-selected="false">
+                    {% if current_language == 'en' %}
+                        Visited Stands
+                    {% elif current_language == 'ar' %}
+                        الأجنحة المزارة
+                    {% else %}
+                        Stands Visités
+                    {% endif %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="meetings-tab" data-bs-toggle="tab" data-bs-target="#meetings-content" type="button" role="tab" aria-controls="meetings-content" aria-selected="false">
+                    {% if current_language == 'en' %}
+                        Scheduled Meetings
+                    {% elif current_language == 'ar' %}
+                        المواعيد المجدولة
+                    {% else %}
+                        Rendez-vous Programmés
+                    {% endif %}
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tabs Content -->
+    <div class="col-12 mt-4">
+        <div class="tab-content" id="myBoxTabsContent">
+            <!-- Favorites Tab -->
+            <div class="tab-pane fade show active" id="favorites-content" role="tabpanel" aria-labelledby="favorites-tab">
+                <div class="row">
+                    <!-- Favorite Exhibitors -->
+                    {% if favorite_exhibitors %}
+                    <h3 class="mb-4">
+                        {% if current_language == 'en' %}
+                            Favorite Exhibitors
+                        {% elif current_language == 'ar' %}
+                            العارضون المفضلون
+                        {% else %}
+                            Exposants Favoris
+                        {% endif %}
+                    </h3>
+                    {% for exhibitor in favorite_exhibitors %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card favorite-card">
+                            {% if exhibitor.banner_url %}
+                                <img src="{{ url_for('static', filename=exhibitor.banner_url) }}" class="card-img-top" alt="{{ exhibitor.company_name }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ exhibitor.company_name }}</h5>
+                                <p class="card-text">{{ exhibitor.description }}</p>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('exhibitor_profile', exhibitor_id=exhibitor.id) }}" class="btn action-button">
+                                        {% if current_language == 'en' %}
+                                            View Profile
+                                        {% elif current_language == 'ar' %}
+                                            عرض الملف
+                                        {% else %}
+                                            Voir le Profil
+                                        {% endif %}
+                                    </a>
+                                    <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }})" class="btn btn-outline-danger rounded-circle">
+                                        <i class="fas fa-heart-broken"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <i class="fas fa-heart fa-3x opacity-75"></i>
+                    {% endfor %}
+                    {% endif %}
+
+                    <!-- Favorite Products -->
+                    {% if favorite_products %}
+                    <h3 class="mb-4 mt-5">
+                        {% if current_language == 'en' %}
+                            Favorite Products
+                        {% elif current_language == 'ar' %}
+                            المنتجات المفضلة
+                        {% else %}
+                            Produits Favoris
+                        {% endif %}
+                    </h3>
+                    {% for product in favorite_products %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card favorite-card">
+                            {% if product.image_url %}
+                                <img src="{{ url_for('static', filename=product.image_url) }}" class="card-img-top" alt="{{ product.name }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <p class="card-text">{{ product.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="product-price">
+                                        {{ product.price }} {{ product.currency }}
+                                    </div>
+                                    <button onclick="toggleFavoriteProduct({{ product.id }})" class="btn btn-outline-danger rounded-circle">
+                                        <i class="fas fa-heart-broken"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if not favorite_exhibitors and not favorite_products %}
+                    <div class="col-12 text-center py-5">
+                        <div class="empty-state">
+                            <i class="fas fa-heart text-muted mb-4" style="font-size: 4rem;"></i>
+                            <h3>
+                                {% if current_language == 'en' %}
+                                    No Favorites Yet
+                                {% elif current_language == 'ar' %}
+                                    لا توجد مفضلات حتى الآن
+                                {% else %}
+                                    Pas de Favoris
+                                {% endif %}
+                            </h3>
+                            <p class="text-muted">
+                                {% if current_language == 'en' %}
+                                    Start exploring exhibitors and products to add them to your favorites!
+                                {% elif current_language == 'ar' %}
+                                    ابدأ باستكشاف العارضين والمنتجات لإضافتها إلى مفضلتك!
+                                {% else %}
+                                    Commencez à explorer les exposants et les produits pour les ajouter à vos favoris !
+                                {% endif %}
+                            </p>
+                            <a href="{{ url_for('gallery') }}" class="btn action-button mt-3">
+                                <i class="fas fa-search me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Explore Gallery
+                                {% elif current_language == 'ar' %}
+                                    استكشف المعرض
+                                {% else %}
+                                    Explorer la Galerie
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Visited Stands Tab -->
+            <div class="tab-pane fade" id="visited-content" role="tabpanel" aria-labelledby="visited-tab">
+                <div class="row">
+                    {% for visit in visited %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card favorite-card">
+                            <img src="{{ url_for('static', filename='images/' + visit.exhibitor.banner_image) }}" class="card-img-top" alt="{{ visit.exhibitor.name }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ visit.exhibitor.name }}</h5>
+                                <p class="card-text">
+                                    {% if current_language == 'en' %}
+                                        Visited on:
+                                    {% elif current_language == 'ar' %}
+                                        تمت الزيارة في:
+                                    {% else %}
+                                        Visité le:
+                                    {% endif %}
+                                    {{ visit.visit_date.strftime('%Y-%m-%d') }}
+                                </p>
+                                <a href="{{ url_for('exhibitor.profile', exhibitor_id=visit.exhibitor.id) }}" class="btn action-button">
+                                    {% if current_language == 'en' %}
+                                        View Profile
+                                    {% elif current_language == 'ar' %}
+                                        عرض الملف
+                                    {% else %}
+                                        Voir le Profil
+                                    {% endif %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Scheduled Meetings Tab -->
+            <div class="tab-pane fade" id="meetings-content" role="tabpanel" aria-labelledby="meetings-tab">
+                <div class="row">
+                    {% for meeting in meetings %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card favorite-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    {% if current_language == 'en' %}
+                                        Meeting with
+                                    {% elif current_language == 'ar' %}
+                                        اجتماع مع
+                                    {% else %}
+                                        Rendez-vous avec
+                                    {% endif %}
+                                    {{ meeting.exhibitor.name }}
+                                </h5>
+                                <p class="card-text">
+                                    <i class="fas fa-calendar-alt me-2"></i>
+                                    {% if current_language == 'en' %}
+                                        Date: {{ meeting.meeting_date.strftime('%Y-%m-%d') }}<br>
+                                        Time: {{ meeting.meeting_time.strftime('%H:%M') }}
+                                    {% elif current_language == 'ar' %}
+                                        التاريخ: {{ meeting.meeting_date.strftime('%Y-%m-%d') }}<br>
+                                        الوقت: {{ meeting.meeting_time.strftime('%H:%M') }}
+                                    {% else %}
+                                        Date: {{ meeting.meeting_date.strftime('%Y-%m-%d') }}<br>
+                                        Heure: {{ meeting.meeting_time.strftime('%H:%M') }}
+                                    {% endif %}
+                                </p>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('exhibitor.profile', exhibitor_id=meeting.exhibitor.id) }}" class="btn action-button">
+                                        {% if current_language == 'en' %}
+                                            View Profile
+                                        {% elif current_language == 'ar' %}
+                                            عرض الملف
+                                        {% else %}
+                                            Voir le Profil
+                                        {% endif %}
+                                    </a>
+                                    <form action="{{ url_for('cancel_meeting') }}" method="post" class="d-inline">
+                                        <input type="hidden" name="meeting_id" value="{{ meeting.id }}">
+                                        <button type="submit" class="btn btn-outline-danger rounded-circle">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
     
     <!-- Tabs Navigation -->
     <ul class="nav nav-tabs justify-content-center mb-4" id="myBoxTabs">
@@ -455,4 +925,3 @@ function shareFavorites() {
     }
 }
 </script>
-{% endblock %}

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+    
+    .form-title {
+        color: #95c11f;
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        color: #666;
+        font-weight: 500;
+    }
+    
+    .submit-btn {
+        background-color: #95c11f;
+        color: white;
+        padding: 10px 30px;
+        border-radius: 30px;
+    }
+    
+    .submit-btn:hover {
+        background-color: #7a9f19;
+        color: white;
+    }
+    
+    .cancel-btn {
+        background-color: #f8f9fa;
+        color: #666;
+        padding: 10px 30px;
+        border-radius: 30px;
+        margin-right: 10px;
+    }
+    
+    .cancel-btn:hover {
+        background-color: #e9ecef;
+        color: #333;
+    }
+
+    .password-hint {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="form-section">
+        <h2 class="form-title">
+            {% if user %}
+                {% if current_language == 'ar' %}تعديل المستخدم{% elif current_language == 'fr' %}Modifier l'utilisateur{% else %}Edit User{% endif %}
+            {% else %}
+                {% if current_language == 'ar' %}إضافة مستخدم جديد{% elif current_language == 'fr' %}Ajouter un nouvel utilisateur{% else %}Add New User{% endif %}
+            {% endif %}
+        </h2>
+
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="first_name" class="form-label">{% if current_language == 'ar' %}الاسم الأول{% elif current_language == 'fr' %}Prénom{% else %}First Name{% endif %}</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name if user else '' }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="last_name" class="form-label">{% if current_language == 'ar' %}اسم العائلة{% elif current_language == 'fr' %}Nom de famille{% else %}Last Name{% endif %}</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name if user else '' }}" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">{% if current_language == 'ar' %}البريد الإلكتروني{% elif current_language == 'fr' %}Email{% else %}Email{% endif %}</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user.email if user else '' }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="password" class="form-label">
+                        {% if current_language == 'ar' %}كلمة المرور{% elif current_language == 'fr' %}Mot de passe{% else %}Password{% endif %}
+                        {% if user %}({% if current_language == 'ar' %}اتركه فارغاً إذا لم ترد تغييره{% elif current_language == 'fr' %}laisser vide si inchangé{% else %}leave empty if unchanged{% endif %}){% endif %}
+                    </label>
+                    <input type="password" class="form-control" id="password" name="password" {% if not user %}required{% endif %}>
+                    {% if not user %}
+                    <div class="password-hint">
+                        {% if current_language == 'ar' %}
+                        يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل
+                        {% elif current_language == 'fr' %}
+                        Le mot de passe doit comporter au moins 8 caractères
+                        {% else %}
+                        Password must be at least 8 characters long
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="role" class="form-label">{% if current_language == 'ar' %}الدور{% elif current_language == 'fr' %}Rôle{% else %}Role{% endif %}</label>
+                    <select class="form-select" id="role" name="role" required>
+                        <option value="user" {% if user and user.role == 'user' %}selected{% endif %}>
+                            {% if current_language == 'ar' %}مستخدم{% elif current_language == 'fr' %}Utilisateur{% else %}User{% endif %}
+                        </option>
+                        <option value="admin" {% if user and user.role == 'admin' %}selected{% endif %}>
+                            {% if current_language == 'ar' %}مدير{% elif current_language == 'fr' %}Administrateur{% else %}Admin{% endif %}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if not user or user.is_active %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">
+                        {% if current_language == 'ar' %}نشط{% elif current_language == 'fr' %}Actif{% else %}Active{% endif %}
+                    </label>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{{ url_for('admin.users') }}" class="btn cancel-btn">
+                    {% if current_language == 'ar' %}إلغاء{% elif current_language == 'fr' %}Annuler{% else %}Cancel{% endif %}
+                </a>
+                <button type="submit" class="btn submit-btn">
+                    {% if user %}
+                        {% if current_language == 'ar' %}حفظ التغييرات{% elif current_language == 'fr' %}Enregistrer les modifications{% else %}Save Changes{% endif %}
+                    {% else %}
+                        {% if current_language == 'ar' %}إضافة المستخدم{% elif current_language == 'fr' %}Ajouter l'utilisateur{% else %}Add User{% endif %}
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .settings-section {
+        position: relative;
+        min-height: 100vh;
+        background: #fff;
+        overflow: hidden;
+        padding: 40px 0;
+    }
+
+    .settings-title {
+        color: #95c11f;
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .admin-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: none;
+        margin-bottom: 30px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .admin-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .admin-card .card-header {
+        background: #95c11f;
+        border: none;
+        padding: 20px;
+        color: white;
+    }
+
+    .admin-card .card-body {
+        padding: 25px;
+    }
+
+    .settings-group {
+        margin-bottom: 30px;
+    }
+
+    .settings-group-title {
+        color: #95c11f;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .admin-button {
+        background: transparent;
+        border: 2px solid #95c11f;
+        color: #95c11f;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .admin-button:hover {
+        background: #95c11f;
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-section">
+    <div class="container">
+        <h2 class="settings-title">
+            {% if current_language == 'en' %}
+                System Settings
+            {% elif current_language == 'ar' %}
+                إعدادات النظام
+            {% else %}
+                Paramètres Système
+            {% endif %}
+        </h2>
+
+        <div class="row">
+            <!-- Interface Settings -->
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-palette me-2"></i>
+                            {% if current_language == 'en' %}
+                                Interface Settings
+                            {% elif current_language == 'ar' %}
+                                إعدادات الواجهة
+                            {% else %}
+                                Paramètres de l'Interface
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin.update_interface_settings') }}">
+                            <div class="settings-group">
+                                <h6 class="settings-group-title">
+                                    {% if current_language == 'en' %}
+                                        Theme Settings
+                                    {% elif current_language == 'ar' %}
+                                        إعدادات المظهر
+                                    {% else %}
+                                        Paramètres du Thème
+                                    {% endif %}
+                                </h6>
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        {% if current_language == 'en' %}
+                                            Primary Color
+                                        {% elif current_language == 'ar' %}
+                                            اللون الرئيسي
+                                        {% else %}
+                                            Couleur Principale
+                                        {% endif %}
+                                    </label>
+                                    <input type="color" class="form-control form-control-color" name="primary_color" value="#95c11f">
+                                </div>
+                            </div>
+                            <button type="submit" class="admin-button">
+                                {% if current_language == 'en' %}
+                                    Save Interface Settings
+                                {% elif current_language == 'ar' %}
+                                    حفظ إعدادات الواجهة
+                                {% else %}
+                                    Enregistrer les Paramètres
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>
+                            {% if current_language == 'en' %}
+                                Exhibition Settings
+                            {% elif current_language == 'ar' %}
+                                إعدادات المعرض
+                            {% else %}
+                                Paramètres de l'Exposition
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin.update_exhibition_settings') }}">
+                            <div class="settings-group">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        {% if current_language == 'en' %}
+                                            Exhibition Name
+                                        {% elif current_language == 'ar' %}
+                                            اسم المعرض
+                                        {% else %}
+                                            Nom de l'Exposition
+                                        {% endif %}
+                                    </label>
+                                    <input type="text" class="form-control" name="exhibition_name" value="{{ settings.exhibition_name if settings }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        {% if current_language == 'en' %}
+                                            Exhibition Date
+                                        {% elif current_language == 'ar' %}
+                                            تاريخ المعرض
+                                        {% else %}
+                                            Date de l'Exposition
+                                        {% endif %}
+                                    </label>
+                                    <input type="date" class="form-control" name="exhibition_date" value="{{ settings.exhibition_date if settings }}">
+                                </div>
+                            </div>
+                            <button type="submit" class="admin-button">
+                                {% if current_language == 'en' %}
+                                    Save Exhibition Settings
+                                {% elif current_language == 'ar' %}
+                                    حفظ إعدادات المعرض
+                                {% else %}
+                                    Enregistrer les Paramètres
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

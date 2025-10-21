@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .edit-profile-section {
+        min-height: 100vh;
+        padding: 40px 0;
+        background-color: #f8f9fa;
+    }
+
+    .edit-profile-title {
+        color: #95c11f;
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .profile-form {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        padding: 30px;
+    }
+
+    .form-label {
+        color: #555;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        padding: 12px;
+        margin-bottom: 20px;
+    }
+
+    .form-control:focus {
+        border-color: #95c11f;
+        box-shadow: 0 0 0 0.2rem rgba(149, 193, 31, 0.25);
+    }
+
+    .image-preview {
+        width: 200px;
+        height: 200px;
+        border-radius: 10px;
+        object-fit: cover;
+        margin-bottom: 15px;
+    }
+
+    .submit-btn {
+        background-color: #95c11f;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background-color: #7a9f19;
+        transform: translateY(-2px);
+    }
+
+    .file-upload {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .file-upload input[type="file"] {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        border: 0;
+    }
+
+    .file-upload-label {
+        background-color: #f8f9fa;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        padding: 15px 25px;
+        cursor: pointer;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .file-upload-label:hover {
+        border-color: #95c11f;
+        background-color: rgba(149, 193, 31, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-profile-section">
+    <div class="container">
+        <h1 class="edit-profile-title">
+            {% if current_language == 'en' %}
+                Edit Exhibitor Profile
+            {% elif current_language == 'ar' %}
+                تعديل ملف العارض
+            {% else %}
+                Modifier le Profil d'Exposant
+            {% endif %}
+        </h1>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <form class="profile-form" method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    {% if current_language == 'en' %}
+                                        Company Name
+                                    {% elif current_language == 'ar' %}
+                                        اسم الشركة
+                                    {% else %}
+                                        Nom de l'Entreprise
+                                    {% endif %}
+                                </label>
+                                <input type="text" class="form-control" name="company_name" 
+                                       value="{{ exhibitor.company_name }}" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    {% if current_language == 'en' %}
+                                        Specialization
+                                    {% elif current_language == 'ar' %}
+                                        التخصص
+                                    {% else %}
+                                        Spécialisation
+                                    {% endif %}
+                                </label>
+                                <select class="form-control" name="specialization_id" required>
+                                    <option value="">
+                                        {% if current_language == 'en' %}
+                                            Select Specialization
+                                        {% elif current_language == 'ar' %}
+                                            اختر التخصص
+                                        {% else %}
+                                            Choisir une spécialisation
+                                        {% endif %}
+                                    </option>
+                                    {% for spec in specializations %}
+                                        <option value="{{ spec.id }}" {% if exhibitor.specialization_id == spec.id %}selected{% endif %}>
+                                            {{ spec.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if current_specialization %}
+                                    <small class="text-muted">
+                                        {% if current_language == 'ar' %}
+                                            التخصص الحالي: {{ current_specialization.name }}
+                                        {% elif current_language == 'en' %}
+                                            Current specialization: {{ current_specialization.name }}
+                                        {% else %}
+                                            Spécialisation actuelle: {{ current_specialization.name }}
+                                        {% endif %}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- عرض القاعة بدون إمكانية التعديل -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            {% if current_language == 'en' %}
+                                Current Hall
+                            {% elif current_language == 'ar' %}
+                                القاعة الحالية
+                            {% else %}
+                                Salle Actuelle
+                            {% endif %}
+                        </label>
+                        <input type="text" class="form-control" value="{{ exhibitor.hall.replace('hall', 'القاعة ') if exhibitor.hall else 'غير محدد' }}" readonly disabled>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            {% if current_language == 'en' %}
+                                Description
+                            {% elif current_language == 'ar' %}
+                                الوصف
+                            {% else %}
+                                Description
+                            {% endif %}
+                        </label>
+                        <textarea class="form-control" name="description" rows="4">{{ exhibitor.description }}</textarea>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="mb-4 text-center">
+                                <label class="form-label">
+                                    {% if current_language == 'en' %}
+                                        Company Logo
+                                    {% elif current_language == 'ar' %}
+                                        شعار الشركة
+                                    {% else %}
+                                        Logo de l'Entreprise
+                                    {% endif %}
+                                </label>
+                                <div class="d-flex justify-content-center mb-3">
+                                    {% if exhibitor.profile_image_url %}
+                                        <img src="{{ exhibitor.profile_image_url }}" class="image-preview" alt="Logo Preview">
+                                    {% else %}
+                                        <div class="image-preview d-flex align-items-center justify-content-center bg-light">
+                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="file-upload">
+                                    <input type="file" name="logo" id="logoInput" accept="image/*" onchange="previewImage(this);">
+                                    <label for="logoInput" class="file-upload-label" onclick="document.getElementById('logoInput').click();">
+                                        <i class="fas fa-upload me-2"></i>
+                                        {% if current_language == 'en' %}
+                                            Upload Logo
+                                        {% elif current_language == 'ar' %}
+                                            رفع الشعار
+                                        {% else %}
+                                            Télécharger Logo
+                                        {% endif %}
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    {% if current_language == 'en' %}
+                                        Recommended size: 200x200 pixels
+                                    {% elif current_language == 'ar' %}
+                                        الحجم الموصى به: 200×200 بكسل
+                                    {% else %}
+                                        Taille recommandée: 200x200 pixels
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-save me-2"></i>
+                            {% if current_language == 'en' %}
+                                Save Changes
+                            {% elif current_language == 'ar' %}
+                                حفظ التغييرات
+                            {% else %}
+                                Enregistrer
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تهيئة معالج النقر على زر الرفع
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileUploadLabel = document.querySelector('.file-upload-label');
+        const fileInput = document.getElementById('logoInput');
+        
+        fileUploadLabel.addEventListener('click', function(e) {
+            e.preventDefault(); // منع السلوك الافتراضي
+            fileInput.click(); // فتح نافذة اختيار الملف
+        });
+    });
+
+    function previewImage(input) {
+        const preview = input.closest('.mb-4').querySelector('.image-preview');
+        const file = input.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (preview.tagName === 'IMG') {
+                    preview.src = e.target.result;
+                } else {
+                    // Replace the placeholder with an actual image
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-preview';
+                    img.alt = 'Logo Preview';
+                    preview.parentNode.replaceChild(img, preview);
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const fileInput = document.querySelector('input[name="logo"]');
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+
+            if (!allowedTypes.includes(file.type)) {
+                e.preventDefault();
+                alert('{% if current_language == "ar" %}يرجى اختيار ملف صورة صالح (JPG، PNG، GIF){% else %}Please select a valid image file (JPG, PNG, GIF){% endif %}');
+            } else if (file.size > maxSize) {
+                e.preventDefault();
+                alert('{% if current_language == "ar" %}حجم الملف كبير جداً. الحد الأقصى هو 5 ميجابايت{% else %}File is too large. Maximum size is 5MB{% endif %}');
+            }
+        }
+    });
+</script>
+{% endblock %}

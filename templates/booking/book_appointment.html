@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .booking-section {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin: 30px 0;
+    }
+    
+    .exhibitor-info {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .exhibitor-name {
+        color: #95c11f;
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .exhibitor-details {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .schedule-selector {
+        margin-bottom: 30px;
+    }
+    
+    .date-picker {
+        margin-bottom: 20px;
+    }
+    
+    .time-slots {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .time-slot {
+        padding: 10px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .time-slot:hover {
+        border-color: #95c11f;
+        background-color: #f8f9fa;
+    }
+    
+    .time-slot.selected {
+        border-color: #95c11f;
+        background-color: #95c11f;
+        color: white;
+    }
+    
+    .time-slot.booked {
+        background-color: #f8f9fa;
+        border-color: #ddd;
+        color: #999;
+        cursor: not-allowed;
+        position: relative;
+    }
+    
+    .time-slot.booked::after {
+        content: '🔒';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.2rem;
+    }
+    
+    .booking-btn {
+        background-color: #95c11f;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 30px;
+        border: none;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .booking-btn:hover {
+        background-color: #7a9f19;
+        color: white;
+    }
+    
+    .booking-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="booking-section">
+        <!-- Exhibitor Information -->
+        <div class="exhibitor-info">
+            <div class="exhibitor-name">{{ exhibitor.company_name }}</div>
+            <div class="exhibitor-details">
+                <div>
+                    {% if current_language == 'ar' %}
+                        التخصص: {{ exhibitor.specialization.name }}
+                    {% else %}
+                        Specialization: {{ exhibitor.specialization.name }}
+                    {% endif %}
+                </div>
+                <div>
+                    {% if current_language == 'ar' %}
+                        العارض: {{ exhibitor.first_name }} {{ exhibitor.last_name }}
+                    {% else %}
+                        Exhibitor: {{ exhibitor.first_name }} {{ exhibitor.last_name }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        <form method="POST">
+            <!-- Schedule Selection -->
+            <div class="schedule-selector">
+                <label class="form-label">
+                    {% if current_language == 'ar' %}اختر اليوم والوقت{% else %}Choose Day and Time{% endif %}
+                </label>
+                <div class="date-picker">
+                    <select name="schedule_id" class="form-select mb-3" required onchange="updateAvailableSlots()">
+                        <option value="">{% if current_language == 'ar' %}اختر يوم{% else %}Select Day{% endif %}</option>
+                        {% for schedule in schedules %}
+                            {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                            {% set days_ar = ['الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'] %}
+                            <option value="{{ schedule.id }}">
+                                {% if current_language == 'ar' %}
+                                    {{ days_ar[schedule.day_of_week] }} ({{ schedule.start_time.strftime('%I:%M %p') }} - {{ schedule.end_time.strftime('%I:%M %p') }})
+                                {% else %}
+                                    {{ days[schedule.day_of_week] }} ({{ schedule.start_time.strftime('%I:%M %p') }} - {{ schedule.end_time.strftime('%I:%M %p') }})
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <input type="date" name="date" class="form-control" required min="{{ today }}" onchange="updateAvailableSlots()">
+                </div>
+                
+                <!-- Time Slots -->
+                <div class="time-slots" id="timeSlots">
+                    <!-- Time slots will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="mb-4">
+                <label class="form-label">
+                    {% if current_language == 'ar' %}ملاحظات إضافية{% else %}Additional Notes{% endif %}
+                </label>
+                <textarea name="notes" class="form-control" rows="3"></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="booking-btn" id="bookingSubmit" disabled>
+                {% if current_language == 'ar' %}
+                    حجز موعد
+                {% else %}
+                    Book Appointment
+                {% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+let bookedSlots = {{ booked_slots|tojson|safe }};
+
+function updateAvailableSlots() {
+    const scheduleId = document.querySelector('select[name="schedule_id"]').value;
+    const selectedDate = document.querySelector('input[name="date"]').value;
+    
+    if (!scheduleId || !selectedDate) return;
+    
+    const schedule = {{ schedules|tojson|safe }}.find(s => s.id === parseInt(scheduleId));
+    if (!schedule) return;
+    
+    // Generate time slots
+    const slots = generateTimeSlots(schedule, selectedDate);
+    displayTimeSlots(slots);
+}
+
+function generateTimeSlots(schedule, date) {
+    const slots = [];
+    let currentTime = new Date(`${date}T${schedule.start_time}`);
+    const endTime = new Date(`${date}T${schedule.end_time}`);
+    
+    while (currentTime < endTime) {
+        const slotEnd = new Date(currentTime.getTime() + schedule.session_duration * 60000);
+        if (slotEnd <= endTime) {
+            slots.push({
+                start: currentTime.toTimeString().slice(0, 5),
+                end: slotEnd.toTimeString().slice(0, 5)
+            });
+        }
+        currentTime = slotEnd;
+    }
+    
+    return slots;
+}
+
+function displayTimeSlots(slots) {
+    const container = document.getElementById('timeSlots');
+    const selectedDate = document.querySelector('input[name="date"]').value;
+    container.innerHTML = '';
+    
+    slots.forEach(slot => {
+        const isBooked = isSlotBooked(selectedDate, slot.start);
+        const div = document.createElement('div');
+        div.className = `time-slot ${isBooked ? 'booked' : ''}`;
+        div.innerHTML = `${slot.start} - ${slot.end}`;
+        
+        if (!isBooked) {
+            div.onclick = () => selectTimeSlot(div, slot.start);
+        }
+        
+        container.appendChild(div);
+    });
+}
+
+function isSlotBooked(date, time) {
+    return bookedSlots.some(slot => 
+        slot.booking_date === date && 
+        slot.start_time === time &&
+        ['confirmed', 'pending'].includes(slot.status)
+    );
+}
+
+function selectTimeSlot(element, time) {
+    document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+    });
+    element.classList.add('selected');
+    
+    const timeInput = document.querySelector('input[name="time"]');
+    if (!timeInput) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'time';
+        document.querySelector('form').appendChild(input);
+    }
+    document.querySelector('input[name="time"]').value = time;
+    document.getElementById('bookingSubmit').disabled = false;
+}
+
+// Initialize with current date
+document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="date"]').min = today;
+});
+</script>
+{% endblock %}
+{% endblock %}

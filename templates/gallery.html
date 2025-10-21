@@ -463,7 +463,7 @@ const exhibitorsData = {
         {
             id: {{ exhibitor.id }},
             name: "{{ exhibitor.company_name }}",
-            description: "{{ exhibitor.description[:100] }}...",
+            description: "{{ (exhibitor.description[:100] + '...') if exhibitor.description else 'No description available' }}",
             position: {
                 x: {{ exhibitor.position_x }},
                 y: {{ exhibitor.position_y }},

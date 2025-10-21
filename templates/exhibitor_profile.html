@@ -6,19 +6,52 @@
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 <style>
     .exhibitor-banner {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/static/images/exhibitors/Gemini_Generated_Image_gnuf9gnuf9gnuf9g.png');
+        background-size: contain;
+        background-position: center center;
         color: white;
-        padding: 60px 0;
-        margin-bottom: 30px;
+        padding: 80px 0;
+        margin-bottom: 80px;
+        min-height: 800px;
+        display: flex;
+        align-items: center;
+        position: relative;
     }
     
     .exhibitor-logo {
-        width: 120px;
-        height: 120px;
+        width: 160px;
+        height: 160px;
         border-radius: 50%;
         object-fit: cover;
-        border: 5px solid white;
-        margin-bottom: 20px;
+        border: 6px solid white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        background-color: white;
+        
+    }
+
+    .shadow {
+        box-shadow: 0 0 30px rgba(0,0,0,0.1) !important;
+    }
+
+    .text-primary {
+        color: #667eea !important;
+    }
+
+    .btn-outline-primary {
+        color: #667eea;
+        border-color: #667eea;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #667eea;
+        border-color: #667eea;
+        color: white;
+    }
+
+    .favorite-btn.favorited {
+        background-color: #667eea !important;
+        border-color: #667eea !important;
+        color: white !important;
     }
     
     .product-card {
@@ -97,50 +130,91 @@
 </style>
 {% endblock %}
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/ar.js"></script>
-{% endblock %}
-
 {% block content %}
-<!-- Exhibitor Banner -->
-<div class="exhibitor-banner">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-3 text-center">
-                {% if exhibitor.logo_url %}
-                    <img src="{{ exhibitor.logo_url }}" alt="{{ exhibitor.company_name }}" class="exhibitor-logo">
-                {% else %}
-                    <div class="exhibitor-logo mx-auto d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.2);">
-                        <i class="fas fa-store fa-3x"></i>
+<!-- Exhibitor Banners Carousel -->
+<div id="exhibitorBannersCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        {% if banners %}
+            {% for banner in banners %}
+                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                    <div class="exhibitor-banner" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ banner.image_path }}');">
+                        <div class="container">
+                            <div class="text-center">
+                                <h1 class="display-4 fw-bold mb-3">{{ banner.title }}</h1>
+                                <h2 class="h3 mb-4">{{ exhibitor.company_name }}</h2>
+                                <p class="lead mb-4">{{ exhibitor.company_description if exhibitor.company_description else '' }}</p>
+                            </div>
+                        </div>
                     </div>
-                {% endif %}
-            </div>
-            <div class="col-md-7">
-                <h1 class="display-4 fw-bold mb-3">{{ exhibitor.company_name }}</h1>
-                <p class="lead mb-4">{{ exhibitor.description }}</p>
-                <div class="row text-center">
-                    <div class="col-4">
-                        <h3>{{ products|length }}</h3>
-                        <small>منتج</small>
-                    </div>
-                    <div class="col-4">
-                        <h3>{{ exhibitor.ranking }}</h3>
-                        <small>التصنيف</small>
-                    </div>
-                    <div class="col-4">
-                        <h3>{{ exhibitor.gallery_hall.replace('hall', '') }}</h3>
-                        <small>القاعة</small>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="carousel-item active">
+                <div class="exhibitor-banner">
+                    <div class="container">
+                        <div class="text-center">
+                            <h1 class="display-4 fw-bold mb-3">{{ exhibitor.company_name }}</h1>
+                            <p class="lead mb-4">{{ exhibitor.company_description if exhibitor.company_description else '' }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-2 text-center">
-                <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }})" 
-                        class="btn btn-outline-light btn-lg favorite-btn {{ 'favorited' if is_favorited }}" 
-                        id="favorite-btn">
-                    <i class="fas fa-heart fa-2x"></i>
-                    <div class="mt-2">{{ 'مُضاف للمفضلة' if is_favorited else 'إضافة للمفضلة' }}</div>
-                </button>
+        {% endif %}
+    </div>
+    {% if banners and banners|length > 1 %}
+    <button class="carousel-control-prev" type="button" data-bs-target="#exhibitorBannersCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">السابق</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#exhibitorBannersCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">التالي</span>
+    </button>
+    {% endif %}
+</div>
+
+<!-- Exhibitor Info Card -->
+<div class="container" style="margin-top: -50px; padding-top:30px; padding-bottom:30px;">
+    <div class="card shadow">
+        <div class="card-body py-4">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center border-end">
+                    {% if exhibitor.logo_url %}
+                        <img src="{{ exhibitor.logo_url }}" alt="{{ exhibitor.company_name }}" class="exhibitor-logo mb-3">
+                    {% else %}
+                        <div class="exhibitor-logo mx-auto d-flex align-items-center justify-content-center mb-3" style="background: rgba(0,0,0,0.05);">
+                            <i class="fas fa-store fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }})" 
+                            class="btn btn-outline-primary btn-lg favorite-btn {{ 'favorited' if is_favorited }}" 
+                            id="favorite-btn">
+                        <i class="fas fa-heart fa-2x"></i>
+                        <div class="mt-2">{{ 'مُضاف للمفضلة' if is_favorited else 'إضافة للمفضلة' }}</div>
+                    </button>
+                </div>
+                <div class="col-md-9">
+                    <div class="row text-center">
+                        <div class="col-4 border-end">
+                            <div class="p-3">
+                                <h3 class="text-primary mb-2">{{ products|length }}</h3>
+                                <small class="text-muted">منتج</small>
+                            </div>
+                        </div>
+                        <div class="col-4 border-end">
+                            <div class="p-3">
+                                <h3 class="text-primary mb-2">{{ exhibitor.specialization.name if exhibitor.specialization else '-' }}</h3>
+                                <small class="text-muted">التخصص</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-3">
+                                <h3 class="text-primary mb-2">{{ exhibitor.hall.replace('hall', '') if exhibitor.hall else '-' }}</h3>
+                                <small class="text-muted">القاعة</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -150,6 +224,11 @@
     <div class="row">
         <!-- Left Column: Products & Info -->
         <div class="col-lg-8">
+            <!-- Products Section -->
+                        </div>
+            
+
+            
             <!-- Products Section -->
             <div class="card mb-4">
                 <div class="card-header">
@@ -164,19 +243,92 @@
                             <div class="col-md-6">
                                 <div class="card product-card h-100" onclick="viewProduct({{ product.id }})">
                                     {% if product.image_url %}
-                                        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                                        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 400px; object-fit: cover;">
                                     {% else %}
-                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
                                             <i class="fas fa-utensils fa-3x text-muted"></i>
                                         </div>
                                     {% endif %}
                                     
                                     <div class="card-body">
-                                        <h5 class="card-title">{{ product.name }}</h5>
-                                        <p class="card-text">{{ product.description[:100] }}...</p>
-                                        
+                                                                                
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <span class="h5 text-primary mb-0">{{ product.price }} {{ product.currency }}</span>
+                                            <h5 class="card-title">{{ product.name }}</h5>
+                                            {% if product.is_featured %}
+                                                <span class="badge bg-warning">مميز</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button onclick="toggleFavoriteProduct({{ product.id }}); event.stopPropagation();" 
+                                                class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-heart"></i> إضافة للمفضلة
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">لا يوجد منتجات متاحة حالياً.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Videos Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-video me-2"></i>فيديوهات العارض
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if videos %}
+                        <div class="row g-4">
+                            {% for video in videos %}
+                            <div class="col-md-12">
+                                <div class="card h-100 overflow-hidden">
+                                    <div class="ratio ratio-16x9 m-0">
+                                        <video autoplay loop muted playsinline class="w-100 h-100 object-fit-cover">
+                                            <source src="{{ video.video_url }}" type="video/mp4">
+                                            متصفحك لا يدعم تشغيل الفيديو.
+                                        </video>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">لا يوجد فيديوهات متاحة حالياً.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Other Products Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-box-open me-2"></i>منتجات أخرى
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if other_products %}
+                        <div class="row g-4">
+                            {% for product in other_products %}
+                            <div class="col-md-6">
+                                <div class="card product-card h-100" onclick="viewProduct({{ product.id }})">
+                                    {% if product.image_url %}
+                                        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 400px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
+                                            <i class="fas fa-utensils fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="card-body">
+                                                                            
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="card-title">{{ product.name }}</h5>
                                             {% if product.is_featured %}
                                                 <span class="badge bg-warning">مميز</span>
                                             {% endif %}
@@ -196,8 +348,8 @@
                     {% else %}
                         <div class="text-center py-5">
                             <i class="fas fa-box fa-4x text-muted mb-3"></i>
-                            <h5>لا توجد منتجات متاحة حالياً</h5>
-                            <p class="text-muted">سيتم إضافة المنتجات قريباً</p>
+                            <h5>لا توجد منتجات أخرى متاحة حالياً</h5>
+                            <p class="text-muted">سيتم إضافة المزيد من المنتجات قريباً</p>
                         </div>
                     {% endif %}
                 </div>
@@ -215,23 +367,23 @@
                         <div class="col-md-6">
                             <h6>معلومات الاتصال</h6>
                             <ul class="list-unstyled">
-                                {% if exhibitor.contact_email %}
-                                <li><i class="fas fa-envelope me-2"></i>{{ exhibitor.contact_email }}</li>
+                                {% if exhibitor.email %}
+                                <li><i class="fas fa-envelope me-2"></i>{{ exhibitor.email }}</li>
                                 {% endif %}
-                                {% if exhibitor.contact_phone %}
-                                <li><i class="fas fa-phone me-2"></i>{{ exhibitor.contact_phone }}</li>
+                                {% if exhibitor.phone %}
+                                <li><i class="fas fa-phone me-2"></i>{{ exhibitor.phone }}</li>
                                 {% endif %}
-                                {% if exhibitor.website %}
-                                <li><i class="fas fa-globe me-2"></i><a href="{{ exhibitor.website }}" target="_blank">الموقع الإلكتروني</a></li>
+                                {% if exhibitor.country %}
+                                <li><i class="fas fa-map-marker-alt me-2"></i>{{ exhibitor.country }}</li>
                                 {% endif %}
                             </ul>
                         </div>
                         <div class="col-md-6">
                             <h6>تفاصيل المعرض</h6>
                             <ul class="list-unstyled">
-                                <li><i class="fas fa-building me-2"></i>{{ exhibitor.gallery_hall.replace('hall', 'القاعة ') }}</li>
-                                <li><i class="fas fa-star me-2"></i>التصنيف: {{ exhibitor.ranking }}</li>
-                                <li><i class="fas fa-calendar me-2"></i>نشط منذ {{ exhibitor.created_at.strftime('%Y') }}</li>
+                                <li><i class="fas fa-building me-2"></i>{{ exhibitor.hall.replace('hall', 'القاعة ') if exhibitor.hall else 'لم يتم تحديد القاعة' }}</li>
+                                <li><i class="fas fa-tag me-2"></i>التخصص: {{ exhibitor.specialization.name if exhibitor.specialization else 'غير محدد' }}</li>
+                                <li><i class="fas fa-calendar me-2"></i>نشط منذ {{ exhibitor.created_at.strftime('%Y') if exhibitor.created_at else '-' }}</li>
                             </ul>
                         </div>
                     </div>
@@ -276,36 +428,62 @@
                 </div>
             </div>
             
-            <!-- Available Slots (fallback) -->
+            <!-- Available Slots -->
             <div class="card" id="available-slots">
-                <div class="card-header">
-                    <h5 class="mb-0">المواعيد المتاحة</h5>
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>المواعيد المتاحة</h5>
                 </div>
                 <div class="card-body">
-                    {% if available_slots %}
-                        {% for slot in available_slots[:5] %}
-                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-                            <div>
-                                <strong>{{ slot.start_time.strftime('%Y-%m-%d') }}</strong><br>
-                                <small>{{ slot.start_time.strftime('%H:%M') }} - {{ (slot.start_time + timedelta(minutes=slot.duration_minutes)).strftime('%H:%M') }}</small>
+                    {% if schedules %}
+                        <div class="mb-4">
+                            <h6 class="mb-3">أيام العمل:</h6>
+                            {% for schedule in schedules %}
+                                <div class="schedule-item mb-3 p-3 border rounded">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            <strong>
+                                                {% set days = {0: 'الاثنين', 1: 'الثلاثاء', 2: 'الأربعاء', 3: 'الخميس', 4: 'الجمعة', 5: 'السبت', 6: 'الأحد'} %}
+                                                {{ days[schedule.day_of_week] }}
+                                            </strong>
+                                        </div>
+                                        <span class="badge bg-info">{{ schedule.session_duration }} دقيقة للجلسة</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="small text-muted">
+                                            من {{ schedule.start_time.strftime('%I:%M %p') }} إلى {{ schedule.end_time.strftime('%I:%M %p') }}
+                                        </div>
+                                        <button onclick="showAvailableSlots('{{ schedule.id }}')" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-calendar-plus me-1"></i>
+                                            حجز موعد
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            يمكنك حجز موعد من خلال اختيار اليوم المناسب والضغط على زر "حجز موعد"
+                        </div>
+
+                        {% if booked_slots %}
+                            <div class="mt-4">
+                                <h6 class="mb-3">المواعيد المحجوزة:</h6>
+                                {% for slot in booked_slots %}
+                                    <div class="booked-slot mb-2 p-2 border rounded bg-light">
+                                        <small class="text-muted">
+                                            {{ slot.booking_date.strftime('%Y-%m-%d') }} |
+                                            {{ slot.start_time.strftime('%I:%M %p') }} - {{ slot.end_time.strftime('%I:%M %p') }}
+                                        </small>
+                                    </div>
+                                {% endfor %}
                             </div>
-                            <button onclick="bookSlot({{ slot.id }})" class="btn btn-sm btn-primary">
-                                حجز
-                            </button>
-                        </div>
-                        {% endfor %}
-                        {% if available_slots|length > 5 %}
-                        <div class="text-center mt-3">
-                            <button onclick="showBookingCalendar()" class="btn btn-outline-primary btn-sm">
-                                عرض المزيد من المواعيد
-                            </button>
-                        </div>
                         {% endif %}
                     {% else %}
-                        <div class="text-center py-3">
-                            <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
-                            <p>لا توجد مواعيد متاحة حالياً</p>
-                            <small class="text-muted">تواصل مع العارض مباشرة</small>
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h6>لم يتم تحديد مواعيد بعد</h6>
+                            <p class="text-muted small">العارض لم يقم بتحديد مواعيد متاحة حتى الآن</p>
                         </div>
                     {% endif %}
                 </div>
@@ -338,6 +516,7 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/ar.js"></script>
 <script>
 let calendar;
 let socket;
@@ -345,6 +524,7 @@ let chatOpen = false;
 
 // Initialize Socket.IO for chat
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize socket for chat
     socket = io();
     
     socket.on('connect', function() {
@@ -359,6 +539,27 @@ document.addEventListener('DOMContentLoaded', function() {
         addMessageToChat(data.message, data.user_name, data.is_from_exhibitor);
     });
 });
+
+// Function to show available slots for a schedule
+function showAvailableSlots(scheduleId) {
+    fetch(`/api/available-slots/${scheduleId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (data.slots && data.slots.length > 0) {
+                    showSlotSelectionModal(scheduleId, data.slots);
+                } else {
+                    alert('لا توجد مواعيد متاحة في هذا اليوم');
+                }
+            } else {
+                alert(data.message || 'حدث خطأ في تحميل المواعيد المتاحة');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching available slots:', error);
+            alert('حدث خطأ في تحميل المواعيد المتاحة');
+        });
+}
 
 function toggleFavoriteExhibitor(exhibitorId) {
     fetch(`/toggle-favorite-exhibitor/${exhibitorId}`, {
@@ -467,18 +668,164 @@ function loadChatHistory() {
     addMessageToChat('مرحباً! كيف يمكنني مساعدتك؟', '{{ exhibitor.company_name }}', true);
 }
 
-function showBookingCalendar() {
-    document.getElementById('booking-calendar').style.display = 'block';
-    document.getElementById('available-slots').style.display = 'none';
-    
-    if (!calendar) {
-        initializeCalendar();
-    }
+function showAvailableSlots(scheduleId) {
+    // Get available slots from API
+    fetch(`/api/available-slots/${scheduleId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (data.slots.length > 0) {
+                    showSlotSelectionModal(scheduleId, data.slots);
+                } else {
+                    alert('لا توجد مواعيد متاحة في الأيام القادمة');
+                }
+            } else {
+                alert(data.message || 'حدث خطأ في تحميل المواعيد المتاحة');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching available slots:', error);
+            alert('حدث خطأ في تحميل المواعيد المتاحة');
+        });
 }
 
-function hideBookingCalendar() {
-    document.getElementById('booking-calendar').style.display = 'none';
-    document.getElementById('available-slots').style.display = 'block';
+// Create a Bootstrap modal for slot selection
+function showSlotSelectionModal(scheduleId, slots) {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('slotSelectionModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Create modal HTML
+    const modalHtml = `
+        <div class="modal fade" id="slotSelectionModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">اختر موعداً</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="slot-date" class="form-label">اختر التاريخ:</label>
+                            <select class="form-select" id="slot-date" onchange="filterSlotsByDate()">
+                                ${[...new Set(slots.map(slot => slot.date))].map(date => 
+                                    `<option value="${date}">${date}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        <div id="slots-container" class="d-grid gap-2">
+                            ${slots.map(slot => `
+                                <button class="btn btn-outline-success slot-btn" 
+                                        data-date="${slot.date}" 
+                                        onclick="selectSlot('${scheduleId}', '${slot.date}', '${slot.start}')"
+                                        style="text-align: right;">
+                                    <div>
+                                        <strong>${slot.start} - ${slot.end}</strong>
+                                    </div>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add modal to document
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Initialize and show modal
+    const modal = new bootstrap.Modal(document.getElementById('slotSelectionModal'));
+    modal.show();
+}
+
+function filterSlotsByDate() {
+    const selectedDate = document.getElementById('slot-date').value;
+    document.querySelectorAll('.slot-btn').forEach(btn => {
+        if (btn.dataset.date === selectedDate) {
+            btn.style.display = 'block';
+        } else {
+            btn.style.display = 'none';
+        }
+    });
+}
+
+function selectSlot(scheduleId, date, startTime) {
+    // Show notes modal
+    const notesModal = `
+        <div class="modal fade" id="bookingNotesModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">إضافة ملاحظات للحجز</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="booking-notes" class="form-label">ملاحظات (اختياري):</label>
+                            <textarea class="form-control" id="booking-notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="button" class="btn btn-success" onclick="confirmBooking('${scheduleId}', '${date}', '${startTime}')">
+                            تأكيد الحجز
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove existing notes modal if any
+    const existingNotesModal = document.getElementById('bookingNotesModal');
+    if (existingNotesModal) {
+        existingNotesModal.remove();
+    }
+
+    // Add and show notes modal
+    document.body.insertAdjacentHTML('beforeend', notesModal);
+    const modal = new bootstrap.Modal(document.getElementById('bookingNotesModal'));
+    modal.show();
+
+    // Close slot selection modal
+    bootstrap.Modal.getInstance(document.getElementById('slotSelectionModal')).hide();
+}
+
+function confirmBooking(scheduleId, date, time) {
+    const notes = document.getElementById('booking-notes').value;
+
+    // Send booking request to server
+    fetch('/book-appointment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            schedule_id: scheduleId,
+            date: date,
+            time: time,
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('تم حجز الموعد بنجاح!');
+            location.reload(); // Refresh page to update available slots
+        } else {
+            alert(data.message || 'حدث خطأ أثناء حجز الموعد');
+        }
+    })
+    .finally(() => {
+        // Close the notes modal
+        bootstrap.Modal.getInstance(document.getElementById('bookingNotesModal')).hide();
+    });
 }
 
 function initializeCalendar() {
@@ -553,11 +900,13 @@ function bookSlot(slotId) {
 // Handle Enter key in message input
 document.addEventListener('DOMContentLoaded', function() {
     const messageInput = document.getElementById('message-input');
-    messageInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
+    if (messageInput) {
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

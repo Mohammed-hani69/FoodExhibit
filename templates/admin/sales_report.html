@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if current_language == 'en' %}
+        Sales Report - Food Exhibition
+    {% elif current_language == 'ar' %}
+        تقرير المبيعات - معرض الأغذية
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-dashboard {
+        padding: 2rem;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid #e0e0e0;
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, #95c11f 0%, #7da019 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    .filter-section {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .table-responsive {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+</style>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid analytics-dashboard">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                {% if current_language == 'en' %}
+                    Sales Analytics Dashboard
+                {% elif current_language == 'ar' %}
+                    لوحة تحليلات المبيعات
+                {% endif %}
+            </h2>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-3">
+                <select class="form-select" id="timeRange">
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="365">Last year</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="packageType">
+                    <option value="all">All Packages</option>
+                    <option value="basic">Basic</option>
+                    <option value="premium">Premium</option>
+                    <option value="vip">VIP</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ total_sales }}</div>
+                <div class="stats-label">Total Sales</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ revenue }}</div>
+                <div class="stats-label">Total Revenue</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ avg_sale }}</div>
+                <div class="stats-label">Average Sale Value</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ conversion_rate }}%</div>
+                <div class="stats-label">Conversion Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="chart-container">
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-container">
+                <canvas id="packageDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Package</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <td>{{ sale.date }}</td>
+                            <td>{{ sale.package }}</td>
+                            <td>{{ sale.customer }}</td>
+                            <td>{{ sale.amount }}</td>
+                            <td>
+                                <span class="badge {% if sale.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ sale.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Sales Trend Chart
+const salesTrendCtx = document.getElementById('salesTrendChart').getContext('2d');
+new Chart(salesTrendCtx, {
+    type: 'line',
+    data: {
+        labels: {{ dates|safe }},
+        datasets: [{
+            label: 'Sales',
+            data: {{ sales_data|safe }},
+            borderColor: '#95c11f',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Sales Trend'
+            }
+        }
+    }
+});
+
+// Package Distribution Chart
+const packageDistCtx = document.getElementById('packageDistributionChart').getContext('2d');
+new Chart(packageDistCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Basic', 'Premium', 'VIP'],
+        datasets: [{
+            data: {{ package_distribution|safe }},
+            backgroundColor: ['#95c11f', '#7da019', '#5c7512']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Package Distribution'
+            }
+        }
+    }
+});
+
+// Event listeners for filters
+document.getElementById('timeRange').addEventListener('change', updateCharts);
+document.getElementById('packageType').addEventListener('change', updateCharts);
+
+function updateCharts() {
+    // Add AJAX call to update charts based on filters
+    const timeRange = document.getElementById('timeRange').value;
+    const packageType = document.getElementById('packageType').value;
+    
+    fetch(`/admin/sales-data?timeRange=${timeRange}&packageType=${packageType}`)
+        .then(response => response.json())
+        .then(data => {
+            // Update charts with new data
+            updateSalesTrendChart(data.salesTrend);
+            updatePackageDistChart(data.packageDist);
+        });
+}
+</script>
+{% endblock %}

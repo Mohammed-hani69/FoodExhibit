@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+    
+    .form-title {
+        color: #95c11f;
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        color: #666;
+        font-weight: 500;
+    }
+    
+    .submit-btn {
+        background-color: #95c11f;
+        color: white;
+        padding: 10px 30px;
+        border-radius: 30px;
+    }
+    
+    .submit-btn:hover {
+        background-color: #7a9f19;
+        color: white;
+    }
+    
+    .cancel-btn {
+        background-color: #f8f9fa;
+        color: #666;
+        padding: 10px 30px;
+        border-radius: 30px;
+        margin-right: 10px;
+    }
+    
+    .cancel-btn:hover {
+        background-color: #e9ecef;
+        color: #333;
+    }
+
+    .password-hint {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="form-section">
+        <h2 class="form-title">
+            {% if exhibitor %}
+                {% if current_language == 'ar' %}تعديل العارض{% elif current_language == 'fr' %}Modifier l'exposant{% else %}Edit Exhibitor{% endif %}
+            {% else %}
+                {% if current_language == 'ar' %}إضافة عارض جديد{% elif current_language == 'fr' %}Ajouter un nouvel exposant{% else %}Add New Exhibitor{% endif %}
+            {% endif %}
+        </h2>
+
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="first_name" class="form-label">{% if current_language == 'ar' %}الاسم الأول{% elif current_language == 'fr' %}Prénom{% else %}First Name{% endif %}</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ exhibitor.first_name if exhibitor else '' }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="last_name" class="form-label">{% if current_language == 'ar' %}اسم العائلة{% elif current_language == 'fr' %}Nom de famille{% else %}Last Name{% endif %}</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ exhibitor.last_name if exhibitor else '' }}" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">{% if current_language == 'ar' %}البريد الإلكتروني{% elif current_language == 'fr' %}Email{% else %}Email{% endif %}</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ exhibitor.email if exhibitor else '' }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="specialization" class="form-label">{% if current_language == 'ar' %}التخصص{% elif current_language == 'fr' %}Spécialisation{% else %}Specialization{% endif %}</label>
+                    <select class="form-control" id="specialization" name="specialization_id" required>
+                        <option value="">{% if current_language == 'ar' %}اختر التخصص{% elif current_language == 'fr' %}Choisir une spécialisation{% else %}Choose specialization{% endif %}</option>
+                        {% for spec in specializations %}
+                            <option value="{{ spec.id }}" {% if exhibitor and exhibitor.specialization_id == spec.id %}selected{% endif %}>{{ spec.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">{% if current_language == 'ar' %}رقم الهاتف{% elif current_language == 'fr' %}Numéro de téléphone{% else %}Phone Number{% endif %}</label>
+                    <input type="tel" class="form-control" id="phone" name="phone" value="{{ exhibitor.phone if exhibitor else '' }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="country" class="form-label">{% if current_language == 'ar' %}الدولة{% elif current_language == 'fr' %}Pays{% else %}Country{% endif %}</label>
+                    <select class="form-control" id="country" name="country" required>
+                        <option value="">{% if current_language == 'ar' %}اختر الدولة{% elif current_language == 'fr' %}Choisir le pays{% else %}Select Country{% endif %}</option>
+                        <option value="AE" {% if exhibitor and exhibitor.country == 'AE' %}selected{% endif %}>الإمارات العربية المتحدة</option>
+                        <option value="SA" {% if exhibitor and exhibitor.country == 'SA' %}selected{% endif %}>المملكة العربية السعودية</option>
+                        <option value="KW" {% if exhibitor and exhibitor.country == 'KW' %}selected{% endif %}>الكويت</option>
+                        <option value="BH" {% if exhibitor and exhibitor.country == 'BH' %}selected{% endif %}>البحرين</option>
+                        <option value="QA" {% if exhibitor and exhibitor.country == 'QA' %}selected{% endif %}>قطر</option>
+                        <option value="OM" {% if exhibitor and exhibitor.country == 'OM' %}selected{% endif %}>عمان</option>
+                        <option value="EG" {% if exhibitor and exhibitor.country == 'EG' %}selected{% endif %}>مصر</option>
+                        <option value="JO" {% if exhibitor and exhibitor.country == 'JO' %}selected{% endif %}>الأردن</option>
+                        <option value="LB" {% if exhibitor and exhibitor.country == 'LB' %}selected{% endif %}>لبنان</option>
+                        <option value="IQ" {% if exhibitor and exhibitor.country == 'IQ' %}selected{% endif %}>العراق</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">{% if current_language == 'ar' %}رقم الهاتف{% elif current_language == 'fr' %}Numéro de téléphone{% else %}Phone Number{% endif %}</label>
+                    <input type="tel" class="form-control" id="phone" name="phone" value="{{ exhibitor.contact_phone if exhibitor else '' }}" required>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="password" class="form-label">
+                        {% if current_language == 'ar' %}كلمة المرور{% elif current_language == 'fr' %}Mot de passe{% else %}Password{% endif %}
+                        {% if exhibitor %}({% if current_language == 'ar' %}اتركه فارغاً إذا لم ترد تغييره{% elif current_language == 'fr' %}laisser vide si inchangé{% else %}leave empty if unchanged{% endif %}){% endif %}
+                    </label>
+                    <input type="password" class="form-control" id="password" name="password" {% if not exhibitor %}required{% endif %}>
+                    {% if not exhibitor %}
+                    <div class="password-hint">
+                        {% if current_language == 'ar' %}
+                        يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل
+                        {% elif current_language == 'fr' %}
+                        Le mot de passe doit comporter au moins 8 caractères
+                        {% else %}
+                        Password must be at least 8 characters long
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="company_name" class="form-label">{% if current_language == 'ar' %}اسم الشركة{% elif current_language == 'fr' %}Nom de l'entreprise{% else %}Company Name{% endif %}</label>
+                    <input type="text" class="form-control" id="company_name" name="company_name" value="{{ exhibitor.company_name if exhibitor else '' }}" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="company_description" class="form-label">{% if current_language == 'ar' %}وصف الشركة{% elif current_language == 'fr' %}Description de l'entreprise{% else %}Company Description{% endif %}</label>
+                <textarea class="form-control" id="company_description" name="company_description" rows="4" required>{{ exhibitor.company_description if exhibitor else '' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if not exhibitor or exhibitor.is_active %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">
+                        {% if current_language == 'ar' %}نشط{% elif current_language == 'fr' %}Actif{% else %}Active{% endif %}
+                    </label>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{{ url_for('admin.exhibitors') }}" class="btn cancel-btn">
+                    {% if current_language == 'ar' %}إلغاء{% elif current_language == 'fr' %}Annuler{% else %}Cancel{% endif %}
+                </a>
+                <button type="submit" class="btn submit-btn">
+                    {% if exhibitor %}
+                        {% if current_language == 'ar' %}حفظ التغييرات{% elif current_language == 'fr' %}Enregistrer les modifications{% else %}Save Changes{% endif %}
+                    {% else %}
+                        {% if current_language == 'ar' %}إضافة العارض{% elif current_language == 'fr' %}Ajouter l'exposant{% else %}Add Exhibitor{% endif %}
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

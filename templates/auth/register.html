@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #fff;
+        color: #333;
+        font-family: 'Tajawal', sans-serif;
+    }
+    .register-section {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        overflow: hidden;
+        padding: 60px 0;
+    }
+    .register-card {
+        background: rgba(255,255,255,0.98);
+        border-radius: 20px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.08);
+        padding: 40px 30px 30px 30px;
+        max-width: 520px;
+        width: 100%;
+        z-index: 2;
+        margin: 0 auto;
+    }
+    .register-title {
+        color: #95c11f;
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    .form-label {
+        color: #95c11f;
+        font-weight: 500;
+    }
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        font-size: 1rem;
+        padding: 10px 14px;
+    }
+    .cta-button {
+        background-color: #95c11f;
+        color: white;
+        padding: 12px 0;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        border: none;
+        transition: background-color 0.3s ease;
+        width: 100%;
+        margin-top: 10px;
+    }
+    .cta-button:hover {
+        background-color: #7a9f19;
+        color: white;
+    }
+    .register-link {
+        color: #95c11f;
+        text-decoration: underline;
+        font-weight: 500;
+    }
+    .register-link:hover {
+        color: #7a9f19;
+    }
+    /* Decorative Circles */
+    .circle-group {
+        position: absolute;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        z-index: 1;
+    }
+    .circle {
+        width: 18px;
+        height: 18px;
+        background: #95c11f;
+        border-radius: 50%;
+        opacity: 0.15;
+    }
+    .top-left { top: 20px; left: 20px; width: 80px; }
+    .middle-left { top: 40%; left: 5%; width: 80px; }
+    .middle-right { top: 50%; right: 5%; width: 80px; }
+    .bottom-right { bottom: 20px; right: 20px; width: 80px; }
+    .bottom-left {
+        bottom: -40px; left: -40px; width: 300px; height: 300px;
+        background: #95c11f; border-radius: 50%; opacity: 0.1; position: absolute; z-index: 1;
+    }
+    .bottom-left::before, .bottom-left::after {
+        content: '';
+        position: absolute;
+        background: #95c11f;
+        border-radius: 50%;
+        opacity: 0.1;
+    }
+    
+    /* Package Selection Styles */
+    .package-section {
+        margin: 20px 0;
+        overflow-x: auto;
+        padding: 10px 0;
+    }
+    .package-container {
+        display: flex;
+        gap: 20px;
+        padding: 10px;
+        min-width: min-content;
+    }
+    .package-card {
+        min-width: 250px;
+        border: 2px solid #e0e0e0;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .package-card.selected {
+        border-color: #95c11f;
+        box-shadow: 0 0 15px rgba(149, 193, 31, 0.2);
+    }
+    .package-name {
+        color: #95c11f;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .package-price {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    .package-description {
+        color: #666;
+        margin-bottom: 15px;
+    }
+    .view-details-btn {
+        color: #95c11f;
+        text-decoration: underline;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px 10px;
+    }
+    .view-details-btn:hover {
+        color: #7a9f19;
+    }
+    .bottom-left::before { width: 200px; height: 200px; left: 120px; top: 30px; }
+    .bottom-left::after { width: 150px; height: 150px; left: 240px; top: 60px; }
+    .top-right {
+        position: absolute; top: -80px; right: -80px; width: 400px; height: 400px;
+        border-radius: 50%; background: #95c11f; opacity: 0.1; z-index: 1;
+    }
+    .top-right::before, .top-right::after {
+        content: '';
+        position: absolute;
+        background: #95c11f;
+        border-radius: 50%;
+        opacity: 0.1;
+    }
+    .top-right::before { width: 300px; height: 300px; right: 60px; bottom: 40px; }
+    .top-right::after { width: 200px; height: 200px; right: 150px; bottom: 60px; }
+    @media (max-width: 576px) {
+        .register-card { padding: 20px 10px; }
+        .register-title { font-size: 1.5rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-section">
+    <!-- Decorative Circles -->
+    <div class="circle-group top-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+    <div class="circle-group middle-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+    <div class="circle-group middle-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+    <div class="circle-group bottom-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+    <div class="bottom-left"></div>
+    <div class="top-right"></div>
+    <div class="register-card position-relative">
+        <div class="register-title">
+            {% if current_language == 'en' %}Create New Account{% elif current_language == 'ar' %}إنشاء حساب جديد{% else %}Créer un nouveau compte{% endif %}
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="first_name" class="form-label">{% if current_language == 'ar' %}الاسم الأول{% elif current_language == 'fr' %}Prénom{% else %}First Name{% endif %}</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="last_name" class="form-label">{% if current_language == 'ar' %}اسم العائلة{% elif current_language == 'fr' %}Nom{% else %}Last Name{% endif %}</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">{% if current_language == 'ar' %}البريد الإلكتروني{% elif current_language == 'fr' %}E-mail{% else %}Email{% endif %}</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">{% if current_language == 'ar' %}كلمة المرور{% elif current_language == 'fr' %}Mot de passe{% else %}Password{% endif %}</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">{% if current_language == 'ar' %}رقم الهاتف{% elif current_language == 'fr' %}Téléphone{% else %}Phone Number{% endif %}</label>
+                <input type="tel" class="form-control" id="phone" name="phone" required>
+            </div>
+            <div class="mb-3">
+                <label for="country" class="form-label">{% if current_language == 'ar' %}الدولة{% elif current_language == 'fr' %}Pays{% else %}Country{% endif %}</label>
+                <select class="form-select" id="country" name="country" required>
+                    <option value="">{% if current_language == 'ar' %}اختر الدولة{% elif current_language == 'fr' %}Sélectionner le pays{% else %}Select Country{% endif %}</option>
+                    <option value="Egypt">{% if current_language == 'ar' %}مصر{% elif current_language == 'fr' %}Égypte{% else %}Egypt{% endif %}</option>
+                    <option value="Saudi Arabia">{% if current_language == 'ar' %}المملكة العربية السعودية{% elif current_language == 'fr' %}Arabie Saoudite{% else %}Saudi Arabia{% endif %}</option>
+                    <option value="UAE">{% if current_language == 'ar' %}الإمارات العربية المتحدة{% elif current_language == 'fr' %}Émirats Arabes Unis{% else %}UAE{% endif %}</option>
+                    <option value="Kuwait">{% if current_language == 'ar' %}الكويت{% elif current_language == 'fr' %}Koweït{% else %}Kuwait{% endif %}</option>
+                    <option value="Qatar">{% if current_language == 'ar' %}قطر{% elif current_language == 'fr' %}Qatar{% else %}Qatar{% endif %}</option>
+                    <option value="Bahrain">{% if current_language == 'ar' %}البحرين{% elif current_language == 'fr' %}Bahreïn{% else %}Bahrain{% endif %}</option>
+                    <option value="Oman">{% if current_language == 'ar' %}عمان{% elif current_language == 'fr' %}Oman{% else %}Oman{% endif %}</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="role" class="form-label">{% if current_language == 'ar' %}التسجيل كـ{% elif current_language == 'fr' %}S'inscrire en tant que{% else %}Register as{% endif %}</label>
+                <select class="form-select" id="role" name="role" onchange="toggleExhibitorFields()" required>
+                    <option value="user">{% if current_language == 'ar' %}مستخدم عادي{% elif current_language == 'fr' %}Utilisateur régulier{% else %}Regular User{% endif %}</option>
+                    <option value="exhibitor">{% if current_language == 'ar' %}عارض{% elif current_language == 'fr' %}Exposant{% else %}Exhibitor{% endif %}</option>
+                </select>
+            </div>
+            
+            <div id="packages-section" class="mb-3" style="display: none;">
+                <label class="form-label">{% if current_language == 'ar' %}اختر الباقة{% elif current_language == 'fr' %}Choisissez votre forfait{% else %}Choose Your Package{% endif %}</label>
+                <div class="package-section">
+                    <div class="package-container">
+                        {% for package in packages %}
+                        <div class="package-card" onclick="selectPackage({{ package.id }})">
+                            <input type="radio" name="package_id" value="{{ package.id }}" id="package_{{ package.id }}" style="display: none;">
+                            <div class="package-name">
+                                {% if current_language == 'en' and package.name_en %}{{ package.name_en }}{% else %}{{ package.name }}{% endif %}
+                            </div>
+                            <div class="package-price">{{ "%.0f"|format(package.price) }} {% if current_language == 'ar' %}جنيه{% else %}EGP{% endif %}</div>
+                            <div class="package-description">
+                                {% if current_language == 'ar' %}{{ package.description }}{% else %}{{ package.description_en }}{% endif %}
+                            </div>
+                            <button type="button" class="view-details-btn" onclick="viewPackageDetails(event, {{ package.id }})">
+                                {% if current_language == 'ar' %}عرض التفاصيل{% elif current_language == 'fr' %}Voir les détails{% else %}View Details{% endif %}
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div id="exhibitor-fields" style="display: none;">
+                <div class="mb-3">
+                    <label for="company_name" class="form-label">{% if current_language == 'ar' %}اسم الشركة{% elif current_language == 'fr' %}Nom de l'entreprise{% else %}Company Name{% endif %}</label>
+                    <input type="text" class="form-control" id="company_name" name="company_name">
+                </div>
+                <div class="mb-3">
+                    <label for="specialization_id" class="form-label">{% if current_language == 'ar' %}التخصص{% elif current_language == 'fr' %}Spécialisation{% else %}Specialization{% endif %}</label>
+                    <select class="form-select" id="specialization_id" name="specialization_id">
+                        <option value="">{% if current_language == 'ar' %}اختر التخصص{% elif current_language == 'fr' %}Choisir la spécialisation{% else %}Select Specialization{% endif %}</option>
+                        {% for spec in specializations %}
+                            <option value="{{ spec.id }}">{{ spec.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="cta-button">{% if current_language == 'ar' %}تسجيل{% elif current_language == 'fr' %}S'inscrire{% else %}Register{% endif %}</button>
+        </form>
+        <div class="text-center mt-3">
+            <p>{% if current_language == 'ar' %}لديك حساب بالفعل؟{% elif current_language == 'fr' %}Vous avez déjà un compte?{% else %}Already have an account?{% endif %}
+                <a href="{{ url_for('auth.login') }}" class="register-link">{% if current_language == 'ar' %}تسجيل الدخول{% elif current_language == 'fr' %}Connexion{% else %}Login here{% endif %}</a></p>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function toggleExhibitorFields() {
+    const role = document.getElementById('role').value;
+    const exhibitorFields = document.getElementById('exhibitor-fields');
+    const companyName = document.getElementById('company_name');
+    const specialization = document.getElementById('specialization_id');
+    const packagesSection = document.getElementById('packages-section');
+    const packageInputs = document.querySelectorAll('input[name="package_id"]');
+    
+    if (role === 'exhibitor') {
+        // Show fields and make them required for exhibitors
+        exhibitorFields.style.display = 'block';
+        packagesSection.style.display = 'block';
+        companyName.required = true;
+        specialization.required = true;
+        packageInputs.forEach(input => {
+            input.required = true;
+        });
+    } else {
+        // Hide fields and make them not required for regular users
+        exhibitorFields.style.display = 'none';
+        packagesSection.style.display = 'none';
+        companyName.required = false;
+        specialization.required = false;
+        packageInputs.forEach(input => {
+            input.required = false;
+            input.checked = false; // Uncheck any selected package
+        });
+        // Clear values when switching to regular user
+        companyName.value = '';
+        specialization.value = '';
+        // Remove selected styling from package cards
+        document.querySelectorAll('.package-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+    }
+}
+
+function selectPackage(packageId) {
+    // Remove selected class from all package cards
+    document.querySelectorAll('.package-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked card and check the radio button
+    const selectedCard = document.querySelector(`.package-card input[value="${packageId}"]`).closest('.package-card');
+    selectedCard.classList.add('selected');
+    document.getElementById(`package_${packageId}`).checked = true;
+}
+
+function viewPackageDetails(event, packageId) {
+    event.stopPropagation(); // Prevent card selection when clicking the view details button
+    window.location.href = `{{ url_for('landing') }}#packages`;
+}
+</script>
+{% endblock %}
+{% endblock %}

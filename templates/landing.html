@@ -1,78 +1,1629 @@
 {% extends "base.html" %}
 
-{% block title %}معرض الأغذية - الصفحة الرئيسية{% endblock %}
+{% block title %}
+    {% if current_language == 'en' %}
+        ESCO FOOD FAIR - Home
+    {% elif current_language == 'ar' %}
+        ESCO FOOD FAIR - الصفحة الرئيسية
+    {% else %}
+        ESCO FOOD FAIR - Page d'accueil
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+<!-- Featured Products Styles -->
+<style>
+    .featured-products {
+        padding: 60px 0;
+        background-color: #f8f9fa;
+    }
+    
+    .featured-products h2 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #333;
+        font-weight: bold;
+    }
+    
+    .swiper {
+        width: 100%;
+        padding: 20px 0;
+    }
+    
+    .product-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        text-decoration: none;
+    }
+    
+    .product-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .product-info {
+        padding: 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .product-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    
+    .product-exhibitor {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    
+    .product-price {
+        color: #95c11f;
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-top: auto;
+    }
+    
+    .swiper-button-next,
+    .swiper-button-prev {
+        color: #95c11f;
+    }
+    
+    .swiper-pagination-bullet-active {
+        background: #95c11f;
+    }
+</style>
+<!-- Language Selector Styles -->
+<style>
+    .language-selector {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+    
+    .language-btn {
+        background-color: #95c11f;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .language-btn:hover {
+        background-color: #7a9f19;
+    }
+    
+    .language-dropdown {
+        display: none;
+        position: absolute;
+        background-color: white;
+        min-width: 120px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        right: 0;
+        top: 100%;
+        margin-top: 5px;
+    }
+    
+    .language-dropdown.show {
+        display: block;
+    }
+    
+    .language-option {
+        padding: 8px 16px;
+        color: #333;
+        text-decoration: none;
+        display: block;
+        transition: background-color 0.3s;
+    }
+    
+    .language-option:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .language-option.active {
+        background-color: #95c11f;
+        color: white;
+    }
+</style>
+<style>
+    body {
+        background-color: #fff;
+        color: #333;
+        font-family: 'Tajawal', sans-serif;
+    }
+    
+    .hero-section {
+        position: relative;
+        min-height: 600px;
+        overflow: hidden;
+    }
+    
+    .carousel-item {
+        height: 600px;
+    }
+    
+    .carousel-item img {
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
+    }
+    
+    .carousel-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6));
+        z-index: 1;
+    }
+    
+    .carousel-caption {
+        position: absolute;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        top: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .carousel-indicators {
+        margin-bottom:0rem;
+        z-index: 3;
+    }
+    
+    .carousel-control-prev,
+    .carousel-control-next {
+        z-index: 3;
+        width: 5%;
+    }
+    
+    .hero-logo {
+        max-width: 200px;
+        height: auto;
+        filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+        animation: floatLogo 3s ease-in-out infinite;
+    }
+
+    @keyframes floatLogo {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .carousel-indicators [data-bs-target] {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #95c11f;
+        opacity: 0.5;
+        transition: all 0.3s ease;
+    }
+    
+    .carousel-indicators .active {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+
+    .feature-icon {
+        width: 120px;
+        height: 120px;
+        background-color: #95c11f;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .feature-icon:hover {
+        transform: scale(1.1);
+    }
+
+    .feature-icon i {
+        font-size: 40px;
+        color: white;
+    }
+
+    .section-heading {
+        color: #95c11f;
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .green-section {
+        background-color: #95c11f;
+        color: white;
+        padding: 80px 0;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .stat-text {
+        font-size: 1.2rem;
+    }
+
+    .feature-description {
+        text-align: center;
+        color: #666;
+        font-size: 1.1rem;
+        margin-top: 15px;
+    }
+
+    /* Why Choose Us Section Styles */
+    .why-choose-us {
+        background-color: #95c11f;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .why-choose-us::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: scale(1.5);
+    }
+
+    .why-choose-us::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        left: -50%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: scale(1.5);
+    }
+
+    .benefit-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 30px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+
+    .benefit-card:hover {
+        transform: translateY(-10px);
+    }
+
+    .benefit-icon {
+        width: 70px;
+        height: 70px;
+        background: #95c11f;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .benefit-icon i {
+        font-size: 30px;
+        color: white;
+    }
+
+    .benefit-card h4 {
+        color: #333;
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .benefit-card p {
+        color: #666;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+        line-height: 1.6;
+    }
+
+    .benefit-number {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        font-size: 3rem;
+        font-weight: bold;
+        color: rgba(149, 193, 31, 0.1);
+        z-index: 0;
+    }
+
+    .why-choose-us .section-heading {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Partner Section Styles */
+    .partner-section {
+        background-color: #ffffff;
+        padding: 60px 0;
+    }
+
+    .partner-section .partner-logo {
+        position: relative;
+        z-index: 2;
+        max-width: 150px;
+        height: auto;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+    }
+
+    .partner-logo:hover {
+        opacity: 1;
+    }
+
+    /* Package Styles */
+    .packages-scroll {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        padding: 1rem 0;
+        margin: 0 -15px;
+    }
+
+    .packages-scroll::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .packages-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .packages-scroll::-webkit-scrollbar-thumb {
+        background: #95c11f;
+        border-radius: 4px;
+    }
+
+    .packages-scroll::-webkit-scrollbar-thumb:hover {
+        background: #7a9f19;
+    }
+
+    .packages-scroll .row {
+        margin: 0;
+        padding: 0 15px;
+    }
+
+    .package-card {
+        border: none;
+        box-shadow: 0 0 30px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 0 auto;
+    }
+
+    .package-card:hover {
+        transform: translateY(-10px);
+    }
+
+    .package-featured {
+        border: 2px solid #95c11f;
+        position: relative;
+    }
+
+    .package-icon {
+        width: 80px;
+        height: 80px;
+        background-color: #95c11f;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .package-icon i {
+        font-size: 32px;
+        color: white;
+    }
+
+    .package-title {
+        color: #333;
+        font-size: 1.5rem;
+        margin: 20px 0;
+    }
+
+    .package-price {
+        color: #95c11f;
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    .package-price .currency {
+        font-size: 1.5rem;
+        vertical-align: super;
+    }
+
+    .package-price .period {
+        color: #666;
+        font-size: 1rem;
+        font-weight: normal;
+    }
+
+    .package-features li {
+        margin-bottom: 10px;
+        color: #666;
+    }
+
+    .package-ribbon {
+        position: absolute;
+        top: 20px;
+        right: -30px;
+        transform: rotate(45deg);
+        background-color: #95c11f;
+        color: white;
+        padding: 5px 40px;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+
+    .cta-button {
+        background-color: #95c11f;
+        color: white;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-size: 1.2rem;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
+
+    .cta-button:hover {
+        background-color: #7a9f19;
+        color: white;
+    }
+
+    .cta-button-outline {
+        background-color: transparent;
+        color: #95c11f;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-size: 1.2rem;
+        border: 2px solid #95c11f;
+        transition: all 0.3s ease;
+    }
+
+    .cta-button-outline:hover {
+        background-color: #95c11f;
+        color: white;
+        border-color: #95c11f;
+    }
+
+    .animate-up {
+        animation: fadeInUp 1s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Common styles for sections with decorative background */
+    .decorated-section, .features-section {
+        padding: 80px 0;
+        position: relative;
+        isolation: isolate;
+        background: #ffffff;
+        overflow: hidden;
+    }
+
+    .decorated-section .section-heading,
+    .features-section .section-heading {
+        margin-bottom: 60px;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Features section specific styles */
+    .features-section .feature-icon {
+        background-color: #95c11f;
+        box-shadow: 0 5px 15px rgba(149, 193, 31, 0.3);
+        position: relative;
+        z-index: 2;
+    }
+
+    .features-section .feature-description {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Package section specific styles */
+    .decorated-section .package-card {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Decorative Background Styles */
+    .circle-group {
+        position: absolute;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        z-index: 1;
+    }
+
+    .circle {
+        width: 18px;
+        height: 18px;
+        background: #95c11f;
+        border-radius: 50%;
+        opacity: 0.15;
+    }
+
+    .top-left {
+        top: 20px;
+        left: 20px;
+        width: 80px;
+    }
+
+    .middle-left {
+        top: 40%;
+        left: 5%;
+        width: 80px;
+    }
+
+    .middle-right {
+        top: 50%;
+        right: 5%;
+        width: 80px;
+    }
+
+    .bottom-right {
+        bottom: 20px;
+        right: 20px;
+        width: 80px;
+    }
+
+    .bottom-left {
+        bottom: -40px;
+        left: -40px;
+        width: 300px;
+        height: 300px;
+        background: #95c11f;
+        border-radius: 50%;
+        opacity: 0.1;
+        position: absolute;
+        z-index: 1;
+    }
+
+    .bottom-left::before,
+    .bottom-left::after {
+        content: '';
+        position: absolute;
+        background: #95c11f;
+        border-radius: 50%;
+        opacity: 0.1;
+    }
+
+    .bottom-left::before {
+        width: 200px;
+        height: 200px;
+        left: 120px;
+        top: 30px;
+    }
+
+    .bottom-left::after {
+        width: 150px;
+        height: 150px;
+        left: 240px;
+        top: 60px;
+    }
+
+    .top-right {
+        position: absolute;
+        top: -80px;
+        right: -80px;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: #95c11f;
+        opacity: 0.1;
+        z-index: 1;
+    }
+
+    .top-right::before,
+    .top-right::after {
+        content: '';
+        position: absolute;
+        background: #95c11f;
+        border-radius: 50%;
+        opacity: 0.1;
+    }
+
+    .top-right::before {
+        width: 300px;
+        height: 300px;
+        right: 60px;
+        bottom: 40px;
+    }
+
+    .top-right::after {
+        width: 200px;
+        height: 200px;
+        right: 150px;
+        bottom: 60px;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 1200px) {
+        .hero-section {
+            min-height: 500px;
+        }
+        
+        .carousel-item {
+            height: 500px;
+        }
+
+        .display-3 {
+            font-size: 2.5rem;
+        }
+
+        .lead {
+            font-size: 1.2rem !important;
+        }
+    }
+
+    @media (max-width: 991px) {
+        .section-heading {
+            font-size: 2rem;
+        }
+
+        .feature-icon {
+            width: 100px;
+            height: 100px;
+        }
+
+        .feature-icon i {
+            font-size: 32px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+        }
+
+        .package-card {
+            margin-bottom: 30px;
+        }
+
+        .benefit-card {
+            margin-bottom: 20px;
+        }
+
+        .hero-logo {
+            max-width: 150px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-section {
+            min-height: 400px;
+        }
+
+        .carousel-item {
+            height: 400px;
+        }
+
+        .display-3 {
+            font-size: 2rem;
+        }
+
+        .lead {
+            font-size: 1.1rem !important;
+        }
+
+        .cta-button, .cta-button-outline {
+            padding: 12px 30px;
+            font-size: 1rem;
+        }
+
+        .feature-description {
+            font-size: 1rem;
+        }
+
+        .package-price {
+            font-size: 2rem;
+        }
+
+        .package-features {
+            font-size: 0.9rem;
+        }
+
+        .partner-logo {
+            max-width: 120px;
+            margin: 15px auto;
+        }
+
+        .benefit-number {
+            font-size: 2.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .hero-section {
+            min-height: 350px;
+        }
+
+        .carousel-item {
+            height: 350px;
+        }
+
+        .display-3 {
+            font-size: 1.5rem;
+        }
+
+        /* تحسينات قسم "لماذا تختارنا" للشاشات الصغيرة */
+        .why-choose-us .col-lg-4 {
+            width: 50% !important;
+            padding: 8px;
+        }
+
+        .why-choose-us .benefit-card {
+            height: 100%;
+            padding: 15px;
+            margin-bottom: 0;
+        }
+
+        .why-choose-us .benefit-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 12px;
+        }
+
+        .why-choose-us .benefit-icon i {
+            font-size: 24px;
+        }
+
+        .why-choose-us h4 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .why-choose-us p {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .why-choose-us .benefit-number {
+            font-size: 2rem;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        /* تحسينات قسم الباقات للشاشات الصغيرة */
+        .packages-scroll {
+            margin: 0 -20px;
+            padding: 1rem 20px;
+        }
+
+        .packages-scroll .row {
+            padding: 0;
+        }
+
+        .package-card {
+            min-width: 280px;
+        }
+
+        .lead {
+            font-size: 1rem !important;
+        }
+
+        .section-heading {
+            font-size: 1.75rem;
+        }
+
+        /* تعديل عرض العناصر في قسم المميزات */
+        .features-section .col-md-4 {
+            width: 50% !important;
+            padding: 8px;
+        }
+
+        /* تعديل قسم الإحصائيات للشاشات الصغيرة */
+        .green-section .col-md-3 {
+            width: 50% !important;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .green-section {
+            padding: 40px 0;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .feature-icon i {
+            font-size: 20px;
+        }
+
+        /* تصغير حجم النصوص في المميزات */
+        .features-section h4 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem !important;
+        }
+
+        .feature-description {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+
+        .stat-text {
+            font-size: 1rem;
+        }
+
+        .hero-logo {
+            max-width: 120px;
+        }
+
+        .container {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        /* تحسين أزرار تسجيل الدخول على الشاشات الصغيرة */
+        .d-flex.justify-content-center.gap-4 {
+            gap: 10px !important;
+            justify-content: center;
+            display: flex !important;
+        }
+
+        .cta-button, .cta-button-outline {
+            padding: 8px 15px !important;
+            font-size: 0.9rem !important;
+            text-align: center;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cta-button i, .cta-button-outline i {
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+
+        /* تحسين القوائم المتجاورة */
+        .row.justify-content-center.g-4 > [class*="col-"] {
+            padding: 10px;
+        }
+
+        /* تحسين البطاقات على الشاشات الصغيرة */
+        .benefit-card, .package-card {
+            padding: 20px;
+        }
+
+        .package-ribbon {
+            font-size: 0.8rem;
+            padding: 3px 30px;
+            right: -25px;
+        }
+
+        /* تحسين المسافات بين العناصر */
+        .py-5 {
+            padding-top: 3rem !important;
+            padding-bottom: 3rem !important;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem !important;
+        }
+
+        /* تحسين الأيقونات في البطاقات */
+        .benefit-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .benefit-icon i {
+            font-size: 24px;
+        }
+    }
+
+    /* تحسينات للأزرار في الشاشات الصغيرة جداً */
+    @media (max-width: 380px) {
+        .d-flex.justify-content-center.gap-4 {
+            gap: 5px !important;
+        }
+
+        .cta-button, .cta-button-outline {
+            padding: 6px 12px !important;
+            font-size: 0.8rem !important;
+            min-width: 100px;
+        }
+
+        .container[style*="margin-top: -100px"] {
+            margin-top: -80px !important;
+        }
+
+        /* تحسينات إضافية لقسم "لماذا تختارنا" في الشاشات الصغيرة جداً */
+        .why-choose-us .benefit-card {
+            padding: 12px;
+        }
+
+        .why-choose-us .benefit-icon {
+            width: 50px;
+            height: 50px;
+        }
+
+        .why-choose-us .benefit-icon i {
+            font-size: 20px;
+        }
+
+        .why-choose-us h4 {
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .why-choose-us p {
+            font-size: 0.8rem;
+            line-height: 1.3;
+        }
+
+        .why-choose-us .benefit-number {
+            font-size: 1.75rem;
+        }
+
+        /* تحسينات قسم الإحصائيات في الشاشات الصغيرة جداً */
+        .green-section .stat-number {
+            font-size: 1.75rem !important;
+        }
+
+        .green-section .stat-text {
+            font-size: 0.9rem;
+        }
+
+        .green-section {
+            padding: 30px 0;
+        }
+
+        .green-section .col-md-3 {
+            padding: 8px;
+        }
+
+        /* تحسينات إضافية لقسم المميزات في الشاشات الصغيرة جداً */
+        .features-section .feature-icon {
+            width: 50px;
+            height: 50px;
+        }
+
+        .features-section .feature-icon i {
+            font-size: 18px;
+        }
+
+        .features-section h4 {
+            font-size: 0.9rem;
+        }
+
+        .feature-description {
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+
+        .features-section .col-md-4 {
+            padding: 6px;
+        }
+    }
+
+    /* تحسينات إضافية للهواتف الصغيرة جداً */
+    @media (max-width: 360px) {
+        .display-3 {
+            font-size: 1.25rem;
+        }
+
+        .lead {
+            font-size: 0.9rem !important;
+        }
+
+        .section-heading {
+            font-size: 1.5rem;
+        }
+
+        .hero-logo {
+            max-width: 100px;
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+        }
+
+        .stat-number {
+            font-size: 1.75rem;
+        }
+
+        .package-price {
+            font-size: 1.75rem;
+        }
+
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <!-- Hero Section -->
-    <div class="row align-items-center min-vh-100">
-        <div class="col-lg-6">
-            <div class="text-center text-lg-start text-white">
-                <h1 class="display-4 fw-bold mb-4">
-                    مرحباً بكم في معرض الأغذية
-                </h1>
-                <p class="lead mb-4">
-                    اكتشف أفضل العارضين والمنتجات الغذائية في تجربة ثلاثية الأبعاد فريدة
-                </p>
-                <a href="{{ url_for('replit_auth.login') }}" class="btn btn-primary btn-lg px-5 py-3">
-                    <i class="fas fa-sign-in-alt me-2"></i>
-                    ابدأ التجربة
-                </a>
-            </div>
+<!-- Language Selector -->
+<div class="language-selector">
+    <button class="language-btn" onclick="toggleLanguageDropdown()">
+        {% if current_language == 'en' %}
+            <i class="fas fa-globe"></i> English
+        {% elif current_language == 'ar' %}
+            <i class="fas fa-globe"></i> العربية
+        {% else %}
+            <i class="fas fa-globe"></i> Français
+        {% endif %}
+    </button>
+    <div class="language-dropdown" id="languageDropdown">
+        <a href="/set-language/en" class="language-option {% if current_language == 'en' %}active{% endif %}">
+            English
+        </a>
+        <a href="/set-language/ar" class="language-option {% if current_language == 'ar' %}active{% endif %}">
+            العربية
+        </a>
+        <a href="/set-language/fr" class="language-option {% if current_language == 'fr' %}active{% endif %}">
+            Français
+        </a>
+    </div>
+</div>
+
+<!-- Hero Section with Dynamic Banners -->
+<div class="hero-section">
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            {% for banner in banners %}
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ loop.index0 }}" 
+                    class="{% if loop.first %}active{% endif %}" aria-current="true" 
+                    aria-label="Slide {{ loop.index }}"></button>
+            {% endfor %}
         </div>
-        
-        <div class="col-lg-6">
-            <div class="text-center">
-                <div class="gallery-3d">
-                    <div class="card bg-white bg-opacity-10 backdrop-blur p-4">
-                        <h3 class="text-white mb-3">المعايير المميزة</h3>
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="feature-card text-center text-white">
-                                    <i class="fas fa-cube fa-2x mb-2"></i>
-                                    <p>تجربة ثلاثية الأبعاد</p>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="feature-card text-center text-white">
-                                    <i class="fas fa-comments fa-2x mb-2"></i>
-                                    <p>تواصل مباشر</p>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="feature-card text-center text-white">
-                                    <i class="fas fa-calendar fa-2x mb-2"></i>
-                                    <p>حجز المواعيد</p>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="feature-card text-center text-white">
-                                    <i class="fas fa-heart fa-2x mb-2"></i>
-                                    <p>قائمة المفضلة</p>
-                                </div>
-                            </div>
+        <div class="carousel-inner">
+            {% for banner in banners %}
+            <div class="carousel-item {% if loop.first %}active{% endif %}" data-bs-interval="5000"
+                 dir="{% if current_language == 'ar' %}rtl{% else %}ltr{% endif %}">
+                <img src="{{ banner.image_path }}" class="d-block w-100" alt="{{ banner.title }}">
+                <div class="carousel-caption">
+                    <div class="container">
+                        <div class="text-center text-white">
+                            <h1 class="display-3 fw-bold mb-4 animate-up">
+                                {% if current_language == 'en' and banner.title_en %}
+                                    {{ banner.title_en }}
+                                {% elif current_language == 'fr' and banner.title_fr %}
+                                    {{ banner.title_fr }}
+                                {% else %}
+                                    {{ banner.title }}
+                                {% endif %}
+                            </h1>
+                            {% if banner.description or banner.description_en or banner.description_fr %}
+                            <p class="lead mb-5 animate-up" style="font-size: 1.4rem;">
+                                {% if current_language == 'en' and banner.description_en %}
+                                    {{ banner.description_en }}
+                                {% elif current_language == 'fr' and banner.description_fr %}
+                                    {{ banner.description_fr }}
+                                {% else %}
+                                    {{ banner.description }}
+                                {% endif %}
+                            </p>
+                            {% endif %}
+                            {% if banner.link %}
+                            <a href="{{ banner.link }}" class="cta-button text-decoration-none animate-up">
+                                {% if current_language == 'en' %}
+                                    Discover More
+                                {% elif current_language == 'ar' %}
+                                    اكتشف المزيد
+                                {% else %}
+                                    En Savoir Plus
+                                {% endif %}
+                            </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
+            {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">السابق</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">التالي</span>
+        </button>
+    </div>
+    
+    <!-- Login/Register Buttons (shown only when not logged in) -->
+    {% if not current_user.is_authenticated %}
+    <div class="container position-relative" style="margin-top: -100px; z-index: 2;">
+        <div class="d-flex justify-content-center gap-4">
+            <a href="{{ url_for('auth.login') }}" class="cta-button text-decoration-none">
+                <i class="fas fa-sign-in-alt me-2"></i>
+                {% if current_language == 'en' %}
+                    Login
+                {% elif current_language == 'ar' %}
+                    تسجيل الدخول
+                {% else %}
+                    Connexion
+                {% endif %}
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="cta-button-outline text-decoration-none">
+                <i class="fas fa-user-plus me-2"></i>
+                {% if current_language == 'en' %}
+                    New Account
+                {% elif current_language == 'ar' %}
+                    حساب جديد
+                {% else %}
+                    Nouveau Compte
+                {% endif %}
+            </a>
         </div>
     </div>
+    {% endif %}
+</div>
 
-    <!-- Featured Products -->
-    {% if featured_products %}
-    <div class="row mt-5">
-        <div class="col-12">
-            <h2 class="text-white text-center mb-4">المنتجات المميزة</h2>
-            <div class="row g-4">
+<!-- Featured Products Section -->
+<section class="featured-products">
+    <div class="container">
+        <h2>
+            {% if current_language == 'en' %}
+                Featured Products
+            {% elif current_language == 'ar' %}
+                منتجات مميزة
+            {% else %}
+                Produits en Vedette
+            {% endif %}
+        </h2>
+        
+        <div class="swiper featured-products-slider">
+            <div class="swiper-wrapper">
                 {% for product in featured_products %}
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            <p class="card-text">{{ product.description[:100] }}...</p>
-                            <a href="{{ url_for('replit_auth.login') }}" class="btn btn-primary">
-                                اكتشف المزيد
+                <div class="swiper-slide">
+                    <a href="{{ url_for('product_details', product_id=product.id) }}" class="product-card">
+                        <div class="product-card">
+                            {% if product.image_url %}
+                            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='images/product-placeholder.jpg') }}" alt="{{ product.name }}" class="product-image">
+                            {% endif %}
+                            <div class="product-info">
+                                <h3 class="product-name">{{ product.name }}</h3>
+                                <p class="product-exhibitor">{{ product.exhibitor.company_name }}</p>
+                                <div class="product-price">
+                                    {{ product.price }} {{ product.currency }}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Add Navigation -->
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <!-- Add Pagination -->
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<!-- Features Section -->
+<section class="features-section py-5">
+    <!-- Decorative Background Elements -->
+    <div class="circle-group top-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group middle-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group middle-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group bottom-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="bottom-left"></div>
+    <div class="top-right"></div>
+    
+    <div class="container position-relative">
+        <h2 class="section-heading">
+            {% if current_language == 'en' %}
+                Virtual Exhibition Features
+            {% elif current_language == 'ar' %}
+                مميزات المعرض الافتراضي
+            {% else %}
+                Caractéristiques de l'Exposition Virtuelle
+            {% endif %}
+        </h2>
+        <div class="row justify-content-center g-4">
+            <div class="col-md-4">
+                <div class="feature-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <h4 class="text-center mb-3">
+                    {% if current_language == 'en' %}
+                        Virtual Exhibition
+                    {% elif current_language == 'ar' %}
+                        معرض افتراضي
+                    {% else %}
+                        Exposition Virtuelle
+                    {% endif %}
+                </h4>
+                <p class="feature-description">
+                    {% if current_language == 'en' %}
+                        Complete online exhibition experience with freedom to explore
+                    {% elif current_language == 'ar' %}
+                        تجربة معرض متكاملة عبر الإنترنت مع إمكانية التجول بحرية
+                    {% else %}
+                        Expérience d'exposition complète en ligne avec liberté d'exploration
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h4 class="text-center mb-3">
+                    {% if current_language == 'en' %}
+                        Direct Communication
+                    {% elif current_language == 'ar' %}
+                        تواصل مباشر
+                    {% else %}
+                        Communication Directe
+                    {% endif %}
+                </h4>
+                <p class="feature-description">
+                    {% if current_language == 'en' %}
+                        Instant communication with exhibitors and visitors through advanced chat platform
+                    {% elif current_language == 'ar' %}
+                        تواصل فوري مع العارضين والزوار عبر منصة محادثة متطورة
+                    {% else %}
+                        Communication instantanée avec les exposants et visiteurs via une plateforme de chat avancée
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h4 class="text-center mb-3">
+                    {% if current_language == 'en' %}
+                        Diverse Products
+                    {% elif current_language == 'ar' %}
+                        منتجات متنوعة
+                    {% else %}
+                        Produits Diversifiés
+                    {% endif %}
+                </h4>
+                <p class="feature-description">
+                    {% if current_language == 'en' %}
+                        Discover a wide range of diverse food products
+                    {% elif current_language == 'ar' %}
+                        اكتشف مجموعة واسعة من المنتجات الغذائية المتنوعة
+                    {% else %}
+                        Découvrez une large gamme de produits alimentaires variés
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h4 class="text-center mb-3">
+                    {% if current_language == 'en' %}
+                        Appointment Booking
+                    {% elif current_language == 'ar' %}
+                        حجز المواعيد
+                    {% else %}
+                        Prise de Rendez-vous
+                    {% endif %}
+                </h4>
+                <p class="feature-description">
+                    {% if current_language == 'en' %}
+                        Integrated system for booking appointments and organizing meetings
+                    {% elif current_language == 'ar' %}
+                        نظام متكامل لحجز المواعيد وتنظيم الاجتماعات
+                    {% else %}
+                        Système intégré pour la réservation de rendez-vous et l'organisation de réunions
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-icon">
+                    <i class="fas fa-video"></i>
+                </div>
+                <h4 class="text-center mb-3">
+                    {% if current_language == 'en' %}
+                        Live Shows
+                    {% elif current_language == 'ar' %}
+                        عروض حية
+                    {% else %}
+                        Spectacles en Direct
+                    {% endif %}
+                </h4>
+                <p class="feature-description">
+                    {% if current_language == 'en' %}
+                        Watch presentations and events live
+                    {% elif current_language == 'ar' %}
+                        شاهد العروض التقديمية والفعاليات بشكل مباشر
+                    {% else %}
+                        Regardez les présentations et événements en direct
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h4 class="text-center mb-3">
+                    {% if current_language == 'en' %}
+                        Advanced Analytics
+                    {% elif current_language == 'ar' %}
+                        تحليلات متقدمة
+                    {% else %}
+                        Analyses Avancées
+                    {% endif %}
+                </h4>
+                <p class="feature-description">
+                    {% if current_language == 'en' %}
+                        Track your activity and interactions with detailed statistics
+                    {% elif current_language == 'ar' %}
+                        تتبع نشاطك وتفاعلاتك مع إحصائيات تفصيلية
+                    {% else %}
+                        Suivez votre activité et vos interactions avec des statistiques détaillées
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="featured-products">
+    <div class="container">
+        <h2>
+            {% if current_language == 'en' %}
+                Featured Products
+            {% elif current_language == 'ar' %}
+                منتجات مميزة
+            {% else %}
+                Produits Vedettes
+            {% endif %}
+        </h2>
+        
+        <div class="swiper featured-products-slider">
+            <div class="swiper-wrapper">
+                {% for product in featured_products %}
+                <div class="swiper-slide">
+                    <a href="{{ url_for('product_details', product_id=product.id) }}" class="product-card">
+                        <img src="{{ product.image_url if product.image_url else url_for('static', filename='images/product-placeholder.jpg') }}" 
+                             alt="{{ product.name }}" 
+                             class="product-image">
+                        <div class="product-info">
+                            <h3 class="product-name">{{ product.name }}</h3>
+                            <p class="product-exhibitor">{{ product.exhibitor.company_name }}</p>
+                            <div class="product-price">{{ product.price }} {{ product.currency }}</div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<div class="green-section">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="stat-number">500+</div>
+                <div class="stat-text">
+                    {% if current_language == 'en' %}
+                        Participating Exhibitors
+                    {% elif current_language == 'ar' %}
+                        عارض مشارك
+                    {% else %}
+                        Exposants Participants
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">1000+</div>
+                <div class="stat-text">
+                    {% if current_language == 'en' %}
+                        Displayed Products
+                    {% elif current_language == 'ar' %}
+                        منتج معروض
+                    {% else %}
+                        Produits Exposés
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">50+</div>
+                <div class="stat-text">
+                    {% if current_language == 'en' %}
+                        Participating Countries
+                    {% elif current_language == 'ar' %}
+                        دولة مشاركة
+                    {% else %}
+                        Pays Participants
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">24/7</div>
+                <div class="stat-text">
+                    {% if current_language == 'en' %}
+                        Continuous Support
+                    {% elif current_language == 'ar' %}
+                        دعم متواصل
+                    {% else %}
+                        Support Continu
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Packages Section -->
+<section class="decorated-section py-5">
+    <!-- Decorative Background Elements -->
+    <div class="circle-group top-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group middle-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group middle-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group bottom-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="bottom-left"></div>
+    <div class="top-right"></div>
+
+    <div class="container position-relative">
+        <h2 class="section-heading">
+            {% if current_language == 'en' %}
+                Exhibitor Packages
+            {% elif current_language == 'ar' %}
+                باقات العارضين
+            {% else %}
+                Forfaits Exposants
+            {% endif %}
+        </h2>
+        <div class="packages-scroll">
+            <div class="row flex-nowrap justify-content-start g-4">
+                {% for package in packages %}
+                <div class="col-10 col-sm-8 col-lg-4">
+                    <div class="card h-100 package-card text-center">
+                        <div class="card-body">
+                            <div class="package-icon mb-4">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3 class="package-title">
+                                {% if current_language == 'en' and package.name_en %}
+                                    {{ package.name_en }}
+                                {% else %}
+                                    {{ package.name }}
+                                {% endif %}
+                            </h3>
+                            <div class="package-price">
+                                <span class="currency">$</span>
+                                <span class="amount">{{ "%.0f"|format(package.price) }}</span>
+                                <span class="period">
+                                    {% if current_language == 'en' %}
+                                        /year
+                                    {% elif current_language == 'ar' %}
+                                        /سنوياً
+                                    {% else %}
+                                        /an
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="package-description mt-4">
+                                {% if current_language == 'en' and package.description_en %}
+                                    {{ package.description_en }}
+                                {% else %}
+                                    {{ package.description }}
+                                {% endif %}
+                            </div>
+                            <ul class="package-features list-unstyled mt-4">
+                                {% if package.features %}
+                                    {% for feature in package.features|fromjson %}
+                                        <li><i class="fas fa-check text-success me-2"></i>{{ feature }}</li>
+                                    {% endfor %}
+                                {% endif %}
+                            </ul>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-success btn-lg mt-4 w-100">
+                                {% if current_language == 'en' %}
+                                    Choose Package
+                                {% elif current_language == 'ar' %}
+                                    اختر الباقة
+                                {% else %}
+                                    Choisir le Forfait
+                                {% endif %}
                             </a>
                         </div>
                     </div>
@@ -80,7 +1631,346 @@
                 {% endfor %}
             </div>
         </div>
+
     </div>
-    {% endif %}
-</div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="why-choose-us py-5">
+    <div class="container">
+        <h2 class="section-heading text-white mb-5">
+            {% if current_language == 'en' %}
+                Why Choose Our Exhibition?
+            {% elif current_language == 'ar' %}
+                لماذا تختار معرضنا؟
+            {% else %}
+                Pourquoi Choisir Notre Exposition?
+            {% endif %}
+        </h2>
+        <div class="row g-4">
+            <!-- Market Reach -->
+            <div class="col-lg-4 col-md-6">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-globe-americas"></i>
+                    </div>
+                    <h4>
+                        {% if current_language == 'en' %}
+                            Global Reach
+                        {% elif current_language == 'ar' %}
+                            وصول عالمي
+                        {% else %}
+                            Portée Mondiale
+                        {% endif %}
+                    </h4>
+                    <p>
+                        {% if current_language == 'en' %}
+                            Connect with thousands of buyers and suppliers from around the world in one place
+                        {% elif current_language == 'ar' %}
+                            تواصل مع آلاف المشترين والموردين من جميع أنحاء العالم في مكان واحد
+                        {% else %}
+                            Connectez-vous avec des milliers d'acheteurs et de fournisseurs du monde entier en un seul endroit
+                        {% endif %}
+                    </p>
+                    <div class="benefit-number">01</div>
+                </div>
+            </div>
+            <!-- Innovation -->
+            <div class="col-lg-4 col-md-6">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h4>
+                        {% if current_language == 'en' %}
+                            Advanced Technology
+                        {% elif current_language == 'ar' %}
+                            تقنيات متطورة
+                        {% else %}
+                            Technologie Avancée
+                        {% endif %}
+                    </h4>
+                    <p>
+                        {% if current_language == 'en' %}
+                            Benefit from the latest technologies in product display and customer communication
+                        {% elif current_language == 'ar' %}
+                            استفد من أحدث التقنيات في عرض المنتجات والتواصل مع العملاء
+                        {% else %}
+                            Profitez des dernières technologies en matière de présentation des produits et de communication client
+                        {% endif %}
+                    </p>
+                    <div class="benefit-number">02</div>
+                </div>
+            </div>
+            <!-- Cost Effective -->
+            <div class="col-lg-4 col-md-6">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <h4>
+                        {% if current_language == 'en' %}
+                            Cost Savings
+                        {% elif current_language == 'ar' %}
+                            توفير التكاليف
+                        {% else %}
+                            Économies de Coûts
+                        {% endif %}
+                    </h4>
+                    <p>
+                        {% if current_language == 'en' %}
+                            Reduce travel and shipping costs while maintaining effective display and communication
+                        {% elif current_language == 'ar' %}
+                            خفض تكاليف السفر والشحن مع الحفاظ على فعالية العرض والتواصل
+                        {% else %}
+                            Réduisez les coûts de voyage et d'expédition tout en maintenant un affichage et une communication efficaces
+                        {% endif %}
+                    </p>
+                    <div class="benefit-number">03</div>
+                </div>
+            </div>
+            <!-- Analytics -->
+            <div class="col-lg-4 col-md-6">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h4>
+                        {% if current_language == 'en' %}
+                            Advanced Analytics
+                        {% elif current_language == 'ar' %}
+                            تحليلات متقدمة
+                        {% else %}
+                            Analyses Avancées
+                        {% endif %}
+                    </h4>
+                    <p>
+                        {% if current_language == 'en' %}
+                            Get detailed reports about your stand visitors and their interests
+                        {% elif current_language == 'ar' %}
+                            احصل على تقارير تفصيلية عن زوار جناحك واهتماماتهم
+                        {% else %}
+                            Obtenez des rapports détaillés sur les visiteurs de votre stand et leurs intérêts
+                        {% endif %}
+                    </p>
+                    <div class="benefit-number">04</div>
+                </div>
+            </div>
+            <!-- Support -->
+            <div class="col-lg-4 col-md-6">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h4>
+                        {% if current_language == 'en' %}
+                            Continuous Support
+                        {% elif current_language == 'ar' %}
+                            دعم متواصل
+                        {% else %}
+                            Support Continu
+                        {% endif %}
+                    </h4>
+                    <p>
+                        {% if current_language == 'en' %}
+                            Specialized technical support team available 24/7 to help you with everything you need
+                        {% elif current_language == 'ar' %}
+                            فريق دعم فني متخصص على مدار الساعة لمساعدتك في كل ما تحتاج
+                        {% else %}
+                            Équipe de support technique spécialisée disponible 24/7 pour vous aider dans tous vos besoins
+                        {% endif %}
+                    </p>
+                    <div class="benefit-number">05</div>
+                </div>
+            </div>
+            <!-- Network -->
+            <div class="col-lg-4 col-md-6">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <h4>
+                        {% if current_language == 'en' %}
+                            Networking Opportunities
+                        {% elif current_language == 'ar' %}
+                            فرص تواصل
+                        {% else %}
+                            Opportunités de Réseautage
+                        {% endif %}
+                    </h4>
+                    <p>
+                        {% if current_language == 'en' %}
+                            Build new business relationships and expand your professional network
+                        {% elif current_language == 'ar' %}
+                            بناء علاقات تجارية جديدة وتوسيع شبكة علاقاتك المهنية
+                        {% else %}
+                            Construisez de nouvelles relations d'affaires et élargissez votre réseau professionnel
+                        {% endif %}
+                    </p>
+                    <div class="benefit-number">06</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Partners Section -->
+<section class="partner-section decorated-section">
+    <!-- Decorative Background Elements -->
+    <div class="circle-group top-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group middle-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group middle-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="circle-group bottom-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="bottom-left"></div>
+    <div class="top-right"></div>
+
+    <div class="container position-relative">
+        <h2 class="section-heading">
+            {% if current_language == 'en' %}
+                Our Partners
+            {% elif current_language == 'ar' %}
+                شركاؤنا
+            {% else %}
+                Nos Partenaires
+            {% endif %}
+        </h2>
+        <div class="row align-items-center justify-content-center g-4">
+            <div class="col-6 col-md-3 text-center">
+                <img src="/static/images/partner/AET24SAH-AA_NBE.png" alt="البنك الأهلي المصري" class="partner-logo img-fluid">
+            </div>
+            <div class="col-6 col-md-3 text-center">
+                <img src="/static/images/partner/Agribankegy.png" alt="البنك الزراعي المصري" class="partner-logo img-fluid">
+            </div>
+            <div class="col-6 col-md-3 text-center">
+                <img src="/static/images/partner/Ahdoslogo.png" alt="Ahdos" class="partner-logo img-fluid">
+            </div>
+            <div class="col-6 col-md-3 text-center">
+                <img src="/static/images/partner/ECS.png" alt="ECS" class="partner-logo img-fluid">
+            </div>
+            <div class="col-6 col-md-3 text-center">
+                <img src="/static/images/partner/edc.png" alt="EDC" class="partner-logo img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Swiper JS -->
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script>
+    // Initialize Swiper
+    var swiper = new Swiper(".featured-products-slider", {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        autoplay: {
+            delay: 3000,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+        },
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2,
+            },
+            768: {
+                slidesPerView: 3,
+            },
+            1024: {
+                slidesPerView: 4,
+            },
+        },
+    });
+
+    // Language Selector
+    function toggleLanguageDropdown() {
+        document.getElementById('languageDropdown').classList.toggle('show');
+    }
+
+    // Close the dropdown when clicking outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.language-btn')) {
+            var dropdowns = document.getElementsByClassName('language-dropdown');
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    };
+    
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation for statistics
+    function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start) + '+';
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // Animate stats when they come into view
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statNumbers = entry.target.querySelectorAll('.stat-number');
+                statNumbers.forEach(stat => {
+                    const finalValue = parseInt(stat.innerText);
+                    if (!isNaN(finalValue)) {
+                        animateValue(stat, 0, finalValue, 2000);
+                    }
+                });
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    document.querySelector('.green-section').querySelectorAll('.col-md-3').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Add animation for features
+    const featureObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-up');
+                featureObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.feature-icon').forEach(el => {
+        featureObserver.observe(el);
+    });
+});
+</script>
 {% endblock %}

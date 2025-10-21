@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .exhibitor-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        padding: 20px;
+        position: relative;
+    }
+    
+    .exhibitor-actions {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .exhibitor-name {
+        color: #95c11f;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .exhibitor-company {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .exhibitor-email {
+        color: #666;
+        margin-bottom: 10px;
+    }
+    
+    .add-exhibitor-btn {
+        background-color: #95c11f;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 30px;
+        margin-bottom: 20px;
+    }
+    
+    .add-exhibitor-btn:hover {
+        background-color: #7a9f19;
+        color: white;
+    }
+    
+    .status-badge {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.9rem;
+    }
+    
+    .status-active {
+        background-color: #e3f0d3;
+        color: #95c11f;
+    }
+    
+    .status-inactive {
+        background-color: #ffe5e5;
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            {% if current_language == 'ar' %}إدارة العارضين{% elif current_language == 'fr' %}Gestion des Exposants{% else %}Exhibitor Management{% endif %}
+        </h2>
+        <a href="{{ url_for('admin.add_exhibitor') }}" class="btn add-exhibitor-btn">
+            {% if current_language == 'ar' %}إضافة عارض جديد{% elif current_language == 'fr' %}Ajouter un nouvel exposant{% else %}Add New Exhibitor{% endif %}
+        </a>
+    </div>
+
+    <div class="row">
+        {% for exhibitor in exhibitors %}
+        <div class="col-md-6">
+            <div class="exhibitor-card">
+                <div class="exhibitor-actions">
+                    <a href="{{ url_for('admin.edit_exhibitor', exhibitor_id=exhibitor.id) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteExhibitor({{ exhibitor.id }})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="exhibitor-name">{{ exhibitor.first_name }} {{ exhibitor.last_name }}</div>
+                <div class="exhibitor-company">{{ exhibitor.company_name }}</div>
+                <div class="exhibitor-email">{{ exhibitor.email }}</div>
+                <div class="mb-2">
+                    <span class="status-badge {% if exhibitor.is_active %}status-active{% else %}status-inactive{% endif %}">
+                        {% if exhibitor.is_active %}
+                            {% if current_language == 'ar' %}نشط{% elif current_language == 'fr' %}Actif{% else %}Active{% endif %}
+                        {% else %}
+                            {% if current_language == 'ar' %}غير نشط{% elif current_language == 'fr' %}Inactif{% else %}Inactive{% endif %}
+                        {% endif %}
+                    </span>
+                </div>
+                <p class="text-muted small mb-0">{% if exhibitor.company_description %}{{ exhibitor.company_description[:150] }}{% if exhibitor.company_description|length > 150 %}...{% endif %}{% else %}{% if current_language == 'ar' %}لا يوجد وصف{% elif current_language == 'fr' %}Pas de description{% else %}No description{% endif %}{% endif %}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteExhibitorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {% if current_language == 'ar' %}تأكيد الحذف{% elif current_language == 'fr' %}Confirmer la suppression{% else %}Confirm Deletion{% endif %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if current_language == 'ar' %}
+                هل أنت متأكد من أنك تريد حذف هذا العارض؟ سيتم حذف جميع البيانات المرتبطة به.
+                {% elif current_language == 'fr' %}
+                Êtes-vous sûr de vouloir supprimer cet exposant ? Toutes les données associées seront supprimées.
+                {% else %}
+                Are you sure you want to delete this exhibitor? All associated data will be deleted.
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% if current_language == 'ar' %}إلغاء{% elif current_language == 'fr' %}Annuler{% else %}Cancel{% endif %}
+                </button>
+                <form id="deleteExhibitorForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        {% if current_language == 'ar' %}حذف{% elif current_language == 'fr' %}Supprimer{% else %}Delete{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDeleteExhibitor(exhibitorId) {
+    const modal = document.getElementById('deleteExhibitorModal');
+    const form = document.getElementById('deleteExhibitorForm');
+    form.action = `{{ url_for('admin.delete_exhibitor', exhibitor_id=0) }}`.replace('0', exhibitorId);
+    new bootstrap.Modal(modal).show();
+}
+</script>
+{% endblock %}

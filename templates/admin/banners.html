@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة البانرات{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>إدارة البانرات</h1>
+        <a href="{{ url_for('add_banner') }}" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>إضافة بانر جديد
+        </a>
+    </div>
+
+    {% if banners %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>الصورة</th>
+                    <th>العنوان</th>
+                    <th>الترتيب</th>
+                    <th>الحالة</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for banner in banners %}
+                <tr>
+                    <td>
+                        <img src="{{ banner.image_path }}" alt="{{ banner.title }}" style="height: 50px;">
+                    </td>
+                    <td>{{ banner.title }}</td>
+                    <td>{{ banner.order }}</td>
+                    <td>
+                        <span class="badge {% if banner.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ 'نشط' if banner.is_active else 'غير نشط' }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('edit_banner', id=banner.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteBanner{{ banner.id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteBanner{{ banner.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">تأكيد الحذف</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                هل أنت متأكد من حذف البانر "{{ banner.title }}"؟
+                            </div>
+                            <div class="modal-footer">
+                                <form action="{{ url_for('delete_banner', id=banner.id) }}" method="POST">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                                    <button type="submit" class="btn btn-danger">حذف</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        لا توجد بانرات حالياً. قم بإضافة بانر جديد.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

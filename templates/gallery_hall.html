@@ -1,107 +1,529 @@
 {% extends "base.html" %}
 
-{% block title %}{{ hall.replace('hall', 'القاعة ') }} - معرض الأغذية{% endblock %}
+{% block title %}
+    {% if current_language == 'en' %}
+        {{ hall.replace('hall', 'Hall ') }} - Food Exhibition
+    {% elif current_language == 'ar' %}
+        {{ hall.replace('hall', 'القاعة ') }} - معرض الأغذية
+    {% else %}
+        {{ hall.replace('hall', 'Salle ') }} - Exposition Alimentaire
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #fff;
+        color: #333;
+        font-family: 'Tajawal', sans-serif;
+    }
+    
+    .hall-section {
+        position: relative;
+        min-height: 100vh;
+        background: #fff;
+        overflow: hidden;
+        padding: 40px 0;
+    }
+    
+    .hall-title {
+        color: #95c11f;
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .back-button {
+        background: transparent;
+        border: 2px solid #95c11f;
+        color: #95c11f;
+        padding: 10px 25px;
+        border-radius: 30px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .back-button:hover {
+        background: #95c11f;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .exhibitor-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .exhibitor-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    }
+    
+    .exhibitor-card .card-header {
+        background: #95c11f;
+        border: none;
+        padding: 20px;
+        color: white;
+    }
+    
+    .exhibitor-card .badge {
+        background: rgba(255,255,255,0.9);
+        color: #95c11f;
+        font-weight: 600;
+        padding: 8px 15px;
+        border-radius: 20px;
+    }
+    
+    .exhibitor-card[data-ranking="1"] {
+        border: 2px solid #FFD700;
+    }
+    
+    .exhibitor-card[data-ranking="2"] {
+        border: 2px solid #C0C0C0;
+    }
+    
+    .exhibitor-card[data-ranking="3"] {
+        border: 2px solid #CD7F32;
+    }
+    
+    .exhibitor-info {
+        display: flex;
+        justify-content: space-around;
+        padding: 15px 0;
+        border-top: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .info-item {
+        text-align: center;
+        color: #666;
+    }
+    
+    .info-item i {
+        color: #95c11f;
+        margin-bottom: 5px;
+    }
+    
+    .action-button {
+        background: #95c11f;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .action-button:hover {
+        background: #7a9f19;
+        transform: translateY(-2px);
+    }
+    
+    .favorite-button {
+        background: transparent;
+        border: 2px solid #95c11f;
+        color: #95c11f;
+        padding: 10px;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .favorite-button:hover {
+        background: #95c11f;
+        color: white;
+    }
+    
+    .favorite-button.active {
+        background: #95c11f;
+        color: white;
+    }
+    
+    .hall-info-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: none;
+        padding: 25px;
+        margin-top: 40px;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hall-info-title {
+        color: #95c11f;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    
+    .info-list li {
+        padding: 10px 0;
+        border-bottom: 1px dashed rgba(0,0,0,0.1);
+    }
+    
+    .info-list li:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: #666;
+        font-weight: 500;
+    }
+    
+    .info-value {
+        color: #95c11f;
+        font-weight: 600;
+    }
+    
+    /* Decorative Circles */
+    .circle-group {
+        position: absolute;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        z-index: 1;
+    }
+    
+    .circle {
+        width: 18px;
+        height: 18px;
+        background: #95c11f;
+        border-radius: 50%;
+        opacity: 0.15;
+    }
+    
+    .top-left { top: 20px; left: 20px; width: 80px; }
+    .middle-left { top: 40%; left: 5%; width: 80px; }
+    .middle-right { top: 50%; right: 5%; width: 80px; }
+    .bottom-right { bottom: 20px; right: 20px; width: 80px; }
+    
+    @media (max-width: 768px) {
+        .hall-title {
+            font-size: 1.8rem;
+        }
+        .exhibitor-card .card-header h5 {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="text-white">{{ hall.replace('hall', 'القاعة ') }}</h1>
-                <a href="{{ url_for('gallery') }}" class="btn btn-outline-light">
-                    <i class="fas fa-arrow-right me-2"></i>العودة للقاعات
-                </a>
-            </div>
+<div class="hall-section">
+    <!-- Decorative Circles -->
+    <div class="circle-group top-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+    <div class="circle-group middle-left">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+    <div class="circle-group middle-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+    <div class="circle-group bottom-right">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="hall-title">{{ hall.replace('hall', 'القاعة ') }}</h1>
+                    <a href="{{ url_for('gallery') }}" class="back-button">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        {% if current_language == 'en' %}
+                            Return to Halls
+                        {% elif current_language == 'ar' %}
+                            العودة للقاعات
+                        {% else %}
+                            Retour aux Salles
+                        {% endif %}
+                    </a>
+                </div>
             
-            <!-- Exhibitors Grid -->
-            <div class="row g-4">
-                {% for exhibitor in exhibitors %}
-                <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 exhibitor-card" data-ranking="{{ exhibitor.ranking }}">
-                        <div class="card-header bg-primary text-white">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">{{ exhibitor.company_name }}</h5>
-                                <span class="badge bg-light text-dark">المرتبة {{ exhibitor.ranking }}</span>
+                <!-- Exhibitors Grid -->
+                <div class="row g-4">
+                    {% for exhibitor in exhibitors %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="exhibitor-card h-100" data-ranking="{{ exhibitor.ranking }}">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">{{ exhibitor.company_name }}</h5>
+                                    <span class="badge">
+                                        {% if current_language == 'en' %}
+                                            Rank {{ exhibitor.ranking }}
+                                        {% elif current_language == 'ar' %}
+                                            المرتبة {{ exhibitor.ranking }}
+                                        {% else %}
+                                            Rang {{ exhibitor.ranking }}
+                                        {% endif %}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="card-body">
-                            {% if exhibitor.logo_url %}
-                            <img src="{{ exhibitor.logo_url }}" class="card-img-top mb-3" alt="{{ exhibitor.company_name }}" style="height: 120px; object-fit: cover;">
-                            {% else %}
-                            <div class="text-center mb-3">
-                                <i class="fas fa-store fa-4x text-muted"></i>
-                            </div>
-                            {% endif %}
                             
-                            <p class="card-text">{{ exhibitor.description[:150] }}...</p>
-                            
-                            <div class="row text-center mb-3">
-                                <div class="col-4">
-                                    <i class="fas fa-box fa-lg text-primary"></i>
-                                    <small class="d-block">{{ exhibitor.products|length }} منتج</small>
+                            <div class="card-body">
+                                {% if exhibitor.logo_url %}
+                                <img src="{{ exhibitor.logo_url }}" class="card-img-top mb-3" alt="{{ exhibitor.company_name }}" style="height: 120px; object-fit: contain;">
+                                {% else %}
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-store fa-4x" style="color: #95c11f;"></i>
                                 </div>
-                                <div class="col-4">
-                                    <i class="fas fa-eye fa-lg text-info"></i>
-                                    <small class="d-block">زيارات</small>
-                                </div>
-                                <div class="col-4">
-                                    <i class="fas fa-star fa-lg text-warning"></i>
-                                    <small class="d-block">تقييم</small>
+                                {% endif %}
+                                
+                                <p class="card-text">{{ exhibitor.description[:150] }}...</p>
+                                
+                                <div class="exhibitor-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-box fa-lg"></i>
+                                        <small class="d-block">
+                                            {% if current_language == 'en' %}
+                                                {{ exhibitor.products|length }} Products
+                                            {% elif current_language == 'ar' %}
+                                                {{ exhibitor.products|length }} منتج
+                                            {% else %}
+                                                {{ exhibitor.products|length }} Produits
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-eye fa-lg"></i>
+                                        <small class="d-block">
+                                            {% if current_language == 'en' %}
+                                                Visits
+                                            {% elif current_language == 'ar' %}
+                                                زيارات
+                                            {% else %}
+                                                Visites
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-star fa-lg"></i>
+                                        <small class="d-block">
+                                            {% if current_language == 'en' %}
+                                                Rating
+                                            {% elif current_language == 'ar' %}
+                                                تقييم
+                                            {% else %}
+                                                Évaluation
+                                            {% endif %}
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="card-footer">
-                            <div class="d-flex gap-2">
-                                <a href="{{ url_for('exhibitor_profile', exhibitor_id=exhibitor.id) }}" 
-                                   class="btn btn-primary flex-fill">
-                                    زيارة الجناح
-                                </a>
-                                <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }}, this)" 
-                                        class="btn btn-outline-danger" title="إضافة للمفضلة">
-                                    <i class="fas fa-heart"></i>
-                                </button>
+                            
+                            <div class="card-footer bg-transparent border-0 p-3">
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('exhibitor.profile', exhibitor_id=exhibitor.id) }}" 
+                                       class="action-button flex-fill text-center text-decoration-none">
+                                        {% if current_language == 'en' %}
+                                            Visit Stand
+                                        {% elif current_language == 'ar' %}
+                                            زيارة الجناح
+                                        {% else %}
+                                            Visiter le Stand
+                                        {% endif %}
+                                    </a>
+                                    <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }}, this)" 
+                                            class="favorite-button" 
+                                            title="{% if current_language == 'en' %}Add to Favorites{% elif current_language == 'ar' %}إضافة للمفضلة{% else %}Ajouter aux Favoris{% endif %}">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+                
+                <!-- No Exhibitors Message -->
+                {% if not exhibitors %}
+                <div class="text-center">
+                    <i class="fas fa-store fa-5x mb-4" style="color: #95c11f; opacity: 0.5;"></i>
+                    <h3 class="text-dark">
+                        {% if current_language == 'en' %}
+                            No exhibitors in this hall currently
+                        {% elif current_language == 'ar' %}
+                            لا توجد عارضين في هذه القاعة حالياً
+                        {% else %}
+                            Aucun exposant dans cette salle actuellement
+                        {% endif %}
+                    </h3>
+                    <p class="lead text-muted">
+                        {% if current_language == 'en' %}
+                            Check other halls or come back later
+                        {% elif current_language == 'ar' %}
+                            تفقد القاعات الأخرى أو عد لاحقاً
+                        {% else %}
+                            Vérifiez les autres salles ou revenez plus tard
+                        {% endif %}
+                    </p>
+                    <a href="{{ url_for('gallery') }}" class="action-button text-decoration-none">
+                        {% if current_language == 'en' %}
+                            Explore Other Halls
+                        {% elif current_language == 'ar' %}
+                            استكشاف القاعات الأخرى
+                        {% else %}
+                            Explorer les Autres Salles
+                        {% endif %}
+                    </a>
+                </div>
+                {% endif %}
             </div>
-            
-            <!-- No Exhibitors Message -->
-            {% if not exhibitors %}
-            <div class="text-center text-white">
-                <i class="fas fa-store fa-5x mb-4 opacity-50"></i>
-                <h3>لا توجد عارضين في هذه القاعة حالياً</h3>
-                <p class="lead">تفقد القاعات الأخرى أو عد لاحقاً</p>
-                <a href="{{ url_for('gallery') }}" class="btn btn-primary">
-                    استكشاف القاعات الأخرى
-                </a>
-            </div>
-            {% endif %}
         </div>
-    </div>
-    
-    <!-- Hall Info -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">معلومات القاعة</h5>
+        
+        <!-- Hall Info -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="hall-info-card">
+                    <h5 class="hall-info-title">
+                        {% if current_language == 'en' %}
+                            Hall Information
+                        {% elif current_language == 'ar' %}
+                            معلومات القاعة
+                        {% else %}
+                            Informations de la Salle
+                        {% endif %}
+                    </h5>
                     <div class="row">
                         <div class="col-md-6">
-                            <ul class="list-unstyled">
-                                <li><strong>عدد العارضين:</strong> {{ exhibitors|length }}</li>
-                                <li><strong>نوع القاعة:</strong> أغذية ومشروبات</li>
-                                <li><strong>المساحة:</strong> واسعة للتنقل الحر</li>
+                            <ul class="list-unstyled info-list">
+                                <li>
+                                    <span class="info-label">
+                                        {% if current_language == 'en' %}
+                                            Number of Exhibitors:
+                                        {% elif current_language == 'ar' %}
+                                            عدد العارضين:
+                                        {% else %}
+                                            Nombre d'Exposants:
+                                        {% endif %}
+                                    </span>
+                                    <span class="info-value">{{ exhibitors|length }}</span>
+                                </li>
+                                <li>
+                                    <span class="info-label">
+                                        {% if current_language == 'en' %}
+                                            Hall Type:
+                                        {% elif current_language == 'ar' %}
+                                            نوع القاعة:
+                                        {% else %}
+                                            Type de Salle:
+                                        {% endif %}
+                                    </span>
+                                    <span class="info-value">
+                                        {% if current_language == 'en' %}
+                                            Food & Beverages
+                                        {% elif current_language == 'ar' %}
+                                            أغذية ومشروبات
+                                        {% else %}
+                                            Alimentation & Boissons
+                                        {% endif %}
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="info-label">
+                                        {% if current_language == 'en' %}
+                                            Space:
+                                        {% elif current_language == 'ar' %}
+                                            المساحة:
+                                        {% else %}
+                                            Espace:
+                                        {% endif %}
+                                    </span>
+                                    <span class="info-value">
+                                        {% if current_language == 'en' %}
+                                            Wide for free movement
+                                        {% elif current_language == 'ar' %}
+                                            واسعة للتنقل الحر
+                                        {% else %}
+                                            Large pour un mouvement libre
+                                        {% endif %}
+                                    </span>
+                                </li>
                             </ul>
                         </div>
                         <div class="col-md-6">
-                            <ul class="list-unstyled">
-                                <li><strong>الإعلانات:</strong> {{ ads|length }} إعلان</li>
-                                <li><strong>التفاعل:</strong> متاح</li>
-                                <li><strong>التجربة:</strong> ثلاثية الأبعاد</li>
+                            <ul class="list-unstyled info-list">
+                                <li>
+                                    <span class="info-label">
+                                        {% if current_language == 'en' %}
+                                            Advertisements:
+                                        {% elif current_language == 'ar' %}
+                                            الإعلانات:
+                                        {% else %}
+                                            Publicités:
+                                        {% endif %}
+                                    </span>
+                                    <span class="info-value">
+                                        {% if current_language == 'en' %}
+                                            {{ ads|length }} Ads
+                                        {% elif current_language == 'ar' %}
+                                            {{ ads|length }} إعلان
+                                        {% else %}
+                                            {{ ads|length }} Annonces
+                                        {% endif %}
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="info-label">
+                                        {% if current_language == 'en' %}
+                                            Interaction:
+                                        {% elif current_language == 'ar' %}
+                                            التفاعل:
+                                        {% else %}
+                                            Interaction:
+                                        {% endif %}
+                                    </span>
+                                    <span class="info-value">
+                                        {% if current_language == 'en' %}
+                                            Available
+                                        {% elif current_language == 'ar' %}
+                                            متاح
+                                        {% else %}
+                                            Disponible
+                                        {% endif %}
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="info-label">
+                                        {% if current_language == 'en' %}
+                                            Experience:
+                                        {% elif current_language == 'ar' %}
+                                            التجربة:
+                                        {% else %}
+                                            Expérience:
+                                        {% endif %}
+                                    </span>
+                                    <span class="info-value">
+                                        {% if current_language == 'en' %}
+                                            3D Experience
+                                        {% elif current_language == 'ar' %}
+                                            ثلاثية الأبعاد
+                                        {% else %}
+                                            Expérience 3D
+                                        {% endif %}
+                                    </span>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -111,31 +533,7 @@
     </div>
 </div>
 
-<style>
-.exhibitor-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.exhibitor-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-}
-
-.exhibitor-card[data-ranking="1"] {
-    border-left: 5px solid #FFD700; /* Gold for rank 1 */
-}
-
-.exhibitor-card[data-ranking="2"] {
-    border-left: 5px solid #C0C0C0; /* Silver for rank 2 */
-}
-
-.exhibitor-card[data-ranking="3"] {
-    border-left: 5px solid #CD7F32; /* Bronze for rank 3 */
-}
-</style>
-
+{% block extra_js %}
 <script>
 function toggleFavoriteExhibitor(exhibitorId, buttonElement) {
     fetch(`/toggle-favorite-exhibitor/${exhibitorId}`, {
@@ -150,20 +548,66 @@ function toggleFavoriteExhibitor(exhibitorId, buttonElement) {
             // Update button state
             const button = buttonElement || event.target.closest('button');
             if (data.action === 'added') {
-                button.classList.remove('btn-outline-danger');
-                button.classList.add('btn-danger');
-                alert('تم إضافة العارض للمفضلة');
+                button.classList.add('active');
+                let message = '';
+                if (document.documentElement.lang === 'ar') {
+                    message = 'تم إضافة العارض للمفضلة';
+                } else if (document.documentElement.lang === 'fr') {
+                    message = 'Exposant ajouté aux favoris';
+                } else {
+                    message = 'Exhibitor added to favorites';
+                }
+                alert(message);
             } else {
-                button.classList.remove('btn-danger');
-                button.classList.add('btn-outline-danger');
-                alert('تم إزالة العارض من المفضلة');
+                button.classList.remove('active');
+                let message = '';
+                if (document.documentElement.lang === 'ar') {
+                    message = 'تم إزالة العارض من المفضلة';
+                } else if (document.documentElement.lang === 'fr') {
+                    message = 'Exposant retiré des favoris';
+                } else {
+                    message = 'Exhibitor removed from favorites';
+                }
+                alert(message);
             }
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('حدث خطأ، حاول مرة أخرى');
+        let message = '';
+        if (document.documentElement.lang === 'ar') {
+            message = 'حدث خطأ، حاول مرة أخرى';
+        } else if (document.documentElement.lang === 'fr') {
+            message = 'Une erreur est survenue, veuillez réessayer';
+        } else {
+            message = 'An error occurred, please try again';
+        }
+        alert(message);
     });
 }
+
+// تأثيرات حركية للبطاقات عند الظهور
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.exhibitor-card');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1
+    });
+
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(card);
+    });
+});
 </script>
+{% endblock %}
 {% endblock %}
