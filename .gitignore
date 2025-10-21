@@ -60,13 +60,17 @@ Thumbs.db
 
 # Project specific
 migrations/versions/__pycache__/
-static/images/banners/*
-static/images/exhibitors/*
-static/images/partner/*
-static/images/products/*
-static/videos/exhibitors/*
-!static/images/banners/.gitkeep
-!static/images/exhibitors/.gitkeep
-!static/images/partner/.gitkeep
-!static/images/products/.gitkeep
-!static/videos/exhibitors/.gitkeep
+
+# Keep default system images and ignore user uploads
+static/images/banners/user_uploads/*
+static/images/exhibitors/user_uploads/*
+static/images/partner/user_uploads/*
+static/images/products/user_uploads/*
+static/videos/exhibitors/user_uploads/*
+
+# Keep gitkeep files
+!static/images/banners/user_uploads/.gitkeep
+!static/images/exhibitors/user_uploads/.gitkeep
+!static/images/partner/user_uploads/.gitkeep
+!static/images/products/user_uploads/.gitkeep
+!static/videos/exhibitors/user_uploads/.gitkeep
