@@ -67,6 +67,7 @@
         </h2>
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="first_name" class="form-label">{% if current_language == 'ar' %}الاسم الأول{% elif current_language == 'fr' %}Prénom{% else %}First Name{% endif %}</label>

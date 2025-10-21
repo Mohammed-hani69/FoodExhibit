@@ -139,6 +139,7 @@
     
     <div class="chat-input">
         <form id="chat-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="text" id="message-input" placeholder="{% if current_language == 'en' %}Type your message...{% elif current_language == 'ar' %}اكتب رسالتك...{% else %}Tapez votre message...{% endif %}" required>
             <button type="submit">
                 <i class="fas fa-paper-plane"></i>

@@ -136,6 +136,7 @@
                     {% if current_language == 'ar' %}إلغاء{% elif current_language == 'fr' %}Annuler{% else %}Cancel{% endif %}
                 </button>
                 <form id="deleteForm" method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-danger">
                         {% if current_language == 'ar' %}حذف{% elif current_language == 'fr' %}Supprimer{% else %}Delete{% endif %}
                     </button>

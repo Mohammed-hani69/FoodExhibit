@@ -128,6 +128,7 @@
 
         <!-- Booking Form -->
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <!-- Schedule Selection -->
             <div class="schedule-selector">
                 <label class="form-label">

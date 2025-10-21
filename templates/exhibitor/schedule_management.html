@@ -90,6 +90,7 @@
     <!-- Add New Schedule Form -->
     <div class="schedule-card">
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="row">
                 <div class="col-md-3 mb-3">
                     <label class="form-label">
@@ -144,6 +145,7 @@
                         <i class="fas fa-edit"></i>
                     </button>
                     <form method="POST" action="{{ url_for('update_schedule', schedule_id=schedule.id) }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="action" value="delete">
                         <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')">
                             <i class="fas fa-trash"></i>
@@ -203,12 +205,14 @@
                     </span>
                     {% if booking.status == 'pending' %}
                     <form method="POST" action="{{ url_for('update_booking', booking_id=booking.id) }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="action" value="confirm">
                         <button type="submit" class="btn btn-sm btn-success ms-2">
                             {% if current_language == 'ar' %}تأكيد{% else %}Confirm{% endif %}
                         </button>
                     </form>
                     <form method="POST" action="{{ url_for('update_booking', booking_id=booking.id) }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="action" value="cancel">
                         <button type="submit" class="btn btn-sm btn-danger ms-2">
                             {% if current_language == 'ar' %}إلغاء{% else %}Cancel{% endif %}

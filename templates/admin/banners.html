@@ -59,6 +59,7 @@
                             </div>
                             <div class="modal-footer">
                                 <form action="{{ url_for('delete_banner', id=banner.id) }}" method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
                                     <button type="submit" class="btn btn-danger">حذف</button>
                                 </form>

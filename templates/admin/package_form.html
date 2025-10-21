@@ -61,6 +61,7 @@
         </h2>
 
         <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="name" class="form-label">{% if current_language == 'ar' %}اسم الباقة (عربي){% elif current_language == 'fr' %}Nom du forfait (arabe){% else %}Package Name (Arabic){% endif %}</label>

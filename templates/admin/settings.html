@@ -107,6 +107,7 @@
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ url_for('admin.update_interface_settings') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="settings-group">
                                 <h6 class="settings-group-title">
                                     {% if current_language == 'en' %}
@@ -161,6 +162,7 @@
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ url_for('admin.update_exhibition_settings') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="settings-group">
                                 <div class="mb-3">
                                     <label class="form-label">

@@ -292,6 +292,7 @@
                                 <td>
                                     <div class="d-flex gap-2">
                                         <form action="{{ url_for('approve_exhibitor', id=exhibitor.id) }}" method="POST">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <button type="submit" class="action-button approve">
                                                 {% if current_language == 'en' %}Approve
                                                 {% elif current_language == 'ar' %}موافقة
@@ -299,6 +300,7 @@
                                             </button>
                                         </form>
                                         <form action="{{ url_for('reject_exhibitor', id=exhibitor.id) }}" method="POST">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <button type="submit" class="action-button">
                                                 {% if current_language == 'en' %}Reject
                                                 {% elif current_language == 'ar' %}رفض

@@ -567,6 +567,7 @@
                                         {% endif %}
                                     </a>
                                     <form action="{{ url_for('cancel_meeting') }}" method="post" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <input type="hidden" name="meeting_id" value="{{ meeting.id }}">
                                         <button type="submit" class="btn btn-outline-danger rounded-circle">
                                             <i class="fas fa-times"></i>
