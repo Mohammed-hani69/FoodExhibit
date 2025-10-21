@@ -84,7 +84,7 @@ git pull origin main
 git add .
 
 # Commit changes | تأكيد التغييرات
-git commit -m "ADD LICENSE"
+git commit -m "EDIT LICENSE"
 
 # Push changes | رفع التغييرات
 git push origin main
@@ -132,6 +132,6 @@ See [LICENSE](LICENSE) file for details. | انظر ملف الترخيص للت
 
 ## 📞 Contact | التواصل
 
-For support or inquiries, please contact [zezohani72@gmail.com OR +201145425207]
+For support or inquiries, please contact [hanizezo72@gmail.com OR +201145425207]
 
-للدعم أو الاستفسارات، يرجى التواصل مع [zezohani72@gmail.com OR +201145425207]
+للدعم أو الاستفسارات، يرجى التواصل مع [hanizezo72@gmail.com OR +201145425207]
