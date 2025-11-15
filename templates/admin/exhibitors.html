@@ -4,35 +4,198 @@
 <style>
     .exhibitor-card {
         background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
-        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0 10px 20px rgba(149, 193, 31, 0.1);
+        margin-bottom: 30px;
+        padding: 25px;
         position: relative;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(149, 193, 31, 0.1);
+    }
+    
+    .exhibitor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(149, 193, 31, 0.2);
+        border-color: rgba(149, 193, 31, 0.3);
     }
     
     .exhibitor-actions {
         position: absolute;
-        top: 15px;
-        right: 15px;
+        top: 20px;
+        right: 450px;
+        display: flex;
+        gap: 8px;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+    }
+    
+    .exhibitor-card:hover .exhibitor-actions {
+        opacity: 1;
+    }
+    
+    .exhibitor-actions .btn {
+        border-radius: 12px;
+        padding: 8px 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .exhibitor-actions .btn:hover {
+        transform: scale(1.1);
     }
     
     .exhibitor-name {
         color: #95c11f;
-        font-size: 1.5rem;
+        font-size: 1.6rem;
         font-weight: bold;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
+        text-shadow: 1px 1px 1px rgba(0,0,0,0.05);
     }
     
     .exhibitor-company {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         color: #333;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid rgba(149, 193, 31, 0.1);
     }
     
-    .exhibitor-email {
+    .exhibitor-details {
+        font-size: 0.95rem;
+        color: #555;
+        background: rgba(149, 193, 31, 0.03);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 15px 0;
+    }
+    
+    .exhibitor-details i {
+        width: 25px;
+        height: 25px;
+        color: #95c11f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(149, 193, 31, 0.1);
+        border-radius: 8px;
+        margin-right: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .exhibitor-details p {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        transition: all 0.3s ease;
+    }
+    
+    .exhibitor-details p:hover {
+        transform: translateX(5px);
+    }
+    
+    .exhibitor-details p:hover i {
+        background: #95c11f;
+        color: white;
+    }
+    
+    .company-description {
+        border-top: 2px solid rgba(149, 193, 31, 0.1);
+        margin-top: 20px;
+        padding-top: 20px;
+        position: relative;
+    }
+    
+    .company-description::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: 0;
+        width: 50px;
+        height: 2px;
+        background: #95c11f;
+    }
+    
+    .status-badge {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .status-active {
+        background-color: rgba(149, 193, 31, 0.15);
+        color: #95c11f;
+    }
+    
+    .status-active:hover {
+        background-color: rgba(149, 193, 31, 0.25);
+    }
+    
+    .status-inactive {
+        background-color: rgba(220, 53, 69, 0.15);
+        color: #dc3545;
+    }
+    
+    .status-inactive:hover {
+        background-color: rgba(220, 53, 69, 0.25);
+    }
+
+    .analytics-section {
+        background: rgba(149, 193, 31, 0.03);
+        border-radius: 15px;
+        padding: 15px;
+    }
+
+    .analytics-card {
+        background: white;
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 8px rgba(149, 193, 31, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .analytics-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(149, 193, 31, 0.2);
+    }
+
+    .analytics-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(149, 193, 31, 0.1);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .analytics-icon i {
+        font-size: 1.2rem;
+        color: #95c11f;
+    }
+
+    .analytics-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .analytics-label {
+        font-size: 0.8rem;
         color: #666;
-        margin-bottom: 10px;
+        margin-bottom: 2px;
+    }
+
+    .analytics-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
     }
     
     .add-exhibitor-btn {
@@ -82,26 +245,137 @@
         <div class="col-md-6">
             <div class="exhibitor-card">
                 <div class="exhibitor-actions">
-                    <a href="{{ url_for('admin.edit_exhibitor', exhibitor_id=exhibitor.id) }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ url_for('exhibitor.profile', exhibitor_id=exhibitor.id) }}" class="btn btn-sm btn-outline-success" title="عرض المعرض">
+                        <i class="fas fa-store"></i>
+                    </a>
+                    <a href="{{ url_for('admin.edit_exhibitor', exhibitor_id=exhibitor.id) }}" class="btn btn-sm btn-outline-primary" title="تعديل">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteExhibitor({{ exhibitor.id }})">
+                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteExhibitor({{ exhibitor.id }})" title="حذف">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
-                <div class="exhibitor-name">{{ exhibitor.first_name }} {{ exhibitor.last_name }}</div>
-                <div class="exhibitor-company">{{ exhibitor.company_name }}</div>
-                <div class="exhibitor-email">{{ exhibitor.email }}</div>
-                <div class="mb-2">
-                    <span class="status-badge {% if exhibitor.is_active %}status-active{% else %}status-inactive{% endif %}">
-                        {% if exhibitor.is_active %}
-                            {% if current_language == 'ar' %}نشط{% elif current_language == 'fr' %}Actif{% else %}Active{% endif %}
-                        {% else %}
-                            {% if current_language == 'ar' %}غير نشط{% elif current_language == 'fr' %}Inactif{% else %}Inactive{% endif %}
-                        {% endif %}
-                    </span>
+                <div class="exhibitor-header">
+                    <div class="exhibitor-name">
+                        {{ exhibitor.first_name }} {{ exhibitor.last_name }}
+                        <span class="status-badge {% if exhibitor.is_active %}status-active{% else %}status-inactive{% endif %}">
+                            <i class="fas {% if exhibitor.is_active %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                            {% if exhibitor.is_active %}
+                                {% if current_language == 'ar' %}نشط{% elif current_language == 'fr' %}Actif{% else %}Active{% endif %}
+                            {% else %}
+                                {% if current_language == 'ar' %}غير نشط{% elif current_language == 'fr' %}Inactif{% else %}Inactive{% endif %}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="exhibitor-company">
+                        <i class="fas fa-building me-2"></i>
+                        {{ exhibitor.company_name }}
+                    </div>
                 </div>
-                <p class="text-muted small mb-0">{% if exhibitor.company_description %}{{ exhibitor.company_description[:150] }}{% if exhibitor.company_description|length > 150 %}...{% endif %}{% else %}{% if current_language == 'ar' %}لا يوجد وصف{% elif current_language == 'fr' %}Pas de description{% else %}No description{% endif %}{% endif %}</p>
+
+                <div class="exhibitor-details">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2" title="البريد الإلكتروني">
+                                <i class="fas fa-envelope"></i>
+                                <span>{{ exhibitor.email }}</span>
+                            </p>
+                            <p class="mb-2" title="رقم الهاتف">
+                                <i class="fas fa-phone"></i>
+                                <span>{{ exhibitor.phone }}</span>
+                            </p>
+                            <p class="mb-2" title="الدولة">
+                                <i class="fas fa-globe"></i>
+                                <span>
+                                {% if exhibitor.country == 'EG' %}مصر
+                                {% elif exhibitor.country == 'AE' %}الإمارات العربية المتحدة
+                                {% elif exhibitor.country == 'KW' %}الكويت
+                                {% elif exhibitor.country == 'BH' %}البحرين
+                                {% elif exhibitor.country == 'QA' %}قطر
+                                {% elif exhibitor.country == 'OM' %}عمان
+                                {% elif exhibitor.country == 'JO' %}الأردن
+                                {% elif exhibitor.country == 'LB' %}لبنان
+                                {% elif exhibitor.country == 'IQ' %}العراق
+                                {% else %}{{ exhibitor.country }}{% endif %}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2" title="التخصص">
+                                <i class="fas fa-tag"></i>
+                                <span>{{ exhibitor.specialization.name if exhibitor.specialization else '-' }}</span>
+                            </p>
+                            <p class="mb-2" title="تاريخ التسجيل">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>{{ exhibitor.created_at.strftime('%Y-%m-%d') }}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="analytics-section mt-3">
+                        <div class="row g-2">
+                            <div class="col-6 col-md-3">
+                                <div class="analytics-card">
+                                    <div class="analytics-icon">
+                                        <i class="fas fa-cube"></i>
+                                    </div>
+                                    <div class="analytics-info">
+                                        <span class="analytics-label">الباقة</span>
+                                        <span class="analytics-value">{{ exhibitor.package_name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="analytics-card">
+                                    <div class="analytics-icon">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                    <div class="analytics-info">
+                                        <span class="analytics-label">المنتجات</span>
+                                        <span class="analytics-value">{{ exhibitor.product_count }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="analytics-card">
+                                    <div class="analytics-icon">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="analytics-info">
+                                        <span class="analytics-label">الزيارات</span>
+                                        <span class="analytics-value">{{ exhibitor.total_visits }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="analytics-card">
+                                    <div class="analytics-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="analytics-info">
+                                        <span class="analytics-label">الزوار</span>
+                                        <span class="analytics-value">{{ exhibitor.unique_visitors }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="company-description">
+                    <h6 class="mb-2">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {% if current_language == 'ar' %}وصف الشركة{% elif current_language == 'fr' %}Description de l'entreprise{% else %}Company Description{% endif %}
+                    </h6>
+                    <p class="text-muted mb-0">
+                        {% if exhibitor.company_description %}
+                            {{ exhibitor.company_description[:150] }}
+                            {% if exhibitor.company_description|length > 150 %}...{% endif %}
+                        {% else %}
+                            {% if current_language == 'ar' %}لا يوجد وصف{% elif current_language == 'fr' %}Pas de description{% else %}No description{% endif %}
+                        {% endif %}
+                    </p>
+                </div>
             </div>
         </div>
         {% endfor %}

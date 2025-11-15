@@ -10,7 +10,7 @@ from models import (
     User, Package, Specialization, Banner, 
     AvailabilitySchedule, Booking, FavoriteExhibitor,
     FavoriteProduct, ChatMessage, ExhibitorAnalytics,
-    GalleryAd, Exhibitor, Product, Appointment, Video
+    GalleryAd, Product, Appointment, Video
 )
 import json
 from datetime import datetime, timedelta
@@ -46,8 +46,8 @@ def fromjson(value):
 
 # Main routes
 @app.route('/')
-def landing():
-    """Landing page route with multilingual support"""
+def index():
+    """Landing page with featured products and exhibition overview"""
     # Get active banners
     banners = Banner.query.filter_by(is_active=True).order_by(Banner.order).all()
     
@@ -56,11 +56,33 @@ def landing():
         is_homepage_featured=True,
         is_active=True
     ).all()
-    
-    return render_template('landing.html', 
-                         banners=banners,
-                         featured_products=featured_products,
-                         current_language=session.get('language', 'ar'))
+
+    if current_user.is_authenticated:
+        # Track homepage visit
+        track_user_action('visit', 'homepage')
+        
+        # Get gallery halls with exhibitor counts
+        halls = {}
+        for hall in ['hall1', 'hall2', 'hall3']:
+            count = User.query.filter_by(gallery_hall=hall, role='exhibitor', is_active=True).count()
+            halls[hall] = count
+        
+        return render_template('index.html', 
+                             banners=banners,
+                             featured_products=featured_products,
+                             halls=halls,
+                             user=current_user)
+    else:
+        # Show landing page for non-authenticated users
+        return render_template('landing.html', 
+                             banners=banners,
+                             featured_products=featured_products,
+                             current_language=session.get('language', 'ar'))
+
+@app.route('/ai-chatbot')
+def ai_chatbot_page():
+    """AI Chatbot page - shows chatbot interface"""
+    return render_template('ai_chatbot.html', current_language=session.get('language', 'ar'))
 
 @app.route('/product/<int:product_id>')
 def product_details(product_id):
@@ -70,11 +92,42 @@ def product_details(product_id):
                          product=product,
                          current_language=session.get('language', 'ar'))
 
+@app.route('/contact', methods=['POST'])
+def contact_submit():
+    """Handle contact form submission"""
+    try:
+        name = request.form.get('name')
+        phone = request.form.get('phone')
+        email = request.form.get('email')
+        message = request.form.get('message')
+        
+        # Basic validation
+        if not all([name, phone, email]):
+            flash('يرجى ملء جميع الحقول المطلوبة | Please fill in all required fields', 'error')
+            return redirect(url_for('index'))
+        
+        # Log the contact message (in a real app, you'd save to database or send email)
+        current_app.logger.info(f"Contact form submitted: {name} ({email}) - {phone}")
+        current_app.logger.info(f"Message: {message}")
+        
+        # Here you could:
+        # 1. Save to database
+        # 2. Send email to admin
+        # 3. Send confirmation email to user
+        
+        flash('شكراً لتواصلك معنا! سنرد عليك قريباً | Thank you for contacting us! We will respond soon.', 'success')
+        return redirect(url_for('index'))
+        
+    except Exception as e:
+        current_app.logger.error(f"Error in contact form: {str(e)}")
+        flash('حدث خطأ في إرسال الرسالة | Error sending message', 'error')
+        return redirect(url_for('index'))
+
 @app.route('/chat/<int:exhibitor_id>')
 @login_required
 def chat_with_exhibitor(exhibitor_id):
     """Chat with exhibitor route"""
-    exhibitor = Exhibitor.query.get_or_404(exhibitor_id)
+    exhibitor = User.query.filter_by(id=exhibitor_id, role='exhibitor').first_or_404()
     # Initialize chat room or get existing chat
     chat_room = f"chat_{min(current_user.id, exhibitor_id)}_{max(current_user.id, exhibitor_id)}"
     
@@ -577,36 +630,6 @@ def track_user_action(action_type, page_visited=None, exhibitor_id=None, product
         db.session.add(analytics)
         db.session.commit()
 
-@app.route('/')
-def index():
-    """Landing page with featured products and exhibition overview"""
-    # Get active banners ordered by their display order
-    banners = Banner.query.filter_by(is_active=True).order_by(Banner.order).all()
-    
-    if current_user.is_authenticated:
-        # Track homepage visit
-        track_user_action('visit', 'homepage')
-        
-        # Get featured products for homepage
-        featured_products = Product.query.filter_by(is_homepage_featured=True, is_active=True).limit(6).all()
-        
-        # Get gallery halls with exhibitor counts
-        halls = {}
-        for hall in ['hall1', 'hall2', 'hall3']:
-            count = Exhibitor.query.filter_by(gallery_hall=hall, is_active=True).count()
-            halls[hall] = count
-        
-        return render_template('index.html', 
-                             banners=banners,
-                             featured_products=featured_products,
-                             halls=halls,
-                             user=current_user)
-    else:
-        # Show landing page for non-authenticated users
-        return render_template('landing.html', banners=banners)
-        featured_products = Product.query.filter_by(is_homepage_featured=True, is_active=True).limit(6).all()
-        return render_template('landing.html', featured_products=featured_products)
-
 @app.route('/gallery')
 @login_required
 def gallery():
@@ -616,7 +639,7 @@ def gallery():
     # Get all active exhibitors grouped by hall
     exhibitors_by_hall = {}
     for hall in ['hall1', 'hall2', 'hall3']:
-        exhibitors = Exhibitor.query.filter_by(gallery_hall=hall, is_active=True).order_by(Exhibitor.ranking).all()
+        exhibitors = User.query.filter_by(gallery_hall=hall, role='exhibitor', is_active=True).order_by(User.ranking).all()
         exhibitors_by_hall[hall] = exhibitors
     
     # Get gallery advertisements
@@ -633,7 +656,7 @@ def gallery_hall(hall):
     track_user_action('visit', f'gallery_{hall}')
     
     # Get exhibitors for this hall
-    exhibitors = Exhibitor.query.filter_by(gallery_hall=hall, is_active=True).order_by(Exhibitor.ranking).all()
+    exhibitors = User.query.filter_by(gallery_hall=hall, role='exhibitor', is_active=True).order_by(User.ranking).all()
     
     # Get hall-specific advertisements
     ads = GalleryAd.query.filter_by(hall=hall, is_active=True).order_by(GalleryAd.display_order).all()
@@ -647,7 +670,7 @@ def gallery_hall(hall):
 @login_required
 def exhibitor_profile(exhibitor_id):
     """Exhibitor profile page with products and chat"""
-    exhibitor = Exhibitor.query.get_or_404(exhibitor_id)
+    exhibitor = User.query.filter_by(id=exhibitor_id, role='exhibitor').first_or_404()
     
     # Track profile visit
     track_user_action('visit', 'exhibitor_profile', exhibitor_id=exhibitor_id)
@@ -721,9 +744,14 @@ def exhibitor_profile(exhibitor_id):
 @login_required
 def my_box():
     """User's saved exhibitors and products"""
-    # Get user's favorite exhibitors
-    favorite_exhibitors = db.session.query(Exhibitor).join(FavoriteExhibitor).filter(
-        FavoriteExhibitor.user_id == current_user.id
+    # Get user's favorite exhibitors from User table with role='exhibitor'
+    # Specify the join condition explicitly to avoid ambiguity
+    favorite_exhibitors = db.session.query(User).join(
+        FavoriteExhibitor, 
+        FavoriteExhibitor.exhibitor_id == User.id
+    ).filter(
+        FavoriteExhibitor.user_id == current_user.id,
+        User.role == 'exhibitor'
     ).all()
     
     # Get user's favorite products

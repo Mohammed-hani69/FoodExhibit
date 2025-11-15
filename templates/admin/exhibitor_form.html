@@ -104,13 +104,12 @@
                     <label for="country" class="form-label">{% if current_language == 'ar' %}الدولة{% elif current_language == 'fr' %}Pays{% else %}Country{% endif %}</label>
                     <select class="form-control" id="country" name="country" required>
                         <option value="">{% if current_language == 'ar' %}اختر الدولة{% elif current_language == 'fr' %}Choisir le pays{% else %}Select Country{% endif %}</option>
+                        <option value="EG" {% if exhibitor and exhibitor.country == 'EG' %}selected{% endif %}>مصر</option>
                         <option value="AE" {% if exhibitor and exhibitor.country == 'AE' %}selected{% endif %}>الإمارات العربية المتحدة</option>
-                        <option value="SA" {% if exhibitor and exhibitor.country == 'SA' %}selected{% endif %}>المملكة العربية السعودية</option>
                         <option value="KW" {% if exhibitor and exhibitor.country == 'KW' %}selected{% endif %}>الكويت</option>
                         <option value="BH" {% if exhibitor and exhibitor.country == 'BH' %}selected{% endif %}>البحرين</option>
                         <option value="QA" {% if exhibitor and exhibitor.country == 'QA' %}selected{% endif %}>قطر</option>
                         <option value="OM" {% if exhibitor and exhibitor.country == 'OM' %}selected{% endif %}>عمان</option>
-                        <option value="EG" {% if exhibitor and exhibitor.country == 'EG' %}selected{% endif %}>مصر</option>
                         <option value="JO" {% if exhibitor and exhibitor.country == 'JO' %}selected{% endif %}>الأردن</option>
                         <option value="LB" {% if exhibitor and exhibitor.country == 'LB' %}selected{% endif %}>لبنان</option>
                         <option value="IQ" {% if exhibitor and exhibitor.country == 'IQ' %}selected{% endif %}>العراق</option>
@@ -118,13 +117,7 @@
                 </div>
             </div>
             
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="phone" class="form-label">{% if current_language == 'ar' %}رقم الهاتف{% elif current_language == 'fr' %}Numéro de téléphone{% else %}Phone Number{% endif %}</label>
-                    <input type="tel" class="form-control" id="phone" name="phone" value="{{ exhibitor.contact_phone if exhibitor else '' }}" required>
-                </div>
-            </div>
-            
+
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="password" class="form-label">
@@ -150,6 +143,17 @@
                 <div class="col-md-6 mb-3">
                     <label for="company_name" class="form-label">{% if current_language == 'ar' %}اسم الشركة{% elif current_language == 'fr' %}Nom de l'entreprise{% else %}Company Name{% endif %}</label>
                     <input type="text" class="form-control" id="company_name" name="company_name" value="{{ exhibitor.company_name if exhibitor else '' }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="package" class="form-label">{% if current_language == 'ar' %}الباقة{% elif current_language == 'fr' %}Package{% else %}Package{% endif %}</label>
+                    <select class="form-control" id="package" name="package_id" required>
+                        <option value="">{% if current_language == 'ar' %}اختر الباقة{% elif current_language == 'fr' %}Choisir un package{% else %}Choose package{% endif %}</option>
+                        {% for package in packages %}
+                            <option value="{{ package.id }}" {% if exhibitor and exhibitor.package_id == package.id %}selected{% endif %}>
+                                {{ package.name }} ({{ package.price }} $)
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
 

@@ -17,17 +17,20 @@
 {% block extra_css %}
 <style>
     :root {
-        --primary-color: #95C11F;
-        --text-primary: #2C3E50;
+        --primary-color: #ff6b00;
+        --primary-dark: #e55f00;
+        --text-primary: #1e3a5f;
         --text-secondary: #596475;
-        --bg-light: #f8f9fa;
+        --bg-light: #e8f1f5;
+        --bg-gradient-start: #ff6b00;
+        --bg-gradient-end: #e55f00;
         --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         --hover-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
         --border-radius: 20px;
     }
 
     .page-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #7a9f19 100%);
+        background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
         color: white;
         padding: 4rem 0;
         margin-bottom: 3rem;
@@ -35,7 +38,7 @@
         position: relative;
         overflow: hidden;
         text-align: center;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 20px rgba(255, 107, 0, 0.25);
     }
 
     .page-header h1 {
@@ -75,7 +78,7 @@
     }
 
     .stats-card {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #7a9f19 100%);
+        background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
         border-radius: var(--border-radius);
         padding: 2.5rem 2rem;
         height: 100%;
@@ -89,6 +92,7 @@
 
     .stats-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(255, 107, 0, 0.2);
     }
 
     .stats-card i {
@@ -115,12 +119,13 @@
         box-shadow: var(--card-shadow);
         transition: all 0.3s ease;
         height: 100%;
-        border: none;
+        border: 1px solid #e0e0e0;
     }
 
     .favorite-card:hover {
         transform: translateY(-5px);
         box-shadow: var(--hover-shadow);
+        border-color: var(--primary-color);
     }
 
     .favorite-card .card-body {
@@ -164,13 +169,17 @@
 
     .custom-tabs .nav-link.active {
         background: var(--primary-color);
-        color: white;
-        box-shadow: 0 4px 15px rgba(149, 193, 31, 0.2);
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2);
+    }
+
+    .custom-tabs .nav-link.active span {
+        color: white !important;
     }
 
     .custom-tabs .nav-link:hover:not(.active) {
         color: var(--primary-color);
-        background: rgba(149, 193, 31, 0.1);
+        background: rgba(255, 107, 0, 0.1);
     }
 
     .action-button {
@@ -188,9 +197,10 @@
     }
 
     .action-button:hover {
-        background: #7a9f19;
+        background: var(--primary-dark);
         transform: translateY(-2px);
         color: white;
+        box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3);
     }
 
     .btn-outline-danger {
@@ -260,6 +270,264 @@
             width: 100%;
             text-align: center;
         }
+
+        /* Small device adjustments */
+        .page-header {
+            padding: 2rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .decorated-section {
+            padding: 1.5rem 0;
+        }
+
+        .circle-decoration {
+            width: 250px;
+            height: 250px;
+            opacity: 0.03;
+        }
+
+        .circle-top-right {
+            top: -150px;
+            right: -150px;
+        }
+
+        .circle-bottom-left {
+            bottom: -150px;
+            left: -150px;
+        }
+
+        .stats-card {
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            border-radius: 12px;
+        }
+
+        .stats-card i {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-card .counter {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stats-card .label {
+            font-size: 0.9rem;
+        }
+
+        .custom-tabs {
+            margin: 1rem 0 1.5rem;
+            gap: 0.5rem;
+            padding: 0.25rem;
+        }
+
+        .custom-tabs .nav-link {
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 30px;
+        }
+
+        .favorite-card {
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .favorite-card .card-body {
+            padding: 1rem;
+        }
+
+        .favorite-card .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .favorite-card .card-text {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .action-button {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9rem;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-outline-danger {
+            width: 36px;
+            height: 36px;
+            font-size: 0.85rem;
+            margin-left: auto;
+            display: block;
+        }
+
+        .favorite-card img {
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .tab-pane .row {
+            row-gap: 1rem;
+        }
+
+        .tab-pane .col-md-4,
+        .tab-pane .col-md-6 {
+            width: 100%;
+        }
+
+        .empty-state {
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3,
+        .empty-state h4 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            padding: 1rem;
+        }
+
+        .card-header h5 {
+            font-size: 1rem;
+        }
+
+        .card-footer {
+            padding: 0.75rem;
+        }
+
+        .d-flex.gap-2 {
+            gap: 0.5rem;
+        }
+
+        .d-flex.gap-2 .btn {
+            padding: 0.6rem;
+            font-size: 0.85rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.6rem;
+        }
+
+        /* Tab navigation responsive */
+        #myBoxTabs {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        #myBoxTabs .nav-link {
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        /* Product/Exhibitor stats on small devices */
+        .row.text-center {
+            font-size: 0.85rem;
+        }
+
+        .row.text-center i {
+            font-size: 1.5rem;
+        }
+
+        .row.text-center small {
+            font-size: 0.75rem;
+        }
+
+        /* Ensure buttons stack on very small screens */
+        .d-flex {
+            flex-direction: column;
+        }
+
+        .d-flex.justify-content-between {
+            flex-direction: column;
+        }
+
+        .d-flex.gap-2 {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        /* Quick actions card */
+        .card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: var(--card-shadow);
+        }
+
+        .card .d-flex {
+            flex-direction: column;
+        }
+
+        .card .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .card .btn:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .page-header h1 {
+            font-size: 1.25rem;
+        }
+
+        .stats-card {
+            padding: 1rem;
+        }
+
+        .stats-card .counter {
+            font-size: 1.75rem;
+        }
+
+        .favorite-card {
+            border-radius: 10px;
+        }
+
+        .custom-tabs .nav-link {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .action-button {
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .favorite-card .card-title {
+            font-size: 1rem;
+        }
+
+        .custom-tabs {
+            margin: 0.75rem 0 1rem;
+        }
+
+        .decorated-section {
+            padding: 1rem 0;
+        }
     }
 </style>
 {% endblock %}
@@ -286,8 +554,8 @@
     <div class="container">
     
     <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-4">
+    <div class="row mb-4 g-3">
+        <div class="col-12 col-sm-6 col-md-4">
             <div class="stats-card">
                 <i class="fas fa-heart mb-3"></i>
                 <span class="counter">{{ favorites_count }}</span>
@@ -302,7 +570,7 @@
                 </span>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-12 col-sm-6 col-md-4">
             <div class="stats-card">
                 <i class="fas fa-history mb-3"></i>
                 <span class="counter">{{ visited_count }}</span>
@@ -317,7 +585,7 @@
                 </span>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-12 col-sm-6 col-md-4">
             <div class="stats-card">
                 <i class="fas fa-calendar-check mb-3"></i>
                 <span class="counter">{{ meetings_count }}</span>
@@ -372,9 +640,6 @@
             </li>
         </ul>
     </div>
-
-    <!-- Tabs Content -->
-    <div class="col-12 mt-4">
         <div class="tab-content" id="myBoxTabsContent">
             <!-- Favorites Tab -->
             <div class="tab-pane fade show active" id="favorites-content" role="tabpanel" aria-labelledby="favorites-tab">
@@ -391,7 +656,7 @@
                         {% endif %}
                     </h3>
                     {% for exhibitor in favorite_exhibitors %}
-                    <div class="col-md-4 mb-4">
+                    <div class="col-12 col-sm-6 col-lg-4 mb-4">
                         <div class="card favorite-card">
                             {% if exhibitor.banner_url %}
                                 <img src="{{ url_for('static', filename=exhibitor.banner_url) }}" class="card-img-top" alt="{{ exhibitor.company_name }}">
@@ -399,8 +664,8 @@
                             <div class="card-body">
                                 <h5 class="card-title">{{ exhibitor.company_name }}</h5>
                                 <p class="card-text">{{ exhibitor.description }}</p>
-                                <div class="d-flex justify-content-between">
-                                    <a href="{{ url_for('exhibitor_profile', exhibitor_id=exhibitor.id) }}" class="btn action-button">
+                                <div class="d-flex flex-column flex-sm-row gap-2">
+                                    <a href="{{ url_for('exhibitor_profile', exhibitor_id=exhibitor.id) }}" class="btn action-button flex-grow-1">
                                         {% if current_language == 'en' %}
                                             View Profile
                                         {% elif current_language == 'ar' %}
@@ -431,7 +696,7 @@
                         {% endif %}
                     </h3>
                     {% for product in favorite_products %}
-                    <div class="col-md-4 mb-4">
+                    <div class="col-12 col-sm-6 col-lg-4 mb-4">
                         <div class="card favorite-card">
                             {% if product.image_url %}
                                 <img src="{{ url_for('static', filename=product.image_url) }}" class="card-img-top" alt="{{ product.name }}">
@@ -439,10 +704,21 @@
                             <div class="card-body">
                                 <h5 class="card-title">{{ product.name }}</h5>
                                 <p class="card-text">{{ product.description }}</p>
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex flex-column gap-2 mb-2">
                                     <div class="product-price">
                                         {{ product.price }} {{ product.currency }}
                                     </div>
+                                </div>
+                                <div class="d-flex flex-column flex-sm-row gap-2">
+                                    <a href="{{ url_for('exhibitor_profile', exhibitor_id=product.exhibitor_id) }}" class="btn action-button flex-grow-1">
+                                        {% if current_language == 'en' %}
+                                            View Exhibitor
+                                        {% elif current_language == 'ar' %}
+                                            عرض العارض
+                                        {% else %}
+                                            Voir l'Exposant
+                                        {% endif %}
+                                    </a>
                                     <button onclick="toggleFavoriteProduct({{ product.id }})" class="btn btn-outline-danger rounded-circle">
                                         <i class="fas fa-heart-broken"></i>
                                     </button>
@@ -456,7 +732,7 @@
                     {% if not favorite_exhibitors and not favorite_products %}
                     <div class="col-12 text-center py-5">
                         <div class="empty-state">
-                            <i class="fas fa-heart text-muted mb-4" style="font-size: 4rem;"></i>
+                            <i class="fas fa-heart text-muted mb-4" style="font-size: 3rem;"></i>
                             <h3>
                                 {% if current_language == 'en' %}
                                     No Favorites Yet

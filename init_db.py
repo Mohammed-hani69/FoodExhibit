@@ -1,5 +1,5 @@
-from app import create_app, db
-from models import User, Package, Specialization, Exhibitor, Product, Banner, ChatMessage, Visit
+from main import create_app, db
+from models import User, Package, Specialization, Product, Banner, ChatMessage, Visit
 from werkzeug.security import generate_password_hash
 import os
 

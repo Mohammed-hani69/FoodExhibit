@@ -12,33 +12,50 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --primary-color: #ff6b00;
+        --primary-dark: #e55f00;
+        --text-primary: #1e3a5f;
+        --text-secondary: #596475;
+        --bg-light: #e8f1f5;
+        --bg-gradient-start: #ff6b00;
+        --bg-gradient-end: #e55f00;
+    }
+
     .dashboard-section {
         padding: 2rem 0;
         background: #f8f9fa;
     }
 
     .stats-card {
-        background: white;
+        background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
         border-radius: 8px;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
         text-align: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(255, 107, 0, 0.2);
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(255, 107, 0, 0.3);
     }
 
     .stats-icon {
-        color: #95c11f;
+        color: white;
         margin-bottom: 1rem;
     }
     
     .stats-number {
         font-size: 2rem;
         font-weight: bold;
-        color: #333;
+        color: white;
     }
     
     .stats-label {
-        color: #666;
+        color: rgba(255, 255, 255, 0.9);
     }
     
     .admin-card {
@@ -46,6 +63,13 @@
         border-radius: 8px;
         margin-bottom: 1.5rem;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+    .admin-card:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 4px 12px rgba(255, 107, 0, 0.15);
     }
     
     .admin-menu-item {
@@ -58,16 +82,16 @@
     
     .admin-menu-item:hover {
         background-color: #f8f9fa;
-        color: #95c11f;
+        color: var(--primary-color);
     }
     
     .admin-menu-item i {
         margin-right: 0.5rem;
-        color: #95c11f;
+        color: var(--primary-color);
     }
 
     .admin-card .card-header {
-        background: #95c11f;
+        background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
         color: white;
         padding: 1rem;
         border-radius: 8px 8px 0 0;
@@ -80,9 +104,9 @@
     .admin-button {
         display: inline-block;
         padding: 0.5rem 1rem;
-        color: #95c11f;
+        color: var(--primary-color);
         background: white;
-        border: 1px solid #95c11f;
+        border: 1px solid var(--primary-color);
         border-radius: 4px;
         text-decoration: none;
         margin: 0.25rem 0;
@@ -90,12 +114,12 @@
     }
 
     .admin-button:hover {
-        background: #95c11f;
+        background: var(--primary-color);
         color: white;
     }
 
     .dashboard-title {
-        color: #333;
+        color: var(--text-primary);
         margin-bottom: 2rem;
         text-align: center;
     }
@@ -403,6 +427,57 @@
                                     إدارة البانرات
                                 {% else %}
                                     Gérer les Bannières
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Partner Management Card -->
+            <div class="col-md-6">
+                <div class="admin-card">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-handshake me-2"></i>
+                            {% if current_language == 'en' %}
+                                Partner Management
+                            {% elif current_language == 'ar' %}
+                                إدارة الرعاة والشركاء
+                            {% else %}
+                                Gestion des Partenaires
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            {% if current_language == 'en' %}
+                                Manage sponsors and partners displayed on homepage
+                            {% elif current_language == 'ar' %}
+                                إدارة الرعاة والشركاء المعروضين على الصفحة الرئيسية
+                            {% else %}
+                                Gérer les sponsors et partenaires affichés sur la page d'accueil
+                            {% endif %}
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin.manage_partners') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-list me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Manage Partners
+                                {% elif current_language == 'ar' %}
+                                    إدارة الرعاة
+                                {% else %}
+                                    Gérer les Partenaires
+                                {% endif %}
+                            </a>
+                            <a href="{{ url_for('admin.add_partner') }}" class="admin-button text-decoration-none">
+                                <i class="fas fa-plus me-2"></i>
+                                {% if current_language == 'en' %}
+                                    Add Partner
+                                {% elif current_language == 'ar' %}
+                                    إضافة راعي
+                                {% else %}
+                                    Ajouter Partenaire
                                 {% endif %}
                             </a>
                         </div>

@@ -4,6 +4,14 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --primary-color: #ff6b00;
+        --primary-dark: #e55f00;
+        --text-primary: #1e3a5f;
+        --text-secondary: #596475;
+        --bg-light: #e8f1f5;
+    }
+
     #gallery-3d {
         width: 100%;
         height: 600px;
@@ -11,12 +19,36 @@
         overflow: hidden;
         position: relative;
     }
+
+    @media (max-width: 768px) {
+        #gallery-3d {
+            height: 400px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        #gallery-3d {
+            height: 300px;
+        }
+    }
     
     .hall-selector {
         position: absolute;
         top: 20px;
         left: 20px;
         z-index: 100;
+    }
+
+    @media (max-width: 576px) {
+        .hall-selector {
+            top: 10px;
+            left: 10px;
+        }
+
+        .hall-selector .form-select {
+            font-size: 0.9rem;
+            padding: 0.375rem 0.5rem;
+        }
     }
     
     .exhibitor-info {
@@ -30,6 +62,39 @@
         max-width: 300px;
         display: none;
         z-index: 100;
+    }
+
+    @media (max-width: 768px) {
+        .exhibitor-info {
+            max-width: 250px;
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .exhibitor-info {
+            max-width: 200px;
+            padding: 10px;
+            font-size: 0.8rem;
+            bottom: 10px;
+            left: 10px;
+        }
+
+        .exhibitor-info h5 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .exhibitor-info p {
+            margin-bottom: 8px;
+            font-size: 0.75rem;
+        }
+
+        .exhibitor-info .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+        }
     }
     
     .gallery-controls {
@@ -48,12 +113,21 @@
         border: none;
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
+
+    @media (max-width: 576px) {
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            margin: 3px;
+            font-size: 0.9rem;
+        }
+    }
     
     .advertisement-wall {
         position: absolute;
         width: 200px;
         height: 150px;
-        background: linear-gradient(45deg, #667eea, #764ba2);
+        background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -84,6 +158,91 @@
         top: 10px;
         left: 50%;
         transform: translateX(-50%);
+    }
+
+    /* Arrow Control Buttons Styling */
+    .arrow-controls {
+        position: absolute;
+        bottom: 100px;
+        right: 20px;
+        display: grid;
+        grid-template-columns: repeat(3, 50px);
+        gap: 5px;
+        z-index: 100;
+    }
+
+    @media (max-width: 576px) {
+        .arrow-controls {
+            bottom: 80px;
+            right: 10px;
+            grid-template-columns: repeat(3, 40px);
+            gap: 3px;
+        }
+    }
+
+    .arrow-btn {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 165, 0, 0.85);
+        border: 2px solid rgba(255, 100, 0, 0.9);
+        border-radius: 8px;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        user-select: none;
+    }
+
+    @media (max-width: 576px) {
+        .arrow-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+        }
+    }
+
+    .arrow-btn:hover {
+        background: rgba(255, 140, 0, 0.9);
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .arrow-btn:active {
+        transform: scale(0.95);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .arrow-btn-empty {
+        background: transparent;
+        border: none;
+    }
+
+    .control-info {
+        position: absolute;
+        bottom: 220px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        z-index: 100;
+        max-width: 200px;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 576px) {
+        .control-info {
+            bottom: 200px;
+            right: 10px;
+            font-size: 10px;
+            padding: 8px;
+        }
     }
 </style>
 {% endblock %}
@@ -130,6 +289,28 @@
                             <i class="fas fa-heart"></i>
                         </button>
                     </div>
+                </div>
+
+                <!-- Arrow Control Buttons -->
+                <div class="control-info">
+                    <strong>التحكم:</strong><br>
+                    <span>↑↓←→ للحركة</span><br>
+                    <span>Q/E للأعلى/الأسفل</span><br>
+                    <span>Shift+أسهم للدوران</span>
+                </div>
+
+                <div class="arrow-controls">
+                    <button class="arrow-btn arrow-btn-empty"></button>
+                    <button class="arrow-btn" id="btnUp" title="للأمام (↑)">▲</button>
+                    <button class="arrow-btn arrow-btn-empty"></button>
+                    
+                    <button class="arrow-btn" id="btnLeft" title="لليسار (←)">◄</button>
+                    <button class="arrow-btn" id="btnDown" title="للخلف (↓)">▼</button>
+                    <button class="arrow-btn" id="btnRight" title="لليمين (→)">►</button>
+
+                    <button class="arrow-btn" id="btnUp2" title="للأعلى (Q)">⬆</button>
+                    <button class="arrow-btn" id="btnDown2" title="للأسفل (E)">⬇</button>
+                    <button class="arrow-btn arrow-btn-empty"></button>
                 </div>
                 
                 <!-- 3D Advertisement Walls are now rendered in the Three.js scene -->
@@ -317,6 +498,61 @@
             }
         }
         
+        function onTouchStart( event ) {
+            if ( scope.enabled === false ) return;
+            
+            switch ( event.touches.length ) {
+                case 1:
+                    rotateStart.set( event.touches[0].clientX, event.touches[0].clientY );
+                    state = STATE.TOUCH_ROTATE;
+                    break;
+                case 2:
+                    dollyStart.set( event.touches[0].clientX, event.touches[1].clientX );
+                    state = STATE.TOUCH_DOLLY_PAN;
+                    break;
+            }
+            
+            if ( state !== STATE.NONE ) {
+                scope.dispatchEvent( startEvent );
+            }
+        }
+        
+        function onTouchMove( event ) {
+            if ( scope.enabled === false ) return;
+            
+            event.preventDefault();
+            
+            switch ( event.touches.length ) {
+                case 1:
+                    if ( state !== STATE.TOUCH_ROTATE ) return;
+                    rotateEnd.set( event.touches[0].clientX, event.touches[0].clientY );
+                    rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
+                    scope.rotateLeft( 2 * Math.PI * rotateDelta.x / scope.domElement.clientHeight );
+                    scope.rotateUp( 2 * Math.PI * rotateDelta.y / scope.domElement.clientHeight );
+                    rotateStart.copy( rotateEnd );
+                    scope.update();
+                    break;
+                case 2:
+                    if ( state !== STATE.TOUCH_DOLLY_PAN ) return;
+                    dollyEnd.set( event.touches[0].clientX, event.touches[1].clientX );
+                    dollyDelta.subVectors( dollyEnd, dollyStart );
+                    if ( dollyDelta.x > 0 ) {
+                        scope.dollyOut( scope.getZoomScale() );
+                    } else if ( dollyDelta.x < 0 ) {
+                        scope.dollyIn( scope.getZoomScale() );
+                    }
+                    dollyStart.copy( dollyEnd );
+                    scope.update();
+                    break;
+            }
+        }
+        
+        function onTouchEnd( event ) {
+            if ( scope.enabled === false ) return;
+            scope.dispatchEvent( endEvent );
+            state = STATE.NONE;
+        }
+        
         function onMouseMove( event ) {
             if ( scope.enabled === false ) return;
             event.preventDefault();
@@ -426,6 +662,9 @@
             scope.domElement.removeEventListener( 'contextmenu', onContextMenu, false );
             scope.domElement.removeEventListener( 'mousedown', onMouseDown, false );
             scope.domElement.removeEventListener( 'wheel', onMouseWheel, false );
+            scope.domElement.removeEventListener( 'touchstart', onTouchStart, false );
+            scope.domElement.removeEventListener( 'touchmove', onTouchMove, false );
+            scope.domElement.removeEventListener( 'touchend', onTouchEnd, false );
             document.removeEventListener( 'mousemove', onMouseMove, false );
             document.removeEventListener( 'mouseup', onMouseUp, false );
         };
@@ -438,6 +677,9 @@
         this.domElement.addEventListener( 'contextmenu', onContextMenu, false );
         this.domElement.addEventListener( 'mousedown', onMouseDown, false );
         this.domElement.addEventListener( 'wheel', onMouseWheel, false );
+        this.domElement.addEventListener( 'touchstart', onTouchStart, false );
+        this.domElement.addEventListener( 'touchmove', onTouchMove, false );
+        this.domElement.addEventListener( 'touchend', onTouchEnd, false );
         
         this.target0 = this.target.clone();
         this.position0 = this.object.position.clone();
@@ -454,6 +696,11 @@ let scene, camera, renderer, controls;
 let exhibitorObjects = [];
 let selectedExhibitor = null;
 let currentHall = 'hall1';
+
+// Keyboard control variables
+const keys = {};
+const moveSpeed = 0.5;
+const rotateSpeed = 0.05;
 
 // Exhibitor data from backend
 const exhibitorsData = {
@@ -483,22 +730,40 @@ function initGallery() {
     
     // Camera setup
     const container = document.getElementById('gallery-3d');
-    camera = new THREE.PerspectiveCamera(75, container.offsetWidth / 600, 0.1, 1000);
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+    
+    camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     camera.position.set(0, 5, 15);
     
     // Renderer setup
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(document.getElementById('gallery-3d').offsetWidth, 600);
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     
-    document.getElementById('gallery-3d').appendChild(renderer.domElement);
+    // Clear any existing renderer
+    const existingCanvas = container.querySelector('canvas');
+    if (existingCanvas) {
+        existingCanvas.remove();
+    }
     
-    // Controls
+    container.appendChild(renderer.domElement);
+    
+    // Controls - disabled to prevent mouse/scroll movement
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.enableZoom = true;
+    controls.enableDamping = false;
+    controls.enableRotate = false;  // Disable rotation with mouse
+    controls.enableZoom = false;    // Disable zoom with scroll wheel
+    controls.enablePan = false;     // Disable pan with mouse
+    
+    // Adjust controls for mobile devices
+    if (window.innerWidth <= 768) {
+        controls.rotateSpeed = 0.8;
+        controls.zoomSpeed = 0.8;
+        controls.panSpeed = 0.8;
+    }
     
     // Lighting
     const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
@@ -524,49 +789,206 @@ function initGallery() {
     // Event listeners
     window.addEventListener('resize', onWindowResize, false);
     renderer.domElement.addEventListener('click', onMouseClick, false);
+    
+    // Keyboard event listeners for arrow controls
+    document.addEventListener('keydown', onKeyDown, false);
+    document.addEventListener('keyup', onKeyUp, false);
 }
 
 function createGalleryFloor() {
+    // Create marble-like floor with texture pattern
     const floorGeometry = new THREE.PlaneGeometry(100, 100);
-    const floorMaterial = new THREE.MeshLambertMaterial({ 
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.8
+    
+    // Create a canvas for custom floor texture
+    const floorCanvas = document.createElement('canvas');
+    floorCanvas.width = 512;
+    floorCanvas.height = 512;
+    const floorCtx = floorCanvas.getContext('2d');
+    
+    // Create marble pattern
+    const gradient = floorCtx.createLinearGradient(0, 0, 512, 512);
+    gradient.addColorStop(0, '#f5f5f5');
+    gradient.addColorStop(0.5, '#e8e8e8');
+    gradient.addColorStop(1, '#f0f0f0');
+    floorCtx.fillStyle = gradient;
+    floorCtx.fillRect(0, 0, 512, 512);
+    
+    // Add tile pattern
+    floorCtx.strokeStyle = '#d0d0d0';
+    floorCtx.lineWidth = 2;
+    for (let i = 0; i < 512; i += 64) {
+        floorCtx.beginPath();
+        floorCtx.moveTo(i, 0);
+        floorCtx.lineTo(i, 512);
+        floorCtx.stroke();
+        
+        floorCtx.beginPath();
+        floorCtx.moveTo(0, i);
+        floorCtx.lineTo(512, i);
+        floorCtx.stroke();
+    }
+    
+    const floorTexture = new THREE.CanvasTexture(floorCanvas);
+    floorTexture.wrapS = THREE.RepeatWrapping;
+    floorTexture.wrapT = THREE.RepeatWrapping;
+    floorTexture.repeat.set(8, 8);
+    
+    const floorMaterial = new THREE.MeshStandardMaterial({ 
+        map: floorTexture,
+        roughness: 0.4,
+        metalness: 0.2
     });
+    
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     scene.add(floor);
     
-    // Add grid
-    const gridHelper = new THREE.GridHelper(100, 50, 0x888888, 0xcccccc);
+    // Add subtle grid for guidance
+    const gridHelper = new THREE.GridHelper(100, 40, 0xe0e0e0, 0xf0f0f0);
+    gridHelper.position.y = 0.01;
+    gridHelper.material.opacity = 0.3;
+    gridHelper.material.transparent = true;
     scene.add(gridHelper);
 }
 
 function createGalleryWalls() {
-    const wallGeometry = new THREE.PlaneGeometry(100, 20);
-    const wallMaterial = new THREE.MeshLambertMaterial({ 
-        color: 0xe6e6e6,
-        transparent: true,
-        opacity: 0.7
-    });
+    // Create texture for walls with professional pattern
+    function createWallTexture(color1, color2) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const context = canvas.getContext('2d');
+        
+        // Create gradient background
+        const gradient = context.createLinearGradient(0, 0, 512, 512);
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(0.5, color2);
+        gradient.addColorStop(1, color1);
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, 512, 512);
+        
+        // Add subtle pattern
+        context.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        context.lineWidth = 1;
+        for (let i = 0; i < 512; i += 32) {
+            context.beginPath();
+            context.moveTo(i, 0);
+            context.lineTo(i, 512);
+            context.stroke();
+            
+            context.beginPath();
+            context.moveTo(0, i);
+            context.lineTo(512, i);
+            context.stroke();
+        }
+        
+        // Add vertical accent lines
+        context.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        context.lineWidth = 2;
+        for (let i = 0; i < 512; i += 128) {
+            context.beginPath();
+            context.moveTo(i, 0);
+            context.lineTo(i, 512);
+            context.stroke();
+        }
+        
+        return new THREE.CanvasTexture(canvas);
+    }
     
-    // Back wall
-    const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    backWall.position.set(0, 10, -50);
+    // Back wall - Professional white/blue gradient
+    const backWallGeometry = new THREE.PlaneGeometry(100, 45);
+    const backWallTexture = createWallTexture('#f5f5f5', '#e0e8f0');
+    const backWallMaterial = new THREE.MeshStandardMaterial({ 
+        map: backWallTexture,
+        roughness: 0.6,
+        metalness: 0.1,
+        side: THREE.DoubleSide
+    });
+    const backWall = new THREE.Mesh(backWallGeometry, backWallMaterial);
+    backWall.position.set(0, 22.5, -50);
+    backWall.receiveShadow = true;
+    backWall.castShadow = true;
     scene.add(backWall);
     
-    // Left wall
-    const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    // Add decorative frame to back wall
+    const frameGeometry = new THREE.BufferGeometry();
+    const frameVertices = new Float32Array([
+        -50, 45, -49.9, 50, 45, -49.9,
+        50, 45, -49.9, 50, 0, -49.9,
+        50, 0, -49.9, -50, 0, -49.9,
+        -50, 0, -49.9, -50, 45, -49.9
+    ]);
+    frameGeometry.setAttribute('position', new THREE.BufferAttribute(frameVertices, 3));
+    const frameMaterial = new THREE.LineBasicMaterial({ color: 0xff6b00, linewidth: 3 });
+    const frame = new THREE.LineSegments(frameGeometry, frameMaterial);
+    scene.add(frame);
+    
+    // Left wall - Orange/gold gradient
+    const leftWallGeometry = new THREE.PlaneGeometry(100, 45);
+    const leftWallTexture = createWallTexture('#ff8c42', '#ffb366');
+    const leftWallMaterial = new THREE.MeshStandardMaterial({ 
+        map: leftWallTexture,
+        roughness: 0.6,
+        metalness: 0.1,
+        side: THREE.DoubleSide
+    });
+    const leftWall = new THREE.Mesh(leftWallGeometry, leftWallMaterial);
     leftWall.rotation.y = Math.PI / 2;
-    leftWall.position.set(-50, 10, 0);
+    leftWall.position.set(-50, 22.5, 0);
+    leftWall.receiveShadow = true;
+    leftWall.castShadow = true;
     scene.add(leftWall);
     
-    // Right wall
-    const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
+    // Right wall - Blue/teal gradient
+    const rightWallGeometry = new THREE.PlaneGeometry(100, 45);
+    const rightWallTexture = createWallTexture('#4a90e2', '#5ba3f5');
+    const rightWallMaterial = new THREE.MeshStandardMaterial({ 
+        map: rightWallTexture,
+        roughness: 0.6,
+        metalness: 0.1,
+        side: THREE.DoubleSide
+    });
+    const rightWall = new THREE.Mesh(rightWallGeometry, rightWallMaterial);
     rightWall.rotation.y = -Math.PI / 2;
-    rightWall.position.set(50, 10, 0);
+    rightWall.position.set(50, 22.5, 0);
+    rightWall.receiveShadow = true;
+    rightWall.castShadow = true;
     scene.add(rightWall);
+    
+    // Add top accent wall
+    const topWallGeometry = new THREE.PlaneGeometry(100, 10);
+    const topWallTexture = createWallTexture('#2c3e50', '#34495e');
+    const topWallMaterial = new THREE.MeshStandardMaterial({ 
+        map: topWallTexture,
+        roughness: 0.5,
+        metalness: 0.2
+    });
+    const topWall = new THREE.Mesh(topWallGeometry, topWallMaterial);
+    topWall.rotation.x = Math.PI / 2;
+    topWall.position.set(0, 45, 0);
+    topWall.receiveShadow = true;
+    scene.add(topWall);
+    
+    // Add corner pillars for professional look
+    function createPillar(x, z) {
+        const pillarGeometry = new THREE.CylinderGeometry(2, 2.5, 45, 8);
+        const pillarMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xcccccc,
+            roughness: 0.7,
+            metalness: 0.1
+        });
+        const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+        pillar.position.set(x, 22.5, z);
+        pillar.castShadow = true;
+        pillar.receiveShadow = true;
+        scene.add(pillar);
+    }
+    
+    createPillar(-48, -48);
+    createPillar(48, -48);
+    createPillar(-48, 48);
+    createPillar(48, 48);
     
     // Create 3D Advertisement walls
     create3DAdvertisementWalls();
@@ -757,6 +1179,83 @@ function createExhibitorStand(exhibitor, index) {
     exhibitorObjects.push(standGroup);
 }
 
+// Keyboard control functions
+function onKeyDown(event) {
+    keys[event.key] = true;
+}
+
+function onKeyUp(event) {
+    keys[event.key] = false;
+}
+
+function handleKeyboardMovement() {
+    // Handle arrow key movements
+    if (keys['ArrowUp'] || keys['w'] || keys['W']) {
+        // Move forward
+        const moveDir = new THREE.Vector3();
+        camera.getWorldDirection(moveDir);
+        moveDir.y = 0; // Keep horizontal movement
+        moveDir.normalize();
+        camera.position.addScaledVector(moveDir, moveSpeed);
+    }
+    
+    if (keys['ArrowDown'] || keys['s'] || keys['S']) {
+        // Move backward
+        const moveDir = new THREE.Vector3();
+        camera.getWorldDirection(moveDir);
+        moveDir.y = 0;
+        moveDir.normalize();
+        camera.position.addScaledVector(moveDir, -moveSpeed);
+    }
+    
+    if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+        // Move left
+        const moveDir = new THREE.Vector3();
+        camera.getWorldDirection(moveDir);
+        moveDir.y = 0;
+        moveDir.normalize();
+        const leftDir = new THREE.Vector3();
+        leftDir.crossVectors(camera.up, moveDir);
+        camera.position.addScaledVector(leftDir, moveSpeed);
+    }
+    
+    if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+        // Move right
+        const moveDir = new THREE.Vector3();
+        camera.getWorldDirection(moveDir);
+        moveDir.y = 0;
+        moveDir.normalize();
+        const rightDir = new THREE.Vector3();
+        rightDir.crossVectors(camera.up, moveDir);
+        camera.position.addScaledVector(rightDir, -moveSpeed);
+    }
+    
+    // Vertical movement (Q and E keys)
+    if (keys['q'] || keys['Q']) {
+        camera.position.y += moveSpeed;
+    }
+    
+    if (keys['e'] || keys['E']) {
+        camera.position.y -= moveSpeed;
+    }
+    
+    // Camera rotation with arrow keys + Shift
+    if (keys['Shift']) {
+        if (keys['ArrowUp']) {
+            camera.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), rotateSpeed);
+        }
+        if (keys['ArrowDown']) {
+            camera.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), -rotateSpeed);
+        }
+        if (keys['ArrowLeft']) {
+            camera.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), rotateSpeed);
+        }
+        if (keys['ArrowRight']) {
+            camera.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -rotateSpeed);
+        }
+    }
+}
+
 function onMouseClick(event) {
     const mouse = new THREE.Vector2();
     const rect = renderer.domElement.getBoundingClientRect();
@@ -873,18 +1372,157 @@ function openAdLink(url) {
 
 function onWindowResize() {
     const container = document.getElementById('gallery-3d');
-    camera.aspect = container.offsetWidth / 600;
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+    
+    if (width === 0 || height === 0) return;
+    
+    camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    renderer.setSize(container.offsetWidth, 600);
+    renderer.setSize(width, height);
 }
 
 function animate() {
     requestAnimationFrame(animate);
+    handleKeyboardMovement();
     controls.update();
     renderer.render(scene, camera);
 }
 
 // Initialize gallery when page loads
 document.addEventListener('DOMContentLoaded', initGallery);
+
+// Setup arrow button click handlers
+document.addEventListener('DOMContentLoaded', function() {
+    const btnUp = document.getElementById('btnUp');
+    const btnDown = document.getElementById('btnDown');
+    const btnLeft = document.getElementById('btnLeft');
+    const btnRight = document.getElementById('btnRight');
+    const btnUp2 = document.getElementById('btnUp2');
+    const btnDown2 = document.getElementById('btnDown2');
+    
+    // Helper function to simulate key press
+    function simulateKeyDown(key) {
+        keys[key] = true;
+    }
+    
+    function simulateKeyUp(key) {
+        keys[key] = false;
+    }
+    
+    // Up button
+    btnUp.addEventListener('mousedown', function() {
+        simulateKeyDown('ArrowUp');
+    });
+    btnUp.addEventListener('mouseup', function() {
+        simulateKeyUp('ArrowUp');
+    });
+    btnUp.addEventListener('mouseleave', function() {
+        simulateKeyUp('ArrowUp');
+    });
+    btnUp.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        simulateKeyDown('ArrowUp');
+    });
+    btnUp.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        simulateKeyUp('ArrowUp');
+    });
+    
+    // Down button
+    btnDown.addEventListener('mousedown', function() {
+        simulateKeyDown('ArrowDown');
+    });
+    btnDown.addEventListener('mouseup', function() {
+        simulateKeyUp('ArrowDown');
+    });
+    btnDown.addEventListener('mouseleave', function() {
+        simulateKeyUp('ArrowDown');
+    });
+    btnDown.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        simulateKeyDown('ArrowDown');
+    });
+    btnDown.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        simulateKeyUp('ArrowDown');
+    });
+    
+    // Left button
+    btnLeft.addEventListener('mousedown', function() {
+        simulateKeyDown('ArrowLeft');
+    });
+    btnLeft.addEventListener('mouseup', function() {
+        simulateKeyUp('ArrowLeft');
+    });
+    btnLeft.addEventListener('mouseleave', function() {
+        simulateKeyUp('ArrowLeft');
+    });
+    btnLeft.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        simulateKeyDown('ArrowLeft');
+    });
+    btnLeft.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        simulateKeyUp('ArrowLeft');
+    });
+    
+    // Right button
+    btnRight.addEventListener('mousedown', function() {
+        simulateKeyDown('ArrowRight');
+    });
+    btnRight.addEventListener('mouseup', function() {
+        simulateKeyUp('ArrowRight');
+    });
+    btnRight.addEventListener('mouseleave', function() {
+        simulateKeyUp('ArrowRight');
+    });
+    btnRight.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        simulateKeyDown('ArrowRight');
+    });
+    btnRight.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        simulateKeyUp('ArrowRight');
+    });
+    
+    // Up movement (Q key)
+    btnUp2.addEventListener('mousedown', function() {
+        simulateKeyDown('q');
+    });
+    btnUp2.addEventListener('mouseup', function() {
+        simulateKeyUp('q');
+    });
+    btnUp2.addEventListener('mouseleave', function() {
+        simulateKeyUp('q');
+    });
+    btnUp2.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        simulateKeyDown('q');
+    });
+    btnUp2.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        simulateKeyUp('q');
+    });
+    
+    // Down movement (E key)
+    btnDown2.addEventListener('mousedown', function() {
+        simulateKeyDown('e');
+    });
+    btnDown2.addEventListener('mouseup', function() {
+        simulateKeyUp('e');
+    });
+    btnDown2.addEventListener('mouseleave', function() {
+        simulateKeyUp('e');
+    });
+    btnDown2.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        simulateKeyDown('e');
+    });
+    btnDown2.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        simulateKeyUp('e');
+    });
+});
 </script>
 {% endblock %}

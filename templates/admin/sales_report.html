@@ -10,58 +10,614 @@
 
 {% block extra_css %}
 <style>
+    main {
+        background: linear-gradient(135deg, #f5f5f0 0%, #f0f0ea 100%);
+        min-height: 100vh;
+    }
+
     .analytics-dashboard {
-        padding: 2rem;
-        background: #fff;
+        padding: 60px 40px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    .analytics-header {
+        text-align: center;
+        margin-bottom: 60px;
+        position: relative;
+    }
+
+    .analytics-header h1 {
+        font-size: 48px;
+        font-weight: 700;
+        color: #1e3a5f;
+        margin-bottom: 15px;
+        line-height: 1.2;
+    }
+
+    .analytics-header p {
+        font-size: 18px;
+        color: #666;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: white;
         border-radius: 15px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 40px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e8e8e8;
+    }
+
+    .filter-section .row {
+        gap: 20px;
+    }
+
+    .filter-section .col-md-3 {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-select {
+        padding: 12px 15px !important;
+        border: 2px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        font-size: 15px !important;
+        transition: all 0.3s ease !important;
+        background-color: #f8f9fa !important;
+    }
+
+    .form-select:focus {
+        border-color: #ff6b00 !important;
+        box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1) !important;
+        background-color: white !important;
+    }
+
+    /* Stats Cards */
+    .stats-cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 2px solid transparent;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(to right, #ff6b00, #ffa500);
+    }
+
+    .stats-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 15px 40px rgba(255, 107, 0, 0.2);
+        border-color: #ff6b00;
+    }
+
+    .stats-label {
+        font-size: 14px;
+        color: #999;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+    }
+
+    .stats-number {
+        font-size: 36px;
+        font-weight: 700;
+        color: #1e3a5f;
+        margin-bottom: 8px;
+        line-height: 1;
+    }
+
+    .stats-change {
+        font-size: 13px;
+        color: #7da019;
+        font-weight: 600;
+    }
+
+    .stats-change.negative {
+        color: #d32f2f;
+    }
+
+    /* Charts Section */
+    .charts-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 25px;
+        margin-bottom: 40px;
     }
 
     .chart-container {
         background: white;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        border: 1px solid #e0e0e0;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e8e8e8;
+        transition: all 0.3s ease;
     }
 
-    .stats-card {
-        background: linear-gradient(135deg, #95c11f 0%, #7da019 100%);
-        color: white;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        transition: transform 0.3s ease;
+    .chart-container:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
     }
 
-    .stats-card:hover {
-        transform: translateY(-5px);
+    .chart-container h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 20px;
     }
 
-    .stats-number {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
+    /* Table Section */
+    .table-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e8e8e8;
+        overflow: hidden;
     }
 
-    .stats-label {
-        font-size: 1rem;
-        opacity: 0.9;
-    }
-
-    .filter-section {
-        margin-bottom: 2rem;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 10px;
+    .table-section h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 20px;
     }
 
     .table-responsive {
-        background: white;
-        border-radius: 10px;
-        padding: 1rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: none;
+        box-shadow: none;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, #f8f9fa 0%, #f0f0f0 100%);
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .table thead th {
+        color: #1e3a5f;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+    }
+
+    .table tbody td {
+        padding: 15px;
+        border-bottom: 1px solid #f0f0f0;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .table tbody tr:hover {
+        background-color: #fafaf8;
+    }
+
+    .badge {
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        border-radius: 20px !important;
+    }
+
+    .bg-success {
+        background: linear-gradient(135deg, #7da019, #5c7512) !important;
+    }
+
+    .bg-warning {
+        background: linear-gradient(135deg, #ff9800, #f57c00) !important;
+    }
+
+    .bg-pending {
+        background: linear-gradient(135deg, #2196f3, #1976d2) !important;
+    }
+
+    /* Responsive - Tablets */
+    @media (max-width: 1024px) {
+        .analytics-dashboard {
+            padding: 40px 30px;
+        }
+
+        .charts-container {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .analytics-header h1 {
+            font-size: 40px;
+        }
+
+        .analytics-header p {
+            font-size: 16px;
+        }
+
+        .stats-cards-container {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .stats-card {
+            padding: 25px 20px;
+        }
+
+        .stats-number {
+            font-size: 32px;
+        }
+
+        .stats-label {
+            font-size: 12px;
+        }
+
+        .chart-container {
+            padding: 25px 20px;
+        }
+
+        .table-section {
+            padding: 25px 20px;
+        }
+    }
+
+    /* Responsive - Medium Devices (768px) */
+    @media (max-width: 768px) {
+        .analytics-dashboard {
+            padding: 30px 16px;
+        }
+
+        .analytics-header {
+            margin-bottom: 40px;
+        }
+
+        .analytics-header h1 {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .analytics-header p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .filter-section {
+            padding: 20px 16px;
+            margin-bottom: 30px;
+        }
+
+        .filter-section .row {
+            gap: 12px;
+        }
+
+        .filter-section .col-md-3 {
+            width: 100%;
+        }
+
+        .form-label {
+            font-size: 12px !important;
+            margin-bottom: 6px !important;
+        }
+
+        .form-select {
+            padding: 10px 12px !important;
+            font-size: 13px !important;
+            border-radius: 6px !important;
+        }
+
+        .stats-cards-container {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stats-card {
+            padding: 20px 16px;
+            border-radius: 12px;
+        }
+
+        .stats-number {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .stats-label {
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+
+        .stats-change {
+            font-size: 12px;
+        }
+
+        .charts-container {
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            padding: 20px 16px;
+            border-radius: 12px;
+        }
+
+        .chart-container h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .chart-container canvas {
+            max-height: 300px;
+        }
+
+        .table-section {
+            padding: 20px 16px;
+            border-radius: 12px;
+        }
+
+        .table-section h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .table thead th {
+            padding: 12px 8px;
+            font-size: 11px;
+            letter-spacing: 0px;
+        }
+
+        .table tbody td {
+            padding: 12px 8px;
+            font-size: 12px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table {
+            min-width: 100%;
+            width: 100%;
+        }
+
+        .badge {
+            padding: 4px 8px !important;
+            font-size: 10px !important;
+        }
+    }
+
+    /* Responsive - Small Devices (480px) */
+    @media (max-width: 480px) {
+        .analytics-dashboard {
+            padding: 20px 12px;
+        }
+
+        .analytics-header {
+            margin-bottom: 30px;
+        }
+
+        .analytics-header h1 {
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        .analytics-header p {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .filter-section {
+            padding: 16px 12px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+        }
+
+        .filter-section .row {
+            gap: 10px;
+        }
+
+        .filter-section .col-md-3 {
+            width: 100%;
+        }
+
+        .form-label {
+            font-size: 11px !important;
+            margin-bottom: 5px !important;
+        }
+
+        .form-select {
+            padding: 9px 10px !important;
+            font-size: 12px !important;
+            border-radius: 6px !important;
+        }
+
+        .stats-cards-container {
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .stats-card {
+            padding: 16px 12px;
+            border-radius: 10px;
+        }
+
+        .stats-card::before {
+            height: 3px;
+        }
+
+        .stats-number {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .stats-label {
+            font-size: 10px;
+            margin-bottom: 8px;
+        }
+
+        .stats-change {
+            font-size: 11px;
+        }
+
+        .charts-container {
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .chart-container {
+            padding: 16px 12px;
+            border-radius: 10px;
+        }
+
+        .chart-container h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .chart-container canvas {
+            max-height: 250px;
+        }
+
+        .table-section {
+            padding: 16px 12px;
+            border-radius: 10px;
+        }
+
+        .table-section h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+        }
+
+        .table {
+            width: 100%;
+            min-width: 500px;
+            margin-bottom: 0;
+        }
+
+        .table thead {
+            background: #f5f5f5;
+        }
+
+        .table thead th {
+            padding: 10px 6px;
+            font-size: 10px;
+            letter-spacing: 0px;
+            font-weight: 600;
+        }
+
+        .table tbody td {
+            padding: 10px 6px;
+            font-size: 11px;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .badge {
+            padding: 3px 6px !important;
+            font-size: 9px !important;
+            border-radius: 12px !important;
+        }
+    }
+
+    /* Extra Small Devices (320px) */
+    @media (max-width: 360px) {
+        .analytics-dashboard {
+            padding: 16px 10px;
+        }
+
+        .analytics-header h1 {
+            font-size: 22px;
+        }
+
+        .analytics-header p {
+            font-size: 12px;
+        }
+
+        .filter-section {
+            padding: 14px 10px;
+            margin-bottom: 20px;
+        }
+
+        .stats-card {
+            padding: 14px 10px;
+        }
+
+        .stats-number {
+            font-size: 20px;
+        }
+
+        .stats-label {
+            font-size: 9px;
+        }
+
+        .stats-change {
+            font-size: 10px;
+        }
+
+        .chart-container {
+            padding: 14px 10px;
+        }
+
+        .chart-container h3 {
+            font-size: 13px;
+        }
+
+        .chart-container canvas {
+            max-height: 220px;
+        }
+
+        .table-section {
+            padding: 14px 10px;
+        }
+
+        .table-section h3 {
+            font-size: 13px;
+        }
+
+        .table thead th {
+            padding: 8px 4px;
+            font-size: 9px;
+        }
+
+        .table tbody td {
+            padding: 8px 4px;
+            font-size: 10px;
+        }
+
+        .badge {
+            padding: 2px 4px !important;
+            font-size: 8px !important;
+        }
     }
 </style>
 <!-- Chart.js CDN -->
@@ -69,23 +625,30 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid analytics-dashboard">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2 class="text-center mb-4">
-                {% if current_language == 'en' %}
-                    Sales Analytics Dashboard
-                {% elif current_language == 'ar' %}
-                    لوحة تحليلات المبيعات
-                {% endif %}
-            </h2>
-        </div>
+<div class="analytics-dashboard">
+    <!-- Header -->
+    <div class="analytics-header">
+        <h1>
+            {% if current_language == 'en' %}
+                Sales Analytics Dashboard
+            {% elif current_language == 'ar' %}
+                لوحة تحليلات المبيعات
+            {% endif %}
+        </h1>
+        <p>
+            {% if current_language == 'en' %}
+                Track your sales performance and revenue growth in real-time
+            {% elif current_language == 'ar' %}
+                تتبع أداء المبيعات والإيرادات الخاصة بك في الوقت الفعلي
+            {% endif %}
+        </p>
     </div>
 
     <!-- Filter Section -->
     <div class="filter-section">
         <div class="row">
             <div class="col-md-3">
+                <label class="form-label" style="font-weight: 600; color: #1e3a5f; margin-bottom: 8px; display: block;">Time Range</label>
                 <select class="form-select" id="timeRange">
                     <option value="7">Last 7 days</option>
                     <option value="30">Last 30 days</option>
@@ -94,6 +657,7 @@
                 </select>
             </div>
             <div class="col-md-3">
+                <label class="form-label" style="font-weight: 600; color: #1e3a5f; margin-bottom: 8px; display: block;">Package Type</label>
                 <select class="form-select" id="packageType">
                     <option value="all">All Packages</option>
                     <option value="basic">Basic</option>
@@ -105,145 +669,215 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">{{ total_sales }}</div>
-                <div class="stats-label">Total Sales</div>
-            </div>
+    <div class="stats-cards-container">
+        <div class="stats-card">
+            <div class="stats-label">Total Sales</div>
+            <div class="stats-number">{{ total_sales }}</div>
+            <div class="stats-change">↑ 12% from last month</div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">{{ revenue }}</div>
-                <div class="stats-label">Total Revenue</div>
-            </div>
+        <div class="stats-card">
+            <div class="stats-label">Total Revenue</div>
+            <div class="stats-number">{{ revenue }}</div>
+            <div class="stats-change">↑ 8% from last month</div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">{{ avg_sale }}</div>
-                <div class="stats-label">Average Sale Value</div>
-            </div>
+        <div class="stats-card">
+            <div class="stats-label">Average Sale Value</div>
+            <div class="stats-number">{{ avg_sale }}</div>
+            <div class="stats-change negative">↓ 3% from last month</div>
         </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">{{ conversion_rate }}%</div>
-                <div class="stats-label">Conversion Rate</div>
-            </div>
+        <div class="stats-card">
+            <div class="stats-label">Conversion Rate</div>
+            <div class="stats-number">{{ conversion_rate }}%</div>
+            <div class="stats-change">↑ 5% from last month</div>
         </div>
     </div>
 
     <!-- Charts -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="chart-container">
-                <canvas id="salesTrendChart"></canvas>
-            </div>
+    <div class="charts-container">
+        <div class="chart-container">
+            <h3>Sales Trend</h3>
+            <canvas id="salesTrendChart"></canvas>
         </div>
-        <div class="col-md-4">
-            <div class="chart-container">
-                <canvas id="packageDistributionChart"></canvas>
-            </div>
+        <div class="chart-container">
+            <h3>Package Distribution</h3>
+            <canvas id="packageDistributionChart"></canvas>
         </div>
     </div>
 
     <!-- Sales Table -->
-    <div class="row">
-        <div class="col-12">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Package</th>
-                            <th>Customer</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for sale in sales %}
-                        <tr>
-                            <td>{{ sale.date }}</td>
-                            <td>{{ sale.package }}</td>
-                            <td>{{ sale.customer }}</td>
-                            <td>{{ sale.amount }}</td>
-                            <td>
-                                <span class="badge {% if sale.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
-                                    {{ sale.status }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <div class="table-section">
+        <h3>Recent Sales</h3>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Package</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td>{{ sale.date }}</td>
+                        <td>{{ sale.package }}</td>
+                        <td>{{ sale.customer }}</td>
+                        <td>{{ sale.amount }}</td>
+                        <td>
+                            <span class="badge {% if sale.status == 'completed' %}bg-success{% elif sale.status == 'pending' %}bg-pending{% else %}bg-warning{% endif %}">
+                                {{ sale.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
-// Sales Trend Chart
-const salesTrendCtx = document.getElementById('salesTrendChart').getContext('2d');
-new Chart(salesTrendCtx, {
-    type: 'line',
-    data: {
-        labels: {{ dates|safe }},
-        datasets: [{
-            label: 'Sales',
-            data: {{ sales_data|safe }},
-            borderColor: '#95c11f',
-            tension: 0.1
-        }]
-    },
-    options: {
+// Initialize charts with modern styling
+function initCharts() {
+    // Detect if device is mobile
+    const isMobile = window.innerWidth <= 768;
+    const isSmall = window.innerWidth <= 480;
+    
+    const chartOptions = {
         responsive: true,
+        maintainAspectRatio: true,
         plugins: {
-            title: {
-                display: true,
-                text: 'Sales Trend'
+            legend: {
+                display: !isSmall,
+                labels: {
+                    font: { size: isMobile ? 10 : 12, weight: 600 },
+                    color: '#666',
+                    padding: isMobile ? 10 : 15,
+                    usePointStyle: true
+                }
             }
         }
-    }
-});
+    };
 
-// Package Distribution Chart
-const packageDistCtx = document.getElementById('packageDistributionChart').getContext('2d');
-new Chart(packageDistCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Basic', 'Premium', 'VIP'],
-        datasets: [{
-            data: {{ package_distribution|safe }},
-            backgroundColor: ['#95c11f', '#7da019', '#5c7512']
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            title: {
-                display: true,
-                text: 'Package Distribution'
+    // Sales Trend Chart
+    const salesTrendCtx = document.getElementById('salesTrendChart').getContext('2d');
+    new Chart(salesTrendCtx, {
+        type: 'line',
+        data: {
+            labels: {{ dates|safe }},
+            datasets: [{
+                label: 'Sales',
+                data: {{ sales_data|safe }},
+                borderColor: '#ff6b00',
+                backgroundColor: 'rgba(255, 107, 0, 0.05)',
+                borderWidth: isMobile ? 2 : 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#ff6b00',
+                pointBorderColor: 'white',
+                pointBorderWidth: isMobile ? 1 : 2,
+                pointRadius: isMobile ? 3 : 5,
+                pointHoverRadius: isMobile ? 5 : 7,
+                segment: {
+                    borderColor: ctx => ctx.p1DataIndex ? '#ff6b00' : '#ff6b00'
+                }
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { 
+                        font: { size: isMobile ? 10 : 12 }, 
+                        color: '#999',
+                        callback: isMobile ? function(value) {
+                            if (value >= 1000) return (value/1000).toFixed(0) + 'k';
+                            return value;
+                        } : undefined
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { 
+                        font: { size: isMobile ? 9 : 12 }, 
+                        color: '#999',
+                        maxRotation: isMobile ? 45 : 0,
+                        minRotation: isMobile ? 45 : 0
+                    }
+                }
             }
         }
-    }
+    });
+
+    // Package Distribution Chart
+    const packageDistCtx = document.getElementById('packageDistributionChart').getContext('2d');
+    new Chart(packageDistCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Basic', 'Premium', 'VIP'],
+            datasets: [{
+                data: {{ package_distribution|safe }},
+                backgroundColor: [
+                    'rgba(255, 107, 0, 0.8)',
+                    'rgba(255, 107, 0, 0.6)',
+                    'rgba(255, 107, 0, 0.4)'
+                ],
+                borderColor: 'white',
+                borderWidth: isMobile ? 2 : 3
+            }]
+        },
+        options: {
+            ...chartOptions,
+            plugins: {
+                ...chartOptions.plugins,
+                tooltip: {
+                    backgroundColor: 'rgba(30, 58, 95, 0.8)',
+                    padding: isMobile ? 8 : 12,
+                    titleFont: { size: isMobile ? 12 : 14, weight: 600 },
+                    bodyFont: { size: isMobile ? 10 : 12 }
+                }
+            }
+        }
+    });
+}
+
+// Initialize charts when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCharts);
+} else {
+    initCharts();
+}
+
+// Re-initialize charts on window resize
+let resizeTimer;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+        // Optionally reinitialize charts on resize
+        // location.reload(); // Uncomment if needed
+    }, 250);
 });
 
 // Event listeners for filters
-document.getElementById('timeRange').addEventListener('change', updateCharts);
-document.getElementById('packageType').addEventListener('change', updateCharts);
+document.getElementById('timeRange')?.addEventListener('change', updateCharts);
+document.getElementById('packageType')?.addEventListener('change', updateCharts);
 
 function updateCharts() {
-    // Add AJAX call to update charts based on filters
-    const timeRange = document.getElementById('timeRange').value;
-    const packageType = document.getElementById('packageType').value;
+    const timeRange = document.getElementById('timeRange')?.value || '7';
+    const packageType = document.getElementById('packageType')?.value || 'all';
     
     fetch(`/admin/sales-data?timeRange=${timeRange}&packageType=${packageType}`)
         .then(response => response.json())
         .then(data => {
             // Update charts with new data
-            updateSalesTrendChart(data.salesTrend);
-            updatePackageDistChart(data.packageDist);
-        });
+            // Note: You may need to destroy and recreate charts here
+            location.reload(); // For now, reload the page
+        })
+        .catch(error => console.error('Error updating charts:', error));
 }
 </script>
 {% endblock %}

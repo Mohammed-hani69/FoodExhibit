@@ -2,6 +2,14 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --primary-color: #ff6b00;
+        --primary-dark: #e55f00;
+        --text-primary: #1e3a5f;
+        --text-secondary: #596475;
+        --bg-light: #e8f1f5;
+    }
+
     .edit-profile-section {
         min-height: 100vh;
         padding: 40px 0;
@@ -9,7 +17,7 @@
     }
 
     .edit-profile-title {
-        color: #95c11f;
+        color: var(--primary-color);
         font-size: 2rem;
         font-weight: bold;
         margin-bottom: 30px;
@@ -24,7 +32,7 @@
     }
 
     .form-label {
-        color: #555;
+        color: var(--text-primary);
         font-weight: 500;
         margin-bottom: 8px;
     }
@@ -37,8 +45,8 @@
     }
 
     .form-control:focus {
-        border-color: #95c11f;
-        box-shadow: 0 0 0 0.2rem rgba(149, 193, 31, 0.25);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.25);
     }
 
     .image-preview {
@@ -50,7 +58,7 @@
     }
 
     .submit-btn {
-        background-color: #95c11f;
+        background-color: var(--primary-color);
         border: none;
         padding: 12px 30px;
         border-radius: 25px;
@@ -60,8 +68,9 @@
     }
 
     .submit-btn:hover {
-        background-color: #7a9f19;
+        background-color: var(--primary-dark);
         transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
     }
 
     .file-upload {
@@ -185,7 +194,7 @@
                                 Salle Actuelle
                             {% endif %}
                         </label>
-                        <input type="text" class="form-control" value="{{ exhibitor.hall.replace('hall', 'القاعة ') if exhibitor.hall else 'غير محدد' }}" readonly disabled>
+                        <input type="text" class="form-control" value="{{ exhibitor.gallery_hall.replace('hall', 'القاعة ') if exhibitor.gallery_hall else 'غير محدد' }}" readonly disabled>
                     </div>
 
                     <div class="mb-4">

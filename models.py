@@ -4,10 +4,23 @@ from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 from flask_login import UserMixin
 from sqlalchemy import UniqueConstraint
 
+# Partner model for sponsors/partners display on landing page
+class Partner(db.Model):
+    __tablename__ = 'partners'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    image_path = db.Column(db.String(255), nullable=False)
+    website_url = db.Column(db.String(255), nullable=True)
+    display_order = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
 class Video(db.Model):
     __tablename__ = 'videos'
     id = db.Column(db.Integer, primary_key=True)
-    exhibitor_id = db.Column(db.Integer, db.ForeignKey('exhibitors.id'), nullable=False)
+    exhibitor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     video_url = db.Column(db.String)
@@ -15,8 +28,8 @@ class Video(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    # Add relationship to exhibitor
-    exhibitor = db.relationship('Exhibitor', backref=db.backref('videos', lazy=True))
+    # Add relationship to exhibitor (User with role='exhibitor')
+    exhibitor = db.relationship('User', backref=db.backref('videos', lazy=True))
 
 # Package model for subscription packages
 class Package(db.Model):
@@ -59,6 +72,20 @@ class User(UserMixin, db.Model):
     package_id = db.Column(db.Integer, db.ForeignKey('packages.id'), nullable=True)  # Made nullable, will be validated in registration
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     
+    # Exhibitor additional fields
+    description = db.Column(db.Text, nullable=True)  # وصف الشركة - Company description
+    logo_url = db.Column(db.String(255), nullable=True)  # رابط اللوجو - Logo URL
+    banner_url = db.Column(db.String(255), nullable=True)  # رابط البنر - Banner URL
+    video_url = db.Column(db.String(255), nullable=True)  # رابط الفيديو - Video URL
+    gallery_hall = db.Column(db.String(50), nullable=True)  # القاعة (hall1, hall2, hall3) - Gallery hall assignment
+    position_x = db.Column(db.Float, default=0.0, nullable=True)  # الموضع X ثلاثي الأبعاد - 3D position X
+    position_y = db.Column(db.Float, default=0.0, nullable=True)  # الموضع Y ثلاثي الأبعاد - 3D position Y
+    position_z = db.Column(db.Float, default=0.0, nullable=True)  # الموضع Z ثلاثي الأبعاد - 3D position Z
+    ranking = db.Column(db.Integer, default=0, nullable=True)  # الترتيب في المعرض - Ranking in exhibition
+    website = db.Column(db.String(255), nullable=True)  # موقع الويب - Website URL
+    contact_email = db.Column(db.String(120), nullable=True)  # البريد الإلكتروني للاتصال - Contact email
+    contact_phone = db.Column(db.String(20), nullable=True)  # رقم الهاتف للاتصال - Contact phone
+    
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     
@@ -72,7 +99,7 @@ class User(UserMixin, db.Model):
 class AvailableSlot(db.Model):
     __tablename__ = 'available_slot'
     id = db.Column(db.Integer, primary_key=True)
-    exhibitor_id = db.Column(db.Integer, db.ForeignKey('exhibitors.id'), nullable=False)
+    exhibitor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
     duration_minutes = db.Column(db.Integer, default=30)
@@ -80,14 +107,14 @@ class AvailableSlot(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     
     # Relationship
-    exhibitor = db.relationship('Exhibitor', backref='available_slots')
+    exhibitor = db.relationship('User', backref='available_slots')
 
 # Appointment model for meetings between users and exhibitors
 class Appointment(db.Model):
     __tablename__ = 'appointment'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    exhibitor_id = db.Column(db.Integer, db.ForeignKey('exhibitors.id'), nullable=False)
+    exhibitor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     slot_id = db.Column(db.Integer, db.ForeignKey('available_slot.id'), nullable=False)
     appointment_date = db.Column(db.DateTime, nullable=False)
     duration_minutes = db.Column(db.Integer, default=30)
@@ -96,9 +123,9 @@ class Appointment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     
     # Relationships
-    exhibitor = db.relationship('Exhibitor', backref='exhibitor_appointments')
-    user = db.relationship('User', backref='user_appointments')
-    slot = db.relationship('AvailableSlot', backref='slot_appointments')
+    exhibitor = db.relationship('User', foreign_keys=[exhibitor_id], backref='exhibitor_appointments')
+    user = db.relationship('User', foreign_keys=[user_id], backref='user_appointments')
+    slot = db.relationship('AvailableSlot', backref='appointments')
 
 # Chat Message model
 class ChatMessage(db.Model):
@@ -106,17 +133,18 @@ class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     receiver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    chat_room = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text, nullable=False)  # Standardized field name for message content
     timestamp = db.Column(db.DateTime, default=datetime.now)
     is_read = db.Column(db.Boolean, default=False)
-    is_from_exhibitor = db.Column(db.Boolean, default=False)
-    exhibitor_id = db.Column(db.Integer, db.ForeignKey('exhibitors.id'), nullable=True)
     
     # Relationships
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
     receiver = db.relationship('User', foreign_keys=[receiver_id], backref='received_messages')
-    exhibitor = db.relationship('Exhibitor', backref='chat_messages')
+    
+    @property
+    def chat_room(self):
+        """Generate consistent chat room identifier from sender and receiver IDs"""
+        return f"chat_{min(self.sender_id, self.receiver_id)}_{max(self.sender_id, self.receiver_id)}"
 
 # Order model for tracking sales
 class Order(db.Model):
@@ -172,7 +200,9 @@ class AvailabilitySchedule(db.Model):
         slots = []
         current_time = self.start_time
         while current_time <= self.end_time:
-            slot_end = datetime.combine(date, current_time).replace(minute=current_time.minute + self.session_duration).time()
+            current_datetime = datetime.combine(date, current_time)
+            slot_end_datetime = current_datetime + timedelta(minutes=self.session_duration)
+            slot_end = slot_end_datetime.time()
             if slot_end <= self.end_time:
                 slots.append({
                     'start': current_time,
@@ -220,39 +250,12 @@ class Banner(db.Model):
 
 
 # Exhibitor model
-class Exhibitor(db.Model):
-    __tablename__ = 'exhibitors'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    company_name = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text)
-    logo_url = db.Column(db.String)
-    banner_url = db.Column(db.String)
-    video_url = db.Column(db.String(255))  # URL to the exhibitor's video
-    gallery_hall = db.Column(db.String, default='hall1')  # hall1, hall2, etc.
-    position_x = db.Column(db.Float, default=0.0)  # 3D position
-    position_y = db.Column(db.Float, default=0.0)
-    position_z = db.Column(db.Float, default=0.0)
-    ranking = db.Column(db.Integer, default=1)  # For positioning in gallery
-    website = db.Column(db.String)
-    contact_email = db.Column(db.String)
-    contact_phone = db.Column(db.String)
-    country = db.Column(db.String(100))
-    is_active = db.Column(db.Boolean, default=True)
-    
-    created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-    
-    # Relationships
-    user = db.relationship('User', backref='exhibitor_profile')
-    products = db.relationship('Product', back_populates='exhibitor', lazy=True, cascade='all, delete-orphan')
-    analytics = db.relationship('ExhibitorAnalytics', backref='exhibitor', lazy=True, cascade='all, delete-orphan')
 
 # Product model
 class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
-    exhibitor_id = db.Column(db.Integer, db.ForeignKey('exhibitors.id'), nullable=False)
+    exhibitor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     price = db.Column(db.Float)
@@ -267,22 +270,15 @@ class Product(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    # Add relationship to get user through exhibitor
-    exhibitor = db.relationship('Exhibitor', back_populates='products')
-    user = db.relationship('User', 
-                          secondary='exhibitors',
-                          primaryjoin='Product.exhibitor_id == Exhibitor.id',
-                          secondaryjoin='Exhibitor.user_id == User.id',
-                          uselist=False,
-                          viewonly=True,
-                          backref=db.backref('exhibitor_products', lazy='dynamic'))
+    # Relationship to exhibitor (User with role='exhibitor')
+    exhibitor = db.relationship('User', backref=db.backref('products', lazy=True))
 
 # Favorite Exhibitors
 class FavoriteExhibitor(db.Model):
     __tablename__ = 'favorite_exhibitors'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    exhibitor_id = db.Column(db.Integer, db.ForeignKey('exhibitors.id'), nullable=False)
+    exhibitor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
     
     __table_args__ = (UniqueConstraint('user_id', 'exhibitor_id', name='uq_user_exhibitor'),)
@@ -304,7 +300,7 @@ class FavoriteProduct(db.Model):
 class ExhibitorAnalytics(db.Model):
     __tablename__ = 'exhibitor_analytics'
     id = db.Column(db.Integer, primary_key=True)
-    exhibitor_id = db.Column(db.Integer, db.ForeignKey('exhibitors.id'), nullable=False)
+    exhibitor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Visitor
     action_type = db.Column(db.String(50))  # visit, favorite, appointment, chat
     page_visited = db.Column(db.String(100))  # profile, product, gallery
@@ -313,7 +309,8 @@ class ExhibitorAnalytics(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     
     # Relationships
-    visitor = db.relationship('User', backref='analytics_actions')
+    exhibitor = db.relationship('User', foreign_keys=[exhibitor_id], backref='exhibitor_analytics')
+    visitor = db.relationship('User', foreign_keys=[user_id], backref='analytics_actions')
     product = db.relationship('Product', backref='analytics')
 
 # Booking model for appointments
@@ -340,7 +337,7 @@ class Booking(db.Model):
 class ExhibitorBanner(db.Model):
     __tablename__ = 'exhibitor_banners'
     id = db.Column(db.Integer, primary_key=True)
-    exhibitor_id = db.Column(db.Integer, db.ForeignKey('exhibitors.id'), nullable=False)
+    exhibitor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     image_path = db.Column(db.String(255), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
@@ -349,7 +346,7 @@ class ExhibitorBanner(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Relationship
-    exhibitor = db.relationship('Exhibitor', backref=db.backref('banners', lazy=True))
+    exhibitor = db.relationship('User', backref=db.backref('banners', lazy=True))
 
 # Gallery Advertisements
 class GalleryAd(db.Model):

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة الرعاة{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>إدارة الرعاة والشركاء</h1>
+        <a href="{{ url_for('admin.add_partner') }}" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>إضافة راعي جديد
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{% if category == 'error' %}danger{% else %}{{ category }}{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if partners %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>الصورة</th>
+                    <th>الاسم</th>
+                    <th>الوصف</th>
+                    <th>الترتيب</th>
+                    <th>الحالة</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for partner in partners %}
+                <tr>
+                    <td>
+                        {% if partner.image_path %}
+                        <img src="{{ partner.image_path }}" alt="{{ partner.name }}" style="height: 50px; width: auto; object-fit: contain;">
+                        {% else %}
+                        <span class="text-muted">بدون صورة</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ partner.name }}</td>
+                    <td>
+                        {% if partner.description %}
+                            {{ partner.description[:50] }}{% if partner.description|length > 50 %}...{% endif %}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ partner.display_order }}</td>
+                    <td>
+                        <span class="badge {% if partner.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ 'نشط' if partner.is_active else 'غير نشط' }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('admin.edit_partner', partner_id=partner.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deletePartner{{ partner.id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deletePartner{{ partner.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">تأكيد الحذف</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                هل أنت متأكد من حذف الراعي "{{ partner.name }}"؟
+                            </div>
+                            <div class="modal-footer">
+                                <form action="{{ url_for('admin.delete_partner', partner_id=partner.id) }}" method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                                    <button type="submit" class="btn btn-danger">حذف</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        لا يوجد رعاة حالياً. قم بإضافة راعي جديد.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

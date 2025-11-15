@@ -5,487 +5,1182 @@
 {% block extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 <style>
+    :root {
+        --primary-color: #ff6b00;
+        --primary-dark: #e55f00;
+        --primary-light: #ff8533;
+        --text-primary: #1e3a5f;
+        --text-secondary: #596475;
+        --bg-light: #f8f9fc;
+        --border-color: #e1e8ed;
+        --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+        --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+        --shadow-lg: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    body {
+        background-color: var(--bg-light);
+    }
+
+    /* Hero Banner Section */
+    .exhibitor-hero {
+        position: relative;
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+
+    .hero-carousel {
+        position: relative;
+        height: 750px;
+    }
+
+    .carousel-item {
+        height: 500px;
+    }
+
     .exhibitor-banner {
-        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/static/images/exhibitors/Gemini_Generated_Image_gnuf9gnuf9gnuf9g.png');
-        background-size: contain;
-        background-position: center center;
-        color: white;
-        padding: 80px 0;
-        margin-bottom: 80px;
-        min-height: 800px;
+        background-size: cover;
+        background-position: center;
+        height: 100%;
         display: flex;
         align-items: center;
         position: relative;
     }
-    
+
+    .exhibitor-banner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        color: white;
+        text-align: center;
+    }
+
+    .hero-content h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        margin-bottom: 1rem;
+    }
+
+    .hero-content .lead {
+        font-size: 1.3rem;
+        opacity: 0.95;
+        text-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    }
+
+    /* Company Info Card */
+    .company-info-wrapper {
+        margin-top: -80px;
+        position: relative;
+        z-index: 10;
+        padding: 0 15px;
+    }
+
+    .company-info-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        border: none;
+        overflow: hidden;
+    }
+
+    .company-header {
+        padding: 40px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .company-logo-section {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .exhibitor-logo-container {
+        flex-shrink: 0;
+    }
+
     .exhibitor-logo {
-        width: 160px;
-        height: 160px;
+        width: 140px;
+        height: 140px;
         border-radius: 50%;
         object-fit: cover;
-        border: 6px solid white;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        background-color: white;
-        
+        border: 5px solid white;
+        box-shadow: var(--shadow-md);
+        background: white;
     }
 
-    .shadow {
-        box-shadow: 0 0 30px rgba(0,0,0,0.1) !important;
+    .company-title {
+        flex: 1;
     }
 
-    .text-primary {
-        color: #667eea !important;
+    .company-title h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
     }
 
-    .btn-outline-primary {
-        color: #667eea;
-        border-color: #667eea;
+    .company-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
     }
 
-    .btn-outline-primary:hover {
-        background-color: #667eea;
-        border-color: #667eea;
+    .company-tags {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .tag-badge {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    /* Stats Section */
+    .stats-section {
+        padding: 30px 40px;
+        background: white;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 20px 10px;
+        position: relative;
+    }
+
+    .stat-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 60px;
+        width: 1px;
+        background: var(--border-color);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #fff3e6, #ffe8cc);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+    }
+
+    .stat-icon i {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        padding: 30px 40px;
+        background: var(--bg-light);
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .btn-action {
+        padding: 12px 30px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: none;
+    }
+
+    .btn-favorite {
+        background: white;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .btn-favorite:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-favorite.favorited {
+        background: var(--primary-color);
         color: white;
     }
 
-    .favorite-btn.favorited {
-        background-color: #667eea !important;
-        border-color: #667eea !important;
-        color: white !important;
+    .btn-chat {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
     }
-    
+
+    .btn-chat:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-booking {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .btn-booking:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Main Content Layout */
+    .content-wrapper {
+        padding: 40px 0;
+    }
+
+    /* Section Cards */
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        margin-bottom: 30px;
+        overflow: hidden;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .section-card:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+    .section-header {
+        padding: 25px 30px;
+        background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .section-header h4 {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .section-header i {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+    }
+
+    .section-body {
+        padding: 30px;
+    }
+
+    /* Product Cards */
     .product-card {
-        transition: transform 0.3s ease;
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        height: 100%;
         cursor: pointer;
     }
-    
+
     .product-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
     }
-    
+
+    .product-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        height: 280px;
+        background: var(--bg-light);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.1);
+    }
+
+    .product-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #333;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .product-card-body {
+        padding: 20px;
+    }
+
+    .product-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 15px;
+    }
+
+    .product-footer {
+        padding: 15px 20px;
+        background: var(--bg-light);
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Video Section */
+    .video-wrapper {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+
+    .video-player {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Sidebar */
+    .sidebar-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        margin-bottom: 25px;
+        overflow: hidden;
+        position: sticky;
+        top: 20px;
+    }
+
+    .sidebar-header {
+        padding: 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+    }
+
+    .sidebar-header h5 {
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .sidebar-body {
+        padding: 20px;
+    }
+
+    /* Schedule Items */
+    .schedule-item {
+        background: var(--bg-light);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .schedule-item:hover {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .schedule-day {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+    }
+
+    .schedule-time {
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .schedule-duration {
+        background: linear-gradient(135deg, #17a2b8, #20c997);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .btn-book-slot {
+        width: 100%;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-book-slot:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Chat Container */
     .chat-container {
         position: fixed;
         bottom: 20px;
         left: 20px;
-        width: 350px;
-        height: 500px;
+        width: 380px;
+        max-height: 600px;
         z-index: 1050;
         display: none;
+        box-shadow: var(--shadow-lg);
+        border-radius: 16px;
+        overflow: hidden;
     }
-    
+
     .chat-header {
-        background: linear-gradient(45deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #667eea, #764ba2);
         color: white;
-        padding: 15px;
-        border-radius: 10px 10px 0 0;
+        padding: 20px;
         cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    
+
     .chat-body {
         background: white;
-        height: 350px;
+        height: 400px;
         overflow-y: auto;
-        padding: 15px;
-        border: 1px solid #ddd;
+        padding: 20px;
     }
-    
-    .chat-footer {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 0 0 10px 10px;
-        border: 1px solid #ddd;
-        border-top: none;
-    }
-    
+
     .message {
         margin-bottom: 15px;
-        padding: 10px;
-        border-radius: 10px;
+        padding: 12px 16px;
+        border-radius: 12px;
         max-width: 80%;
+        animation: slideIn 0.3s ease;
     }
-    
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .message.user {
-        background: #667eea;
+        background: linear-gradient(135deg, #667eea, #764ba2);
         color: white;
         margin-left: auto;
+        border-bottom-right-radius: 4px;
     }
-    
+
     .message.exhibitor {
-        background: #e9ecef;
-        color: #333;
+        background: var(--bg-light);
+        color: var(--text-primary);
+        border-bottom-left-radius: 4px;
     }
-    
-    .calendar-container {
+
+    .chat-footer {
         background: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        padding: 15px;
+        border-top: 1px solid var(--border-color);
     }
-    
-    .favorite-btn.favorited {
-        background: #dc3545 !important;
-        border-color: #dc3545 !important;
-        color: white !important;
+
+    .chat-input-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .chat-input {
+        flex: 1;
+        border: 1px solid var(--border-color);
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-size: 0.95rem;
+    }
+
+    .btn-send {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-send:hover {
+        transform: scale(1.1);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #cbd5e0;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h5 {
+        color: var(--text-primary);
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+    }
+
+    /* Contact Info */
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .contact-item:last-child {
+        border-bottom: none;
+    }
+
+    .contact-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #fff3e6, #ffe8cc);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .contact-icon i {
+        color: var(--primary-color);
+    }
+
+    .contact-text {
+        color: var(--text-secondary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-content h1 {
+            font-size: 2rem;
+        }
+
+        .company-info-wrapper {
+            margin-top: -40px;
+        }
+
+        .company-header {
+            padding: 20px;
+        }
+
+        .company-logo-section {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .stats-section {
+            padding: 20px 15px;
+        }
+
+        .stat-item {
+            padding: 12px 8px;
+        }
+
+        /* إظهار الخطوط الفاصلة بين الأعمدة على الشاشات المتوسطة */
+        .stat-item:not(:last-child)::after {
+            display: block;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px;
+        }
+
+        .stat-icon i {
+            font-size: 1.2rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            margin-bottom: 3px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .chat-container {
+            width: calc(100% - 40px);
+            left: 20px;
+            right: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-carousel {
+            height: 300px;
+        }
+
+        .carousel-item {
+            height: 300px;
+        }
+
+        .hero-content h1 {
+            font-size: 1.5rem;
+        }
+
+        .hero-content .lead {
+            font-size: 1rem;
+        }
+
+        .company-info-wrapper {
+            margin-top: -30px;
+        }
+
+        .company-header {
+            padding: 15px;
+        }
+
+        .company-title h2 {
+            font-size: 1.5rem;
+        }
+
+        .company-subtitle {
+            font-size: 0.95rem;
+        }
+
+        .stats-section {
+            padding: 15px 10px;
+        }
+
+        .stat-item {
+            padding: 10px 6px;
+        }
+
+        /* إخفاء الخطوط الفاصلة على الموبايل - ستبقى الأعمدة بجنب بعضها */
+        .stat-item:not(:last-child)::after {
+            display: none;
+        }
+
+        .stat-icon {
+            width: 35px;
+            height: 35px;
+            margin: 0 auto 8px;
+        }
+
+        .stat-icon i {
+            font-size: 1rem;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+        }
+
+        .action-buttons {
+            padding: 15px 20px;
+            gap: 10px;
+        }
+
+        .btn-action {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+        }
+
+        .btn-action i {
+            display: none;
+        }
+
+        .chat-container {
+            width: calc(100% - 30px);
+            left: 15px;
+            right: 15px;
+            max-height: 400px;
+        }
+
+        .chat-body {
+            height: 250px;
+        }
+    }
+
+    /* Calendar Styles */
+    .calendar-container {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .fc {
+        direction: rtl;
+    }
+
+    .fc-button {
+        background: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+    }
+
+    .fc-button:hover {
+        background: var(--primary-dark) !important;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Exhibitor Banners Carousel -->
-<div id="exhibitorBannersCarousel" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-inner">
-        {% if banners %}
-            {% for banner in banners %}
-                <div class="carousel-item {% if loop.first %}active{% endif %}">
-                    <div class="exhibitor-banner" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ banner.image_path }}');">
+<!-- Hero Section -->
+<div class="exhibitor-hero">
+    <div id="exhibitorBannersCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel">
+        <div class="carousel-inner h-100">
+            {% if banners %}
+                {% for banner in banners %}
+                    <div class="carousel-item h-100 {% if loop.first %}active{% endif %}">
+                        <div class="exhibitor-banner" style="background-image: url('{{ banner.image_path }}');">
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="carousel-item h-100 active">
+                    <div class="exhibitor-banner">
                         <div class="container">
-                            <div class="text-center">
-                                <h1 class="display-4 fw-bold mb-3">{{ banner.title }}</h1>
-                                <h2 class="h3 mb-4">{{ exhibitor.company_name }}</h2>
-                                <p class="lead mb-4">{{ exhibitor.company_description if exhibitor.company_description else '' }}</p>
+                            <div class="hero-content">
+                                <h1>{{ exhibitor.company_name }}</h1>
+                                <p class="lead">{{ exhibitor.company_description if exhibitor.company_description else 'مرحباً بكم في صفحتنا' }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            {% endfor %}
-        {% else %}
-            <div class="carousel-item active">
-                <div class="exhibitor-banner">
-                    <div class="container">
-                        <div class="text-center">
-                            <h1 class="display-4 fw-bold mb-3">{{ exhibitor.company_name }}</h1>
-                            <p class="lead mb-4">{{ exhibitor.company_description if exhibitor.company_description else '' }}</p>
+            {% endif %}
+        </div>
+        {% if banners and banners|length > 1 %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#exhibitorBannersCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#exhibitorBannersCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Company Info Card -->
+<div class="company-info-wrapper">
+    <div class="container">
+        <div class="company-info-card">
+            <!-- Company Header -->
+            <div class="company-header">
+                <div class="company-logo-section">
+                    <div class="exhibitor-logo-container">
+                        {% if exhibitor.logo_url %}
+                            <img src="{{ exhibitor.logo_url }}" alt="{{ exhibitor.company_name }}" class="exhibitor-logo">
+                        {% else %}
+                            <div class="exhibitor-logo d-flex align-items-center justify-content-center" style="background: var(--bg-light);">
+                                <i class="fas fa-store fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="company-title">
+                        <h2>{{ exhibitor.company_name }}</h2>
+                        <p class="company-subtitle">{{ exhibitor.company_description if exhibitor.company_description else 'مرحباً بكم في صفحتنا' }}</p>
+                        <div class="company-tags">
+                            {% if exhibitor.specialization %}
+                                <span class="tag-badge">
+                                    <i class="fas fa-tag me-1"></i>{{ exhibitor.specialization.name }}
+                                </span>
+                            {% endif %}
+                            {% if exhibitor.gallery_hall %}
+                                <span class="tag-badge">
+                                    <i class="fas fa-building me-1"></i>{{ exhibitor.gallery_hall.replace('hall', 'القاعة ') }}
+                                </span>
+                            {% endif %}
+                            {% if exhibitor.country %}
+                                <span class="tag-badge">
+                                    <i class="fas fa-globe me-1"></i>{{ exhibitor.country }}
+                                </span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
-        {% endif %}
-    </div>
-    {% if banners and banners|length > 1 %}
-    <button class="carousel-control-prev" type="button" data-bs-target="#exhibitorBannersCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">السابق</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#exhibitorBannersCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">التالي</span>
-    </button>
-    {% endif %}
-</div>
 
-<!-- Exhibitor Info Card -->
-<div class="container" style="margin-top: -50px; padding-top:30px; padding-bottom:30px;">
-    <div class="card shadow">
-        <div class="card-body py-4">
-            <div class="row align-items-center">
-                <div class="col-md-3 text-center border-end">
-                    {% if exhibitor.logo_url %}
-                        <img src="{{ exhibitor.logo_url }}" alt="{{ exhibitor.company_name }}" class="exhibitor-logo mb-3">
-                    {% else %}
-                        <div class="exhibitor-logo mx-auto d-flex align-items-center justify-content-center mb-3" style="background: rgba(0,0,0,0.05);">
-                            <i class="fas fa-store fa-3x text-muted"></i>
-                        </div>
-                    {% endif %}
-                    <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }})" 
-                            class="btn btn-outline-primary btn-lg favorite-btn {{ 'favorited' if is_favorited }}" 
-                            id="favorite-btn">
-                        <i class="fas fa-heart fa-2x"></i>
-                        <div class="mt-2">{{ 'مُضاف للمفضلة' if is_favorited else 'إضافة للمفضلة' }}</div>
-                    </button>
-                </div>
-                <div class="col-md-9">
-                    <div class="row text-center">
-                        <div class="col-4 border-end">
-                            <div class="p-3">
-                                <h3 class="text-primary mb-2">{{ products|length }}</h3>
-                                <small class="text-muted">منتج</small>
+            <!-- Stats Section -->
+            <div class="stats-section">
+                <div class="row">
+                    <div class="col-6 col-sm-4">
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-box"></i>
                             </div>
+                            <div class="stat-value">{{ products|length }}</div>
+                            <div class="stat-label">منتج متاح</div>
                         </div>
-                        <div class="col-4 border-end">
-                            <div class="p-3">
-                                <h3 class="text-primary mb-2">{{ exhibitor.specialization.name if exhibitor.specialization else '-' }}</h3>
-                                <small class="text-muted">التخصص</small>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-video"></i>
                             </div>
+                            <div class="stat-value">{{ videos|length if videos else 0 }}</div>
+                            <div class="stat-label">فيديو</div>
                         </div>
-                        <div class="col-4">
-                            <div class="p-3">
-                                <h3 class="text-primary mb-2">{{ exhibitor.hall.replace('hall', '') if exhibitor.hall else '-' }}</h3>
-                                <small class="text-muted">القاعة</small>
+                    </div>
+                    <div class="col-6 col-sm-4">
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-check"></i>
                             </div>
+                            <div class="stat-value">{{ available_slots|length if available_slots else 0 }}</div>
+                            <div class="stat-label">موعد متاح</div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button onclick="toggleFavoriteExhibitor({{ exhibitor.id }})" 
+                        class="btn btn-action btn-favorite {{ 'favorited' if is_favorited }}" 
+                        id="favorite-btn">
+                    <i class="fas fa-heart"></i>
+                    <span>{{ 'مُضاف للمفضلة' if is_favorited else 'إضافة للمفضلة' }}</span>
+                </button>
+                <button onclick="openChat()" class="btn btn-action btn-chat">
+                    <i class="fas fa-comments"></i>
+                    <span>بدء محادثة</span>
+                </button>
+                
             </div>
         </div>
     </div>
 </div>
 
-<div class="container">
-    <div class="row">
-        <!-- Left Column: Products & Info -->
-        <div class="col-lg-8">
-            <!-- Products Section -->
-                        </div>
-            
-
-            
-            <!-- Products Section -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4 class="mb-0">
-                        <i class="fas fa-box me-2"></i>منتجات العارض
-                    </h4>
-                </div>
-                <div class="card-body">
-                    {% if products %}
-                        <div class="row g-4">
-                            {% for product in products %}
-                            <div class="col-md-6">
-                                <div class="card product-card h-100" onclick="viewProduct({{ product.id }})">
-                                    {% if product.image_url %}
-                                        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 400px; object-fit: cover;">
-                                    {% else %}
-                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
-                                            <i class="fas fa-utensils fa-3x text-muted"></i>
-                                        </div>
-                                    {% endif %}
-                                    
-                                    <div class="card-body">
-                                                                                
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h5 class="card-title">{{ product.name }}</h5>
+<!-- Main Content -->
+<div class="content-wrapper">
+    <div class="container">
+        <div class="row">
+            <!-- Left Column: Products & Videos -->
+            <div class="col-lg-8">
+                <!-- Products Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h4><i class="fas fa-box"></i>منتجات العارض</h4>
+                    </div>
+                    <div class="section-body">
+                        {% if products %}
+                            <div class="row g-4">
+                                {% for product in products %}
+                                <div class="col-md-6">
+                                    <div class="product-card" onclick="viewProduct({{ product.id }})">
+                                        <div class="product-image-wrapper">
+                                            {% if product.image_url %}
+                                                <img src="{{ product.image_url }}" class="product-image" alt="{{ product.name }}">
+                                            {% else %}
+                                                <div class="product-image d-flex align-items-center justify-content-center">
+                                                    <i class="fas fa-utensils fa-4x text-muted"></i>
+                                                </div>
+                                            {% endif %}
                                             {% if product.is_featured %}
-                                                <span class="badge bg-warning">مميز</span>
+                                                <span class="product-badge">
+                                                    <i class="fas fa-star me-1"></i>مميز
+                                                </span>
                                             {% endif %}
                                         </div>
-                                    </div>
-                                    <div class="card-footer">
-                                        <button onclick="toggleFavoriteProduct({{ product.id }}); event.stopPropagation();" 
-                                                class="btn btn-outline-danger btn-sm">
-                                            <i class="fas fa-heart"></i> إضافة للمفضلة
-                                        </button>
+                                        <div class="product-card-body">
+                                            <h5 class="product-title">{{ product.name }}</h5>
+                                        </div>
+                                        <div class="product-footer">
+                                            <button onclick="toggleFavoriteProduct({{ product.id }}); event.stopPropagation();" 
+                                                    class="btn btn-outline-danger btn-sm w-100">
+                                                <i class="fas fa-heart me-2"></i>إضافة للمفضلة
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted text-center">لا يوجد منتجات متاحة حالياً.</p>
-                    {% endif %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-box-open"></i>
+                                <h5>لا يوجد منتجات متاحة</h5>
+                                <p>سيتم إضافة منتجات قريباً</p>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
 
-            <!-- Videos Section -->
-            <div class="card mb-4">
-                <div class="card-header bg-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-video me-2"></i>فيديوهات العارض
-                    </h4>
-                </div>
-                <div class="card-body">
-                    {% if videos %}
+                <!-- Videos Section -->
+                {% if videos %}
+                <div class="section-card">
+                    <div class="section-header">
+                        <h4><i class="fas fa-video"></i>فيديوهات العارض</h4>
+                    </div>
+                    <div class="section-body">
                         <div class="row g-4">
                             {% for video in videos %}
-                            <div class="col-md-12">
-                                <div class="card h-100 overflow-hidden">
-                                    <div class="ratio ratio-16x9 m-0">
-                                        <video autoplay loop muted playsinline class="w-100 h-100 object-fit-cover">
-                                            <source src="{{ video.video_url }}" type="video/mp4">
-                                            متصفحك لا يدعم تشغيل الفيديو.
-                                        </video>
-                                    </div>
+                            <div class="col-12">
+                                <div class="video-wrapper">
+                                    <video autoplay loop muted playsinline class="video-player">
+                                        <source src="{{ video.video_url }}" type="video/mp4">
+                                    </video>
                                 </div>
                             </div>
                             {% endfor %}
                         </div>
-                    {% else %}
-                        <p class="text-muted text-center">لا يوجد فيديوهات متاحة حالياً.</p>
-                    {% endif %}
+                    </div>
                 </div>
-            </div>
+                {% endif %}
 
-            <!-- Other Products Section -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4 class="mb-0">
-                        <i class="fas fa-box-open me-2"></i>منتجات أخرى
-                    </h4>
-                </div>
-                <div class="card-body">
-                    {% if other_products %}
+                <!-- Other Products -->
+                {% if other_products %}
+                <div class="section-card">
+                    <div class="section-header">
+                        <h4><i class="fas fa-box-open"></i>منتجات أخرى</h4>
+                    </div>
+                    <div class="section-body">
                         <div class="row g-4">
                             {% for product in other_products %}
                             <div class="col-md-6">
-                                <div class="card product-card h-100" onclick="viewProduct({{ product.id }})">
-                                    {% if product.image_url %}
-                                        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 400px; object-fit: cover;">
-                                    {% else %}
-                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
-                                            <i class="fas fa-utensils fa-3x text-muted"></i>
-                                        </div>
-                                    {% endif %}
-                                    
-                                    <div class="card-body">
-                                                                            
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h5 class="card-title">{{ product.name }}</h5>
-                                            {% if product.is_featured %}
-                                                <span class="badge bg-warning">مميز</span>
-                                            {% endif %}
-                                        </div>
+                                <div class="product-card" onclick="viewProduct({{ product.id }})">
+                                    <div class="product-image-wrapper">
+                                        {% if product.image_url %}
+                                            <img src="{{ product.image_url }}" class="product-image" alt="{{ product.name }}">
+                                        {% else %}
+                                            <div class="product-image d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-utensils fa-4x text-muted"></i>
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                    
-                                    <div class="card-footer">
+                                    <div class="product-card-body">
+                                        <h5 class="product-title">{{ product.name }}</h5>
+                                    </div>
+                                    <div class="product-footer">
                                         <button onclick="toggleFavoriteProduct({{ product.id }}); event.stopPropagation();" 
-                                                class="btn btn-outline-danger btn-sm">
-                                            <i class="fas fa-heart"></i> إضافة للمفضلة
+                                                class="btn btn-outline-danger btn-sm w-100">
+                                            <i class="fas fa-heart me-2"></i>إضافة للمفضلة
                                         </button>
                                     </div>
                                 </div>
                             </div>
                             {% endfor %}
                         </div>
-                    {% else %}
-                        <div class="text-center py-5">
-                            <i class="fas fa-box fa-4x text-muted mb-3"></i>
-                            <h5>لا توجد منتجات أخرى متاحة حالياً</h5>
-                            <p class="text-muted">سيتم إضافة المزيد من المنتجات قريباً</p>
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Company Information -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>معلومات الشركة
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>معلومات الاتصال</h6>
-                            <ul class="list-unstyled">
+                {% endif %}
+
+                <!-- Company Information -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h4><i class="fas fa-info-circle"></i>معلومات الشركة</h4>
+                    </div>
+                    <div class="section-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="mb-3 fw-bold">معلومات الاتصال</h6>
                                 {% if exhibitor.email %}
-                                <li><i class="fas fa-envelope me-2"></i>{{ exhibitor.email }}</li>
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="contact-text">{{ exhibitor.email }}</div>
+                                </div>
                                 {% endif %}
                                 {% if exhibitor.phone %}
-                                <li><i class="fas fa-phone me-2"></i>{{ exhibitor.phone }}</li>
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="fas fa-phone"></i>
+                                    </div>
+                                    <div class="contact-text">{{ exhibitor.phone }}</div>
+                                </div>
                                 {% endif %}
                                 {% if exhibitor.country %}
-                                <li><i class="fas fa-map-marker-alt me-2"></i>{{ exhibitor.country }}</li>
-                                {% endif %}
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>تفاصيل المعرض</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-building me-2"></i>{{ exhibitor.hall.replace('hall', 'القاعة ') if exhibitor.hall else 'لم يتم تحديد القاعة' }}</li>
-                                <li><i class="fas fa-tag me-2"></i>التخصص: {{ exhibitor.specialization.name if exhibitor.specialization else 'غير محدد' }}</li>
-                                <li><i class="fas fa-calendar me-2"></i>نشط منذ {{ exhibitor.created_at.strftime('%Y') if exhibitor.created_at else '-' }}</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Right Column: Chat & Booking -->
-        <div class="col-lg-4">
-            <!-- Quick Actions -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">إجراءات سريعة</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <button onclick="openChat()" class="btn btn-primary">
-                            <i class="fas fa-comments me-2"></i>بدء محادثة
-                        </button>
-                        <button onclick="showBookingCalendar()" class="btn btn-success">
-                            <i class="fas fa-calendar-plus me-2"></i>حجز موعد
-                        </button>
-                        <a href="{{ url_for('gallery_hall', hall=exhibitor.gallery_hall) }}" class="btn btn-outline-primary">
-                            <i class="fas fa-arrow-left me-2"></i>العودة للقاعة
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Appointment Booking Calendar -->
-            <div class="card calendar-container" id="booking-calendar" style="display: none;">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">حجز موعد</h5>
-                    <button onclick="hideBookingCalendar()" class="btn-close"></button>
-                </div>
-                <div class="card-body">
-                    <div id="calendar"></div>
-                    <div class="mt-3">
-                        <label for="appointment-notes" class="form-label">ملاحظات إضافية:</label>
-                        <textarea id="appointment-notes" class="form-control" rows="3" placeholder="اذكر أي متطلبات خاصة للموعد..."></textarea>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Available Slots -->
-            <div class="card" id="available-slots">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>المواعيد المتاحة</h5>
-                </div>
-                <div class="card-body">
-                    {% if schedules %}
-                        <div class="mb-4">
-                            <h6 class="mb-3">أيام العمل:</h6>
-                            {% for schedule in schedules %}
-                                <div class="schedule-item mb-3 p-3 border rounded">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div>
-                                            <strong>
-                                                {% set days = {0: 'الاثنين', 1: 'الثلاثاء', 2: 'الأربعاء', 3: 'الخميس', 4: 'الجمعة', 5: 'السبت', 6: 'الأحد'} %}
-                                                {{ days[schedule.day_of_week] }}
-                                            </strong>
-                                        </div>
-                                        <span class="badge bg-info">{{ schedule.session_duration }} دقيقة للجلسة</span>
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="fas fa-map-marker-alt"></i>
                                     </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="small text-muted">
-                                            من {{ schedule.start_time.strftime('%I:%M %p') }} إلى {{ schedule.end_time.strftime('%I:%M %p') }}
+                                    <div class="contact-text">{{ exhibitor.country }}</div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="mb-3 fw-bold">تفاصيل المعرض</h6>
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <div class="contact-text">{{ exhibitor.gallery_hall.replace('hall', 'القاعة ') if exhibitor.gallery_hall else 'لم يتم تحديد القاعة' }}</div>
+                                </div>
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="fas fa-tag"></i>
+                                    </div>
+                                    <div class="contact-text">{{ exhibitor.specialization.name if exhibitor.specialization else 'غير محدد' }}</div>
+                                </div>
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="fas fa-calendar"></i>
+                                    </div>
+                                    <div class="contact-text">نشط منذ {{ exhibitor.created_at.strftime('%Y') if exhibitor.created_at else '-' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar: Booking & Schedule -->
+            <div class="col-lg-4">
+                <!-- Available Schedules -->
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <h5><i class="fas fa-clock me-2"></i>المواعيد المتاحة</h5>
+                    </div>
+                    <div class="sidebar-body">
+                        {% if available_slots and available_slots|length > 0 %}
+                            {% set shown_days = {} %}
+                            {% for slot in available_slots %}
+                                {% set day_key = slot.start_time.strftime('%Y-%m-%d') %}
+                                {% if day_key not in shown_days %}
+                                    {% set _ = shown_days.update({day_key: true}) %}
+                                    <div class="schedule-item">
+                                        <div class="schedule-day">
+                                            {% set days_ar = {0: 'الاثنين', 1: 'الثلاثاء', 2: 'الأربعاء', 3: 'الخميس', 4: 'الجمعة', 5: 'السبت', 6: 'الأحد'} %}
+                                            <i class="fas fa-calendar-day me-2"></i>
+                                            {{ slot.start_time.strftime('%d/%m/%Y') }} - {{ days_ar[slot.start_time.weekday()] }}
                                         </div>
-                                        <button onclick="showAvailableSlots('{{ schedule.id }}')" class="btn btn-sm btn-outline-success">
-                                            <i class="fas fa-calendar-plus me-1"></i>
-                                            حجز موعد
+                                        <div class="schedule-time">
+                                            <i class="fas fa-clock"></i>
+                                            <span>{{ slot.start_time.strftime('%H:%M') }} - {{ slot.end_time.strftime('%H:%M') }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="schedule-duration">
+                                                <i class="fas fa-hourglass-half me-1"></i>موعد متاح
+                                            </span>
+                                        </div>
+                                        <button onclick="selectSlot('{{ slot.start_time.strftime('%Y-%m-%d') }}', '{{ slot.start_time.strftime('%H:%M') }}')" class="btn-book-slot">
+                                            <i class="fas fa-calendar-plus me-2"></i>حجز هذا الموعد
                                         </button>
                                     </div>
-                                </div>
+                                {% endif %}
                             {% endfor %}
-                        </div>
 
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            يمكنك حجز موعد من خلال اختيار اليوم المناسب والضغط على زر "حجز موعد"
-                        </div>
+                            <div class="alert alert-info mt-3 mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <small>اختر اليوم المناسب لحجز موعدك</small>
+                            </div>
 
-                        {% if booked_slots %}
-                            <div class="mt-4">
-                                <h6 class="mb-3">المواعيد المحجوزة:</h6>
-                                {% for slot in booked_slots %}
-                                    <div class="booked-slot mb-2 p-2 border rounded bg-light">
-                                        <small class="text-muted">
-                                            {{ slot.booking_date.strftime('%Y-%m-%d') }} |
-                                            {{ slot.start_time.strftime('%I:%M %p') }} - {{ slot.end_time.strftime('%I:%M %p') }}
-                                        </small>
-                                    </div>
-                                {% endfor %}
+                            {% if booked_slots %}
+                                <div class="mt-4">
+                                    <h6 class="mb-3 fw-bold">مواعيدك المحجوزة</h6>
+                                    {% for appointment in booked_slots %}
+                                        <div class="schedule-item" style="background: #e8f5e9; border-color: #4caf50;">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="fw-bold text-success mb-1">
+                                                        <i class="fas fa-check-circle me-1"></i>محجوز
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        {{ appointment.appointment_date.strftime('%d/%m/%Y') }}
+                                                    </small>
+                                                </div>
+                                                <div class="text-end">
+                                                    <small class="text-muted">
+                                                        {{ appointment.appointment_date.strftime('%H:%M') }}<br>
+                                                        <i class="fas fa-hourglass-half me-1"></i>{{ appointment.duration_minutes }} دقيقة
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-times"></i>
+                                <h6>لا توجد مواعيد متاحة</h6>
+                                <p class="small">لم يتم تحديد مواعيد بعد</p>
                             </div>
                         {% endif %}
-                    {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                            <h6>لم يتم تحديد مواعيد بعد</h6>
-                            <p class="text-muted small">العارض لم يقم بتحديد مواعيد متاحة حتى الآن</p>
+                    </div>
+                </div>
+
+                <!-- Calendar Container (Hidden by default) -->
+                <div class="sidebar-card calendar-container" id="booking-calendar" style="display: none;">
+                    <div class="sidebar-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>حجز موعد</h5>
+                        <button onclick="hideBookingCalendar()" class="btn-close btn-close-white"></button>
+                    </div>
+                    <div class="sidebar-body">
+                        <div id="calendar"></div>
+                        <div class="mt-3">
+                            <label for="appointment-notes" class="form-label">ملاحظات إضافية:</label>
+                            <textarea id="appointment-notes" class="form-control" rows="3" placeholder="اذكر أي متطلبات خاصة..."></textarea>
                         </div>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -494,19 +1189,20 @@
 
 <!-- Chat Container -->
 <div id="chat-container" class="chat-container">
-    <div class="chat-header" onclick="toggleChat()">
-        <div class="d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-comments me-2"></i>محادثة مع {{ exhibitor.company_name }}</span>
-            <span id="chat-close" onclick="closeChat(); event.stopPropagation();">×</span>
+    <div class="chat-header">
+        <div>
+            <i class="fas fa-comments me-2"></i>
+            <strong>محادثة مع {{ exhibitor.company_name }}</strong>
         </div>
+        <button onclick="closeChat()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
     </div>
     <div class="chat-body" id="chat-messages">
         <!-- Messages will be loaded here -->
     </div>
     <div class="chat-footer">
-        <div class="input-group">
-            <input type="text" id="message-input" class="form-control" placeholder="اكتب رسالتك...">
-            <button onclick="sendMessage()" class="btn btn-primary">
+        <div class="chat-input-group">
+            <input type="text" id="message-input" class="chat-input" placeholder="اكتب رسالتك...">
+            <button onclick="sendMessage()" class="btn-send">
                 <i class="fas fa-paper-plane"></i>
             </button>
         </div>
@@ -540,32 +1236,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Function to show available slots for a schedule
-function showAvailableSlots(scheduleId) {
-    fetch(`/api/available-slots/${scheduleId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                if (data.slots && data.slots.length > 0) {
-                    showSlotSelectionModal(scheduleId, data.slots);
-                } else {
-                    alert('لا توجد مواعيد متاحة في هذا اليوم');
-                }
-            } else {
-                alert(data.message || 'حدث خطأ في تحميل المواعيد المتاحة');
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching available slots:', error);
-            alert('حدث خطأ في تحميل المواعيد المتاحة');
-        });
-}
-
+// Toggle Favorite Exhibitor
 function toggleFavoriteExhibitor(exhibitorId) {
     fetch(`/toggle-favorite-exhibitor/${exhibitorId}`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         }
     })
     .then(response => response.json())
@@ -574,46 +1250,54 @@ function toggleFavoriteExhibitor(exhibitorId) {
             const btn = document.getElementById('favorite-btn');
             if (data.action === 'added') {
                 btn.classList.add('favorited');
-                btn.innerHTML = '<i class="fas fa-heart fa-2x"></i><div class="mt-2">مُضاف للمفضلة</div>';
-                alert('تم إضافة العارض للمفضلة');
+                btn.querySelector('span').textContent = 'مُضاف للمفضلة';
+                showNotification('تم إضافة العارض للمفضلة', 'success');
             } else {
                 btn.classList.remove('favorited');
-                btn.innerHTML = '<i class="fas fa-heart fa-2x"></i><div class="mt-2">إضافة للمفضلة</div>';
-                alert('تم إزالة العارض من المفضلة');
+                btn.querySelector('span').textContent = 'إضافة للمفضلة';
+                showNotification('تم إزالة العارض من المفضلة', 'info');
             }
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('حدث خطأ، حاول مرة أخرى', 'error');
     });
 }
 
+// Toggle Favorite Product
 function toggleFavoriteProduct(productId) {
     fetch(`/toggle-favorite-product/${productId}`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         }
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert(data.action === 'added' ? 'تم إضافة المنتج للمفضلة' : 'تم إزالة المنتج من المفضلة');
+            const message = data.action === 'added' ? 'تم إضافة المنتج للمفضلة' : 'تم إزالة المنتج من المفضلة';
+            showNotification(message, 'success');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('حدث خطأ، حاول مرة أخرى', 'error');
     });
 }
 
+// View Product
 function viewProduct(productId) {
-    // Could navigate to a detailed product page
-    console.log('Viewing product:', productId);
+    window.location.href = `/product/${productId}`;
 }
 
+// Chat Functions
 function openChat() {
     const chatContainer = document.getElementById('chat-container');
     chatContainer.style.display = 'block';
     chatOpen = true;
     
-    // Join chat room
     socket.emit('join_chat', {exhibitor_id: {{ exhibitor.id }}});
-    
-    // Load chat history (would typically fetch from backend)
     loadChatHistory();
 }
 
@@ -621,22 +1305,6 @@ function closeChat() {
     const chatContainer = document.getElementById('chat-container');
     chatContainer.style.display = 'none';
     chatOpen = false;
-}
-
-function toggleChat() {
-    if (chatOpen) {
-        // Minimize/maximize chat
-        const chatBody = document.querySelector('.chat-body');
-        const chatFooter = document.querySelector('.chat-footer');
-        
-        if (chatBody.style.display === 'none') {
-            chatBody.style.display = 'block';
-            chatFooter.style.display = 'block';
-        } else {
-            chatBody.style.display = 'none';
-            chatFooter.style.display = 'none';
-        }
-    }
 }
 
 function sendMessage() {
@@ -657,60 +1325,73 @@ function addMessageToChat(message, userName, isFromExhibitor) {
     const messagesContainer = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isFromExhibitor ? 'exhibitor' : 'user'}`;
-    messageDiv.innerHTML = `<strong>${userName}:</strong> ${message}`;
+    messageDiv.innerHTML = `<strong>${userName}:</strong><br>${message}`;
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 function loadChatHistory() {
-    // This would typically fetch chat history from the backend
-    // For now, show a welcome message
     addMessageToChat('مرحباً! كيف يمكنني مساعدتك؟', '{{ exhibitor.company_name }}', true);
 }
 
+// Booking Functions
+function showBookingCalendar() {
+    const calendar = document.getElementById('booking-calendar');
+    calendar.style.display = 'block';
+    calendar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    if (!window.calendarInitialized) {
+        initializeCalendar();
+        window.calendarInitialized = true;
+    }
+}
+
+function hideBookingCalendar() {
+    const calendar = document.getElementById('booking-calendar');
+    calendar.style.display = 'none';
+}
+
 function showAvailableSlots(scheduleId) {
-    // Get available slots from API
     fetch(`/api/available-slots/${scheduleId}`)
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                if (data.slots.length > 0) {
+                if (data.slots && data.slots.length > 0) {
                     showSlotSelectionModal(scheduleId, data.slots);
                 } else {
-                    alert('لا توجد مواعيد متاحة في الأيام القادمة');
+                    showNotification('لا توجد مواعيد متاحة في الأيام القادمة', 'info');
                 }
             } else {
-                alert(data.message || 'حدث خطأ في تحميل المواعيد المتاحة');
+                showNotification(data.message || 'حدث خطأ في تحميل المواعيد', 'error');
             }
         })
         .catch(error => {
-            console.error('Error fetching available slots:', error);
-            alert('حدث خطأ في تحميل المواعيد المتاحة');
+            console.error('Error:', error);
+            showNotification('حدث خطأ في الاتصال بالخادم', 'error');
         });
 }
 
-// Create a Bootstrap modal for slot selection
 function showSlotSelectionModal(scheduleId, slots) {
-    // Remove existing modal if any
     const existingModal = document.getElementById('slotSelectionModal');
     if (existingModal) {
         existingModal.remove();
     }
 
-    // Create modal HTML
+    const uniqueDates = [...new Set(slots.map(slot => slot.date))];
+    
     const modalHtml = `
         <div class="modal fade" id="slotSelectionModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">اختر موعداً</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); color: white; border: none;">
+                        <h5 class="modal-title"><i class="fas fa-calendar-alt me-2"></i>اختر موعداً مناسباً</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="slot-date" class="form-label">اختر التاريخ:</label>
-                            <select class="form-select" id="slot-date" onchange="filterSlotsByDate()">
-                                ${[...new Set(slots.map(slot => slot.date))].map(date => 
+                    <div class="modal-body" style="padding: 30px;">
+                        <div class="mb-4">
+                            <label for="slot-date" class="form-label fw-bold">التاريخ:</label>
+                            <select class="form-select" id="slot-date" onchange="filterSlotsByDate()" style="border-radius: 10px;">
+                                ${uniqueDates.map(date => 
                                     `<option value="${date}">${date}</option>`
                                 ).join('')}
                             </select>
@@ -720,61 +1401,62 @@ function showSlotSelectionModal(scheduleId, slots) {
                                 <button class="btn btn-outline-success slot-btn" 
                                         data-date="${slot.date}" 
                                         onclick="selectSlot('${scheduleId}', '${slot.date}', '${slot.start}')"
-                                        style="text-align: right;">
-                                    <div>
-                                        <strong>${slot.start} - ${slot.end}</strong>
+                                        style="text-align: right; border-radius: 10px; padding: 15px; border-width: 2px;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong><i class="fas fa-clock me-2"></i>${slot.start} - ${slot.end}</strong>
+                                        <i class="fas fa-chevron-left"></i>
                                     </div>
                                 </button>
                             `).join('')}
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
                     </div>
                 </div>
             </div>
         </div>
     `;
 
-    // Add modal to document
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-    // Initialize and show modal
     const modal = new bootstrap.Modal(document.getElementById('slotSelectionModal'));
     modal.show();
+    
+    filterSlotsByDate();
 }
 
 function filterSlotsByDate() {
     const selectedDate = document.getElementById('slot-date').value;
     document.querySelectorAll('.slot-btn').forEach(btn => {
-        if (btn.dataset.date === selectedDate) {
-            btn.style.display = 'block';
-        } else {
-            btn.style.display = 'none';
-        }
+        btn.style.display = btn.dataset.date === selectedDate ? 'block' : 'none';
     });
 }
 
-function selectSlot(scheduleId, date, startTime) {
-    // Show notes modal
+function selectSlot(date, startTime) {
     const notesModal = `
         <div class="modal fade" id="bookingNotesModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">إضافة ملاحظات للحجز</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 16px; border: none;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none;">
+                        <h5 class="modal-title"><i class="fas fa-edit me-2"></i>إضافة ملاحظات</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" style="padding: 30px;">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>الموعد المختار:</strong> ${date} - ${startTime}
+                        </div>
                         <div class="mb-3">
-                            <label for="booking-notes" class="form-label">ملاحظات (اختياري):</label>
-                            <textarea class="form-control" id="booking-notes" rows="3"></textarea>
+                            <label for="booking-notes" class="form-label fw-bold">ملاحظات إضافية (اختياري):</label>
+                            <textarea class="form-control" id="booking-notes" rows="4" 
+                                      placeholder="مثال: أرغب في مناقشة خيارات التوريد..."
+                                      style="border-radius: 10px;"></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                        <button type="button" class="btn btn-success" onclick="confirmBooking('${scheduleId}', '${date}', '${startTime}')">
-                            تأكيد الحجز
+                    <div class="modal-footer" style="border: none; padding: 20px 30px;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px;">
+                            <i class="fas fa-times me-2"></i>إلغاء
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="confirmBookingDirect('${date}', '${startTime}')"
+                                style="border-radius: 10px;">
+                            <i class="fas fa-check me-2"></i>تأكيد الحجز
                         </button>
                     </div>
                 </div>
@@ -782,29 +1464,57 @@ function selectSlot(scheduleId, date, startTime) {
         </div>
     `;
 
-    // Remove existing notes modal if any
     const existingNotesModal = document.getElementById('bookingNotesModal');
     if (existingNotesModal) {
         existingNotesModal.remove();
     }
 
-    // Add and show notes modal
     document.body.insertAdjacentHTML('beforeend', notesModal);
     const modal = new bootstrap.Modal(document.getElementById('bookingNotesModal'));
     modal.show();
+}
 
-    // Close slot selection modal
-    bootstrap.Modal.getInstance(document.getElementById('slotSelectionModal')).hide();
+function confirmBookingDirect(date, time) {
+    const notes = document.getElementById('booking-notes').value;
+
+    fetch('/book-appointment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            exhibitor_id: {{ exhibitor.id }},
+            date: date,
+            time: time,
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showNotification('تم حجز الموعد بنجاح!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showNotification(data.message || 'حدث خطأ أثناء الحجز', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('حدث خطأ في الاتصال بالخادم', 'error');
+    })
+    .finally(() => {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('bookingNotesModal'));
+        if (modal) modal.hide();
+    });
 }
 
 function confirmBooking(scheduleId, date, time) {
     const notes = document.getElementById('booking-notes').value;
 
-    // Send booking request to server
     fetch('/book-appointment', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
             schedule_id: scheduleId,
@@ -816,34 +1526,71 @@ function confirmBooking(scheduleId, date, time) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('تم حجز الموعد بنجاح!');
-            location.reload(); // Refresh page to update available slots
+            showNotification('تم حجز الموعد بنجاح!', 'success');
+            setTimeout(() => location.reload(), 1500);
         } else {
-            alert(data.message || 'حدث خطأ أثناء حجز الموعد');
+            showNotification(data.message || 'حدث خطأ أثناء الحجز', 'error');
         }
     })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('حدث خطأ في الاتصال بالخادم', 'error');
+    })
     .finally(() => {
-        // Close the notes modal
-        bootstrap.Modal.getInstance(document.getElementById('bookingNotesModal')).hide();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('bookingNotesModal'));
+        if (modal) modal.hide();
     });
 }
 
+// Utility Functions
+function shareExhibitor() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ exhibitor.company_name }}',
+            text: 'تعرف على {{ exhibitor.company_name }} في معرض الأغذية',
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        showNotification('تم نسخ الرابط!', 'success');
+    }
+}
+
+function showNotification(message, type) {
+    const colors = {
+        success: '#28a745',
+        error: '#dc3545',
+        info: '#17a2b8'
+    };
+    
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${colors[type] || colors.info};
+        color: white;
+        padding: 15px 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: slideDown 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideUp 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Initialize calendar if needed
 function initializeCalendar() {
     const calendarEl = document.getElementById('calendar');
-    
-    // Convert available slots to calendar events
-    const events = [
-        {% for slot in available_slots %}
-        {
-            id: '{{ slot.id }}',
-            title: 'متاح ({{ slot.duration_minutes }} دقيقة)',
-            start: '{{ slot.start_time.strftime("%Y-%m-%dT%H:%M:%S") }}',
-            end: '{{ (slot.start_time + timedelta(minutes=slot.duration_minutes)).strftime("%Y-%m-%dT%H:%M:%S") }}',
-            backgroundColor: '#28a745',
-            borderColor: '#28a745'
-        }{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ];
+    if (!calendarEl) return;
     
     calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'timeGridWeek',
@@ -854,12 +1601,6 @@ function initializeCalendar() {
             center: 'title',
             right: 'timeGridWeek,timeGridDay'
         },
-        events: events,
-        eventClick: function(info) {
-            if (confirm('هل تريد حجز هذا الموعد؟')) {
-                bookSlot(info.event.id);
-            }
-        },
         slotMinTime: '08:00:00',
         slotMaxTime: '20:00:00',
         allDaySlot: false,
@@ -869,35 +1610,7 @@ function initializeCalendar() {
     calendar.render();
 }
 
-function bookSlot(slotId) {
-    const notes = document.getElementById('appointment-notes')?.value || '';
-    
-    fetch('/book-appointment', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            slot_id: slotId,
-            notes: notes
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert('تم حجز الموعد بنجاح!');
-            // Refresh calendar or remove booked slot
-            if (calendar) {
-                calendar.getEventById(slotId).remove();
-            }
-            hideBookingCalendar();
-        } else {
-            alert(data.message || 'حدث خطأ أثناء حجز الموعد');
-        }
-    });
-}
-
-// Handle Enter key in message input
+// Handle Enter key in chat
 document.addEventListener('DOMContentLoaded', function() {
     const messageInput = document.getElementById('message-input');
     if (messageInput) {
@@ -908,5 +1621,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideDown {
+        from {
+            transform: translateX(-50%) translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideUp {
+        from {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(-50%) translateY(-20px);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
 </script>
 {% endblock %}

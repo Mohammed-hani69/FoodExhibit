@@ -132,7 +132,7 @@
                             <option value="{{ exhibitor.id }}" 
                                     data-email="{{ exhibitor.email }}"
                                     data-name="{{ exhibitor.company_name }}"
-                                    data-specialization="{{ exhibitor.specialization }}">
+                                    data-specialization="{% if exhibitor.specialization %}{{ exhibitor.specialization.name }}{% endif %}">
                                 {{ exhibitor.company_name }}
                             </option>
                             {% endfor %}

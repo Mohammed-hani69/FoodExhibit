@@ -25,7 +25,7 @@
                             <label for="exhibitor_id" class="form-label">اختر العارض</label>
                             <select class="form-select" id="exhibitor_id" name="exhibitor_id" required>
                                 <option value="">اختر العارض...</option>
-                                {% for exhibitor, user in exhibitors %}
+                                {% for exhibitor in exhibitors %}
                                 <option value="{{ exhibitor.id }}">{{ exhibitor.company_name }}</option>
                                 {% endfor %}
                             </select>
@@ -61,7 +61,13 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">{{ banner.exhibitor.company_name }}</h5>
+                            <h5 class="mb-0">
+                                {% if banner.exhibitor %}
+                                    {{ banner.exhibitor.company_name }}
+                                {% else %}
+                                    العارض (محذوف)
+                                {% endif %}
+                            </h5>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" 
                                        id="bannerStatus{{ banner.id }}" 
@@ -97,12 +103,53 @@
 
 {% block scripts %}
 <script>
+function toggleBannerStatus(bannerId) {
+    const checkbox = document.getElementById(`bannerStatus${bannerId}`);
+    const isActive = checkbox.checked;
+    const csrfToken = getCsrfToken();
+    
+    fetch(`/admin/exhibitor-banner/${bannerId}/toggle-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ is_active: isActive })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('حدث خطأ أثناء تحديث حالة البانر');
+            checkbox.checked = !isActive;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء تحديث حالة البانر');
+        checkbox.checked = !isActive;
+    });
+}
+
+function getCsrfToken() {
+    const token = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (!token) {
+        const formToken = document.querySelector('input[name="csrf_token"]')?.value;
+        return formToken || '';
+    }
+    return token;
+}
+
 function deleteBanner(bannerId) {
     if (confirm('هل أنت متأكد من حذف هذا البانر؟')) {
+        const csrfToken = getCsrfToken();
+        
         fetch(`/admin/exhibitor-banner/${bannerId}/delete`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
             },
         })
         .then(response => response.json())
@@ -112,6 +159,10 @@ function deleteBanner(bannerId) {
             } else {
                 alert('حدث خطأ أثناء حذف البانر');
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء حذف البانر');
         });
     }
 }

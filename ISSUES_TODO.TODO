@@ -1,0 +1,306 @@
+# FoodExhibit - System Issues and Problems TODO List
+
+## 🔴 Critical Issues (High Priority)
+
+### 1. **Model Relationship Mismatch: Product exhibitor_id**
+- **File**: `models.py`
+- **Issue**: `Product` model has `exhibitor_id` FK to `exhibitors` table, but the `Exhibitor` model stores `user_id` not `id` in relationship
+- **Location**: `models.py` lines where Product.exhibitor_id is set
+- **Impact**: When adding products via admin routes, it references the `User.id` instead of `Exhibitor.id`
+- **Solution Needed**: Either change Product to use user_id, or ensure consistency in all admin_routes.py operations
+
+### 2. **Duplicate Index Routes in routes.py**
+- **File**: `routes.py`
+- **Issue**: Route `@app.route('/')` is defined twice (lines ~127 and ~240)
+- **Problem**: Flask will only use the last definition; first one is ignored
+- **Impact**: `landing()` function is never called
+- **Solution**: Remove duplicate definition, consolidate logic
+
+### 3. **Missing Video Model Foreign Key Relationship**
+- **File**: `models.py` - `Appointment` model  
+- **Issue**: Appointment model references `slot_id` but the relationship expects `AvailableSlot`, which should work, but the `slot_appointments` backref could cause issues
+- **Location**: `class Appointment` line 
+- **Impact**: Queries using `slot.slot_appointments` might fail
+- **Solution**: Verify the backref naming consistency
+
+### 4. **Exhibitor Profile Route Logic Error**
+- **File**: `exhibitor_routes.py` line ~58
+- **Issue**: The route queries `User` instead of `Exhibitor` for the profile
+- **Location**: `def profile(exhibitor_id)` - uses `User.query.filter_by(id=exhibitor_id, role='exhibitor')`
+- **Problem**: The template expects an `Exhibitor` object with `available_slots`, but User doesn't have this relationship
+- **Impact**: Available slots won't render properly in template
+- **Solution**: Query `Exhibitor` not `User`, or load both relationships
+
+### 5. **Inconsistent Exhibitor ID Usage in Booking**
+- **File**: `routes.py` line ~380
+- **Issue**: `book_appointment()` expects `exhibitor_id` but the route signature and database query use different models
+- **Location**: `@app.route('/book-appointment', methods=['POST'])`
+- **Problem**: The function gets `exhibitor_id` but `Appointment.exhibitor_id` references `Exhibitor.id`, not `User.id`
+- **Impact**: Booking creation will fail or use wrong IDs
+- **Solution**: Clarify if exhibitor_id should be User or Exhibitor
+
+### 6. **Chat Message Model Fields Confusion**
+- **File**: `models.py` - `ChatMessage`
+- **Issue**: Has fields `message`, `content`, `chat_room` with unclear usage
+- **Location**: `ChatMessage` model definition
+- **Fields**: 
+  - Column named `content` but JavaScript uses `message`
+  - Has both `exhibitor_id` and `receiver_id` which seem redundant
+  - Has `chat_room` but sockets also pass room data
+- **Impact**: Chat save/retrieve will fail or use wrong fields
+- **Solution**: Standardize field names across model and JavaScript
+
+## 🟠 Major Issues (Medium-High Priority)
+
+### 7. **Duplicate Banner Addition Logic**
+- **File**: `routes.py`
+- **Issue**: In `add_banner()` route, there are TWO implementations mixed together (lines ~220-280)
+- **Problem**: First implementation creates Banner with multilingual fields, second one doesn't
+- **Impact**: Second one overwrites the first, so multilingual support is broken
+- **Solution**: Remove the duplicate code, keep the multilingual version
+
+### 8. **Missing Specialization Relationship in Exhibitor**
+- **File**: `models.py`, `exhibitor_routes.py`
+- **Issue**: `User` model has `specialization_id`, but `Exhibitor` model doesn't have this field
+- **Problem**: When displaying exhibitor profile, specialization info is lost
+- **Location**: `exhibitor_routes.py` line ~73 tries to access exhibitor specialization
+- **Impact**: Specialization won't display on exhibitor profile page
+- **Solution**: Add `specialization_id` to `Exhibitor` model or use `user.specialization`
+
+### 9. **Video Model Exhibitor FK Reference Issue**
+- **File**: `models.py` - `Video` model
+- **Issue**: Video FK to `exhibitors` table, but admin_routes expects `user_id` (User table)
+- **Location**: `admin_routes.py` line ~390 `add_video()` gets `user_id` but tries to save to exhibitor_id
+- **Impact**: Videos can't be added properly; FK constraint will fail
+- **Solution**: Change admin route to use Exhibitor.id or modify Video model
+
+### 10. **ExhibitorBanner FK Mismatch**
+- **File**: `models.py`, `admin_routes.py`
+- **Issue**: `ExhibitorBanner` has FK to `exhibitors.id`, but admin creates with `exhibitor_id` from form
+- **Problem**: If user IDs are used instead of Exhibitor IDs, will fail
+- **Location**: `admin_routes.py` add_exhibitor_banner() line ~560
+- **Impact**: Banner creation fails with FK constraint error
+- **Solution**: Ensure exhibitor_id always references Exhibitor.id
+
+### 11. **Missing Exhibitor Creation When User Registers**
+- **File**: `auth.py`
+- **Issue**: When a user registers as exhibitor via `auth.register()`, no `Exhibitor` record is created
+- **Location**: `auth.py` line ~50 when `role == 'exhibitor'`
+- **Problem**: User is created but corresponding Exhibitor entry is missing
+- **Impact**: `exhibitor_profile()` in routes.py will fail to find the Exhibitor
+- **Solution**: Create Exhibitor record after User creation in auth blueprint
+
+### 12. **Booking Status Logic Error**
+- **File**: `routes.py` line ~155
+- **Issue**: `update_booking()` concatenates string to create status: `action + 'ed'`
+- **Problem**: For action='cancel', this creates 'cancelled' ✓, but for 'confirm' creates 'confirmed' ✓, but logic is fragile
+- **Location**: Line: `booking.status = action + 'ed' if action != 'cancel' else 'cancelled'`
+- **Impact**: Edge case handling is unclear
+- **Solution**: Use explicit status mapping dictionary
+
+### 13. **Missing Product Category Synchronization**
+- **File**: `admin_routes.py`, `models.py`
+- **Issue**: When adding product, category is set from specialization name, but if specialization is null, category is "غير محدد"
+- **Problem**: No way to update product if specialization is removed
+- **Location**: `admin_routes.py` line ~48
+- **Impact**: Products can have orphaned categories
+- **Solution**: Add category field validation and synchronization
+
+## 🟡 Medium Priority Issues
+
+### 14. **Route Function Name Conflict: index() defined twice**
+- **File**: `routes.py`
+- **Issue**: Two functions named `index()` are defined
+- **Location**: Lines ~127 and ~240 
+- **Problem**: Python will only keep the last definition; first is silently overwritten
+- **Impact**: Landing page implementation is lost
+- **Solution**: Rename one or consolidate
+
+### 15. **Missing CSRF Token in JavaScript Calls**
+- **File**: `exhibitor_profile.html`
+- **Issue**: Many AJAX calls to `/book-appointment`, `/toggle-favorite-*` include CSRF but some might be missing
+- **Location**: JavaScript functions in exhibitor_profile.html
+- **Problem**: Some form submissions might fail CSRF validation
+- **Impact**: Booking and favorite toggle might fail in production
+- **Solution**: Verify all CSRF tokens are sent with every request
+
+### 16. **Available Slots Query Inconsistency**
+- **File**: `routes.py` vs `exhibitor_routes.py`
+- **Issue**: In `exhibitor_profile()` uses `AvailableSlot` model, but in `exhibitor_booking()` uses `AvailabilitySchedule`
+- **Problem**: Two different models for same purpose
+- **Location**: 
+  - `routes.py` line ~545: uses AvailableSlot
+  - `routes.py` line ~125: uses AvailabilitySchedule
+- **Impact**: Inconsistent data source; could show different slots
+- **Solution**: Consolidate to single model
+
+### 17. **Missing Booked Slots Query Validation**
+- **File**: `routes.py` line ~555
+- **Issue**: `booked_slots` query doesn't verify if current_user can view this data
+- **Problem**: Any user can see any other user's appointments if they craft the URL
+- **Impact**: Privacy violation - appointment details exposed
+- **Solution**: Add authorization check for current_user
+
+### 18. **Chat Room Creation Logic Flawed**
+- **File**: `routes.py` line ~72
+- **Issue**: Chat room name uses `min(current_user.id, exhibitor_id)` and `max()`
+- **Problem**: If exhibitor_id is from User table but should be from Exhibitor table, IDs won't match
+- **Location**: `chat_room = f"chat_{min(...)}_{max(...)}"`
+- **Impact**: Users and exhibitors won't find each other's chats
+- **Solution**: Clarify if exhibitor_id is User or Exhibitor
+
+### 19. **Track User Action Function Missing Exhibitor FK Check**
+- **File**: `routes.py` line ~500
+- **Issue**: `track_user_action()` function assumes exhibitor_id is valid but doesn't check if it's User or Exhibitor
+- **Problem**: If exhibitor_id doesn't match ExhibitorAnalytics.exhibitor_id FK, will fail
+- **Location**: Function definition line ~500
+- **Impact**: Analytics won't be saved properly
+- **Solution**: Add model validation
+
+### 20. **Gallery Hall Query Uses Wrong User Model**
+- **File**: `routes.py` line ~510
+- **Issue**: `gallery_hall()` queries `Exhibitor` not `User` for gallery_hall field
+- **Problem**: But gallery_hall field might be in User model (hall field)
+- **Location**: `Exhibitor.query.filter_by(gallery_hall=hall)`
+- **Impact**: Gallery won't display exhibitors correctly
+- **Solution**: Check which model actually has gallery_hall field
+
+## 🟢 Lower Priority Issues
+
+### 21. **Incomplete Admin Settings Routes**
+- **File**: `admin_routes.py`
+- **Issue**: Many routes have incomplete implementations
+- **Location**: 
+  - `@admin.route('/settings/exhibition', methods=['POST'])` - empty function
+  - `@admin.route('/visitor-data')` - empty function
+- **Impact**: Admin features don't work
+- **Solution**: Complete implementations
+
+### 22. **Missing Error Handling in File Uploads**
+- **File**: Multiple routes (admin_routes.py, exhibitor_routes.py, routes.py)
+- **Issue**: File upload handlers don't validate file size
+- **Problem**: Users could upload massive files causing memory issues
+- **Impact**: DoS vulnerability
+- **Solution**: Add MAX_CONTENT_LENGTH or file size validation
+
+### 23. **Inconsistent Error Messages Language**
+- **File**: All routes
+- **Issue**: Mix of Arabic and English error messages
+- **Location**: Flash messages throughout
+- **Problem**: User experience inconsistent
+- **Impact**: Confusion for non-Arabic users
+- **Solution**: Use consistent language or translation system
+
+### 24. **Missing Input Validation in Forms**
+- **File**: Multiple routes
+- **Issue**: Most routes trust request.form.get() without validation
+- **Examples**:
+  - No email format validation
+  - No phone number validation
+  - No date format validation
+- **Impact**: Invalid data can be saved to database
+- **Solution**: Add WTForms validators or manual validation
+
+### 25. **Gallery AD Display Order Not Enforced**
+- **File**: `routes.py`
+- **Issue**: GalleryAd.query filters by is_active but order_by display_order might conflict
+- **Location**: `gallery()` function
+- **Problem**: If display_order has duplicates, order is undefined
+- **Impact**: Inconsistent ad display
+- **Solution**: Add tie-breaking in order_by clause
+
+### 26. **Missing Pagination for Large Data Sets**
+- **File**: Multiple routes
+- **Issue**: All queries fetch entire result sets
+- **Examples**:
+  - `Product.query.filter_by(...)` - could be thousands
+  - `User.query.filter_by(...)` - could be thousands
+- **Impact**: Memory usage and slow page loads
+- **Solution**: Add pagination with limit/offset
+
+### 27. **Socket IO Message History Not Limited**
+- **File**: `routes.py` line ~405
+- **Issue**: `get_chat_history()` loads ALL messages with only `.limit(50)`
+- **Problem**: If many messages exist, still loads 50+ items
+- **Impact**: Slow chat loading
+- **Solution**: Add proper pagination or limit to last 20
+
+### 28. **No Rate Limiting on API Endpoints**
+- **File**: All routes in routes.py
+- **Issue**: No protection against repeated rapid requests
+- **Examples**: `/toggle-favorite-*`, `/book-appointment`
+- **Impact**: Spam/abuse possible
+- **Solution**: Add Flask-Limiter
+
+### 29. **Product Image Path Inconsistency**
+- **File**: `admin_routes.py`, `exhibitor_routes.py`
+- **Issue**: Some use `/static/images/products/`, some use `/static/images/exhibitors/`
+- **Location**: 
+  - Line ~50: `/static/images/products/`
+  - Line ~95: `/static/images/exhibitors/`
+- **Impact**: Images won't load consistently
+- **Solution**: Standardize image folder structure
+
+### 30. **Missing Database Transaction Rollback Error Logging**
+- **File**: All routes with db.session
+- **Issue**: `db.session.rollback()` called but error not always logged properly
+- **Location**: Multiple except blocks
+- **Problem**: Debugging is hard when errors aren't logged
+- **Impact**: Hard to diagnose production issues
+- **Solution**: Add proper logging with stack traces
+
+## 📋 Missing Functionality (Not Bugs, but Missing)
+
+### 31. **No Email Notification System**
+- **Issue**: Users don't get notified of new appointments
+- **Solution**: Add email notifications on appointment creation/approval
+
+### 32. **No Appointment Reminder System**
+- **Issue**: Users don't get reminders before appointments
+- **Solution**: Add scheduled task to send reminders
+
+### 33. **No Real-time Notification System**
+- **Issue**: Users don't see real-time updates (new messages, new appointments)
+- **Solution**: Implement WebSocket notifications
+
+### 34. **No Image Optimization**
+- **Issue**: Large images uploaded directly without compression
+- **Solution**: Add image optimization on upload
+
+### 35. **No Caching Strategy**
+- **Issue**: All queries hit database every time
+- **Solution**: Add Redis caching for frequently accessed data
+
+### 36. **No Search Functionality for Products**
+- **Issue**: Users can't search products
+- **Solution**: Add full-text search for products
+
+### 37. **No Export/Download Functionality**
+- **Issue**: Admins can't export reports as PDF/CSV
+- **Solution**: Add export functionality
+
+---
+
+## Summary Statistics
+
+| Priority | Count |
+|----------|-------|
+| 🔴 Critical | 6 |
+| 🟠 Major | 8 |
+| 🟡 Medium | 9 |
+| 🟢 Lower | 14 |
+| 📋 Missing | 7 |
+| **Total** | **44** |
+
+## Recommended Fix Order
+
+1. Fix model relationship issues (Issues 1, 8, 9, 10)
+2. Remove duplicate routes and functions (Issues 2, 14)
+3. Create missing Exhibitor records (Issue 11)
+4. Standardize Product/Video/Banner FK usage (Issues 4, 6, 7)
+5. Add input validation (Issue 24)
+6. Add proper error handling (Issue 30)
+7. Add pagination (Issue 26)
+8. Add rate limiting (Issue 28)
+9. Complete unfinished routes (Issue 21)
+10. Add remaining features (Issue 31-37)

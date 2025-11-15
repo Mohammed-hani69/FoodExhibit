@@ -99,6 +99,11 @@ def register():
             new_user.is_active = False  # Exhibitors need admin approval
             
         db.session.add(new_user)
+        db.session.flush()  # Get the user ID without committing
+        
+        # All exhibitor data is now stored directly in the User table
+        # No need to create a separate Exhibitor record
+        
         db.session.commit()
         
         if role == 'exhibitor':

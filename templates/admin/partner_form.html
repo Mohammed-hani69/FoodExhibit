@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if partner %}
+        تعديل الراعي - {{ partner.name }}
+    {% else %}
+        إضافة راعي جديد
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4">
+                {% if partner %}
+                    تعديل الراعي: {{ partner.name }}
+                {% else %}
+                    إضافة راعي جديد
+                {% endif %}
+            </h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{% if category == 'error' %}danger{% else %}{{ category }}{% endif %} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- Name Field -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">اسم الراعي *</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="name" 
+                                name="name" 
+                                value="{{ partner.name if partner else '' }}"
+                                required
+                                placeholder="أدخل اسم الراعي">
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">الوصف</label>
+                            <textarea 
+                                class="form-control" 
+                                id="description" 
+                                name="description" 
+                                rows="4"
+                                placeholder="أدخل وصف الراعي (اختياري)">{{ partner.description if partner else '' }}</textarea>
+                        </div>
+
+                        <!-- Website URL Field -->
+                        <div class="mb-3">
+                            <label for="website_url" class="form-label">رابط الموقع</label>
+                            <input 
+                                type="url" 
+                                class="form-control" 
+                                id="website_url" 
+                                name="website_url" 
+                                value="{{ partner.website_url if partner else '' }}"
+                                placeholder="https://example.com">
+                        </div>
+
+                        <!-- Image Upload Field -->
+                        <div class="mb-3">
+                            <label for="image" class="form-label">
+                                صورة الراعي
+                                {% if not partner %}
+                                    <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+                            <div class="input-group">
+                                <input 
+                                    type="file" 
+                                    class="form-control" 
+                                    id="image" 
+                                    name="image" 
+                                    accept="image/*"
+                                    {% if not partner %}required{% endif %}>
+                                <label class="input-group-text">اختر صورة</label>
+                            </div>
+                            <small class="form-text text-muted">
+                                الصيغ المدعومة: PNG, JPG, JPEG, GIF, WebP (الحد الأقصى للحجم: 5MB)
+                            </small>
+                            {% if partner and partner.image_path %}
+                                <div class="mt-2">
+                                    <img src="{{ partner.image_path }}" alt="{{ partner.name }}" 
+                                         style="max-height: 150px; max-width: 200px; object-fit: contain;">
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Display Order Field -->
+                        <div class="mb-3">
+                            <label for="display_order" class="form-label">ترتيب العرض</label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="display_order" 
+                                name="display_order" 
+                                value="{{ partner.display_order if partner else 0 }}"
+                                min="0"
+                                placeholder="أدخل ترتيب العرض (0, 1, 2, ...)">
+                            <small class="form-text text-muted">
+                                الأرقام الأصغر تظهر أولاً
+                            </small>
+                        </div>
+
+                        <!-- Is Active Checkbox -->
+                        <div class="mb-3 form-check">
+                            <input 
+                                type="checkbox" 
+                                class="form-check-input" 
+                                id="is_active" 
+                                name="is_active"
+                                {% if partner and partner.is_active %}checked{% elif not partner %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active">
+                                نشط (ظاهر على الصفحة)
+                            </label>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if partner %}
+                                    حفظ التغييرات
+                                {% else %}
+                                    إضافة الراعي
+                                {% endif %}
+                            </button>
+                            <a href="{{ url_for('admin.manage_partners') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        border: none;
+        border-radius: 10px;
+    }
+    
+    .form-control:focus {
+        border-color: #ff6b00;
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.25);
+    }
+    
+    .btn-primary {
+        background-color: #ff6b00;
+        border-color: #ff6b00;
+    }
+    
+    .btn-primary:hover {
+        background-color: #e55f00;
+        border-color: #e55f00;
+    }
+</style>
+{% endblock %}

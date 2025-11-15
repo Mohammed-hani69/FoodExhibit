@@ -20,12 +20,11 @@ def handle_message(data):
     sender_id = data['sender_id']
     receiver_id = data['receiver_id']
     
-    # Save message to database
+    # Save message to database using standardized 'message' field
     chat_message = ChatMessage(
         sender_id=sender_id,
         receiver_id=receiver_id,
-        content=message,
-        chat_room=room,
+        message=message,  # Use 'message' field instead of 'content'
         timestamp=datetime.utcnow()
     )
     db.session.add(chat_message)
@@ -35,5 +34,6 @@ def handle_message(data):
     emit('message', {
         'message': message,
         'sender_id': sender_id,
+        'receiver_id': receiver_id,
         'timestamp': chat_message.timestamp.strftime('%H:%M')
     }, room=room)

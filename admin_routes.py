@@ -1,8 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required
 from extensions import db
-from models import Package, User, Order, Visit, Product, Settings, Exhibitor, Specialization, Video, ExhibitorBanner
-import os
+from models import Package, User, Order, Visit, Product, Settings, Specialization, Video, ExhibitorBanner, ExhibitorAnalytics, Partner
 from werkzeug.utils import secure_filename
 from auth import admin_required
 import json
@@ -10,7 +9,6 @@ from sqlalchemy import func, or_
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash
 import os
-from werkzeug.utils import secure_filename
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -53,45 +51,41 @@ def search_exhibitors():
     if not query or len(query) < 2:
         return jsonify([])
     
-    exhibitors = db.session.query(Exhibitor, User).join(User).filter(
+    # Search User table directly with role='exhibitor'
+    exhibitors = User.query.filter(
+        User.role == 'exhibitor',
         or_(
             User.email.ilike(f'%{query}%'),
-            Exhibitor.company_name.ilike(f'%{query}%')
+            User.company_name.ilike(f'%{query}%')
         )
     ).all()
     
     return jsonify([{
         'id': exhibitor.id,
-        'company_name': exhibitor.company_name,
-        'email': user.email
-    } for exhibitor, user in exhibitors])
+        'company_name': exhibitor.company_name or f"{exhibitor.first_name} {exhibitor.last_name}",
+        'email': exhibitor.email
+    } for exhibitor in exhibitors])
 
 @admin.route('/add-product', methods=['POST'])
 @login_required
 @admin_required
 def add_product():
-    """Add a new product"""
+    """Add a new product with category synchronization"""
     try:
-        # 1️⃣ جلب معرف العارض (من جدول users)
-        exhibitor_id = request.form.get('user_id')
+        # Get user ID from form (representing the exhibitor user)
+        user_id = request.form.get('user_id')
 
-        if not exhibitor_id:
+        if not user_id:
             flash('يجب اختيار العارض أولاً', 'error')
             return redirect(url_for('admin.manage_products'))
 
-        # 2️⃣ التأكد أن المستخدم المختار هو عارض
-        exhibitor = User.query.filter_by(id=exhibitor_id, role='exhibitor').first()
-        if not exhibitor:
+        # Verify exhibitor user exists with role='exhibitor'
+        user = User.query.filter_by(id=user_id, role='exhibitor').first()
+        if not user:
             flash('العارض المحدد غير موجود أو ليس عارضًا', 'error')
             return redirect(url_for('admin.manage_products'))
 
-        # 3️⃣ جلب اسم القسم من جدول التخصصات
-        specialization_name = None
-        if exhibitor.specialization_id:
-            specialization = Specialization.query.get(exhibitor.specialization_id)
-            specialization_name = specialization.name if specialization else None
-
-        # 4️⃣ جلب باقي بيانات المنتج من الفورم
+        # Get product data from form
         name = request.form.get('name')
         description = request.form.get('description')
         price = float(request.form.get('price', 0))
@@ -99,10 +93,17 @@ def add_product():
         is_featured = bool(request.form.get('is_featured'))
         is_homepage_featured = bool(request.form.get('is_homepage_featured'))
 
-        # 5️⃣ حفظ اسم القسم (category)
-        category = specialization_name or "غير محدد"
+        # Get or create category - use user's specialization if available
+        explicit_category = request.form.get('category', '').strip()
+        if explicit_category:
+            category = explicit_category
+        elif user.specialization_id:
+            specialization = Specialization.query.get(user.specialization_id)
+            category = specialization.name if specialization else "غير محدد"
+        else:
+            category = "غير محدد"
 
-        # 6️⃣ معالجة الصورة
+        # Handle image upload
         image = request.files.get('image')
         image_url = None
         if image:
@@ -110,16 +111,17 @@ def add_product():
             image_path = os.path.join('static', 'images', 'products', filename)
             os.makedirs(os.path.dirname(image_path), exist_ok=True)
             image.save(image_path)
-            image_url = '/' + image_path
+            # Convert backslashes to forward slashes for web URLs
+            image_url = '/' + image_path.replace('\\', '/')
 
-        # 7️⃣ إنشاء المنتج
+        # Create product - use user.id directly from User table
         product = Product(
-            exhibitor_id=exhibitor.id,       # حفظ معرف العارض من جدول users
+            exhibitor_id=user_id,              # Use user ID directly from users table
             name=name,
             description=description,
             price=price,
             currency=currency,
-            category=category,               # اسم القسم من جدول specialization
+            category=category,
             image_url=image_url,
             is_featured=is_featured,
             is_homepage_featured=is_homepage_featured
@@ -202,6 +204,65 @@ def get_product(product_id):
         'image_url': product.image_url
     })
 
+@admin.route('/update-product/<int:product_id>', methods=['POST'])
+@login_required
+@admin_required
+def update_product(product_id):
+    """Update product details including category synchronization"""
+    product = Product.query.get_or_404(product_id)
+    
+    try:
+        # Update basic product info
+        product.name = request.form.get('name', product.name)
+        product.description = request.form.get('description', product.description)
+        product.price = float(request.form.get('price', product.price))
+        product.currency = request.form.get('currency', product.currency)
+        product.is_featured = bool(request.form.get('is_featured'))
+        product.is_homepage_featured = bool(request.form.get('is_homepage_featured'))
+        
+        # Handle category - use explicit category or keep existing
+        explicit_category = request.form.get('category', '').strip()
+        if explicit_category:
+            product.category = explicit_category
+        
+        # Handle image update if provided
+        image = request.files.get('image')
+        if image and image.filename:
+            # Validate image file
+            if allowed_image_file(image.filename):
+                # Delete old image if exists
+                if product.image_url:
+                    old_image_path = os.path.join('static', product.image_url.lstrip('/'))
+                    if os.path.exists(old_image_path):
+                        try:
+                            os.remove(old_image_path)
+                        except OSError:
+                            pass  # Ignore if old file doesn't exist
+                
+                # Save new image
+                filename = secure_filename(image.filename)
+                image_path = os.path.join('static', 'images', 'products', filename)
+                os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                image.save(image_path)
+                # Convert backslashes to forward slashes for web URLs
+                product.image_url = '/' + image_path.replace('\\', '/')
+            else:
+                flash('نوع الصورة غير مدعوم. استخدم: PNG, JPG, JPEG, GIF, WEBP', 'warning')
+        
+        product.updated_at = datetime.now()
+        db.session.commit()
+        
+        flash('تم تحديث المنتج بنجاح', 'success')
+        return redirect(url_for('admin.manage_products'))
+        
+    except ValueError as ve:
+        flash('السعر يجب أن يكون رقمًا صحيحًا', 'error')
+        return redirect(url_for('admin.manage_products'))
+    except Exception as e:
+        db.session.rollback()
+        flash(f'حدث خطأ أثناء تحديث المنتج: {str(e)}', 'error')
+        return redirect(url_for('admin.manage_products'))
+
 @admin.route('/dashboard')
 @login_required
 @admin_required
@@ -223,54 +284,77 @@ def dashboard():
 @admin_required
 def exhibitors():
     """Admin exhibitor management page"""
-    exhibitors = User.query.filter_by(role='exhibitor').order_by(User.created_at.desc()).all()
-    return render_template('admin/exhibitors.html', exhibitors=exhibitors)
+    # Get exhibitors - all from User table with role='exhibitor'
+    exhibitors_list = db.session.query(User)\
+        .outerjoin(Package)\
+        .filter(User.role == 'exhibitor')\
+        .order_by(User.created_at.desc())\
+        .all()
+    
+    # Get analytics data for each exhibitor
+    for exhibitor in exhibitors_list:
+        # Count products
+        exhibitor.product_count = Product.query.filter_by(exhibitor_id=exhibitor.id).count()
+        
+        # Get package name
+        exhibitor.package_name = exhibitor.package.name if exhibitor.package else "لا يوجد باقة"
+        
+        # Get total visits (analytics)
+        exhibitor.total_visits = ExhibitorAnalytics.query\
+            .filter_by(exhibitor_id=exhibitor.id)\
+            .filter_by(action_type='visit')\
+            .count()
+
+        # Get unique visitors count
+        exhibitor.unique_visitors = db.session.query(ExhibitorAnalytics.user_id)\
+            .filter_by(exhibitor_id=exhibitor.id)\
+            .filter_by(action_type='visit')\
+            .distinct().count()
+
+    return render_template('admin/exhibitors.html', exhibitors=exhibitors_list)
 
 @admin.route('/exhibitors/add', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def add_exhibitor():
     """Add new exhibitor route"""
-    # Get all specializations for the dropdown
+    # Get all specializations and packages for the dropdowns
     specializations = Specialization.query.order_by(Specialization.name).all()
+    packages = Package.query.filter_by(is_active=True).order_by(Package.name).all()
     
     if request.method == 'POST':
-        # Create the User record
-        user = User(
-            email=request.form['email'],
-            password=generate_password_hash(request.form['password'], method='scrypt'),
-            first_name=request.form['first_name'],
-            last_name=request.form['last_name'],
-            company_name=request.form['company_name'],
-            company_description=request.form['company_description'],
-            specialization_id=request.form.get('specialization_id'),
-            role='exhibitor',
-            is_active='is_active' in request.form,
-            phone=request.form.get('phone')
-        )
-        
-        # Create the Exhibitor record
-        exhibitor = Exhibitor(
-            company_name=request.form['company_name'],
-            contact_email=request.form['email'],
-            contact_phone=request.form.get('phone'),
-            country=request.form.get('country')
-        )
-        
-        db.session.add(user)
-        
         try:
-            db.session.flush()  # This will assign an ID to the user
-            exhibitor.user_id = user.id
-            db.session.add(exhibitor)
+            # Create the User record with all exhibitor data directly in User table
+            user = User(
+                email=request.form['email'],
+                password=generate_password_hash(request.form['password'], method='scrypt'),
+                first_name=request.form['first_name'],
+                last_name=request.form['last_name'],
+                company_name=request.form['company_name'],
+                company_description=request.form['company_description'],
+                description=request.form.get('description'),
+                specialization_id=request.form.get('specialization_id'),
+                package_id=request.form.get('package_id'),
+                role='exhibitor',
+                is_active='is_active' in request.form,
+                phone=request.form.get('phone'),
+                country=request.form.get('country'),
+                contact_email=request.form.get('contact_email', request.form['email']),
+                contact_phone=request.form.get('contact_phone', request.form.get('phone')),
+                website=request.form.get('website')
+            )
+            
+            db.session.add(user)
             db.session.commit()
-            flash('Exhibitor added successfully.', 'success')
+            
+            flash('تم إضافة العارض بنجاح', 'success')
             return redirect(url_for('admin.exhibitors'))
+            
         except Exception as e:
             db.session.rollback()
-            flash('Error adding exhibitor. Please try again.', 'danger')
+            flash(f'حدث خطأ أثناء إضافة العارض: {str(e)}', 'danger')
             
-    return render_template('admin/exhibitor_form.html', exhibitor=None, specializations=specializations)
+    return render_template('admin/exhibitor_form.html', exhibitor=None, specializations=specializations, packages=packages)
 
 @admin.route('/exhibitors/<int:exhibitor_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -281,7 +365,7 @@ def edit_exhibitor(exhibitor_id):
     specializations = Specialization.query.order_by(Specialization.name).all()
     
     if request.method == 'POST':
-        # Update User information
+        # Update User information directly
         exhibitor.email = request.form['email']
         if request.form.get('password'):  # Only update password if provided
             exhibitor.password = generate_password_hash(request.form['password'], method='scrypt')
@@ -289,25 +373,22 @@ def edit_exhibitor(exhibitor_id):
         exhibitor.last_name = request.form['last_name']
         exhibitor.company_name = request.form['company_name']
         exhibitor.company_description = request.form['company_description']
+        exhibitor.description = request.form.get('description')
         exhibitor.specialization_id = request.form.get('specialization_id')
         exhibitor.is_active = 'is_active' in request.form
         exhibitor.phone = request.form.get('phone')
-
-        # Update Exhibitor information
-        exhibitor_profile = Exhibitor.query.filter_by(user_id=exhibitor.id).first()
-        if exhibitor_profile:
-            exhibitor_profile.company_name = request.form['company_name']
-            exhibitor_profile.contact_email = request.form['email']
-            exhibitor_profile.contact_phone = request.form.get('phone')
-            exhibitor_profile.country = request.form.get('country')
+        exhibitor.contact_email = request.form.get('contact_email', request.form['email'])
+        exhibitor.contact_phone = request.form.get('contact_phone', request.form.get('phone'))
+        exhibitor.website = request.form.get('website')
+        exhibitor.country = request.form.get('country')
         
         try:
             db.session.commit()
-            flash('Exhibitor updated successfully.', 'success')
+            flash('تم تحديث العارض بنجاح', 'success')
             return redirect(url_for('admin.exhibitors'))
         except Exception as e:
             db.session.rollback()
-            flash('Error updating exhibitor. Please try again.', 'danger')
+            flash('حدث خطأ أثناء تحديث العارض. يرجى المحاولة مرة أخرى.', 'danger')
             
     return render_template('admin/exhibitor_form.html', exhibitor=exhibitor, specializations=specializations)
 
@@ -319,12 +400,13 @@ def delete_exhibitor(exhibitor_id):
     exhibitor = User.query.filter_by(id=exhibitor_id, role='exhibitor').first_or_404()
     
     try:
+        # Delete the User directly (all data is now in User table)
         db.session.delete(exhibitor)
         db.session.commit()
-        flash('Exhibitor deleted successfully.', 'success')
+        flash('تم حذف العارض بنجاح', 'success')
     except Exception as e:
         db.session.rollback()
-        flash('Error deleting exhibitor. Please try again.', 'danger')
+        flash('حدث خطأ أثناء حذف العارض. يرجى المحاولة مرة أخرى.', 'danger')
     
     return redirect(url_for('admin.exhibitors'))
 
@@ -656,6 +738,23 @@ def visit_statistics():
 @admin_required
 def get_visitor_data():
     """API endpoint for visitor data"""
+    try:
+        total_visits = Visit.query.count()
+        unique_visitors = db.session.query(Visit.visitor_id).distinct().count()
+        
+        # Get visit trend data
+        visits_by_date = db.session.query(
+            db.func.date(Visit.timestamp).label('date'),
+            db.func.count(Visit.id).label('count')
+        ).group_by(db.func.date(Visit.timestamp)).all()
+        
+        return jsonify({
+            'total_visits': total_visits,
+            'unique_visitors': unique_visitors,
+            'visits_by_date': [{'date': str(v.date), 'count': v.count} for v in visits_by_date]
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @admin.route('/settings')
 @login_required
@@ -691,6 +790,33 @@ def update_interface_settings():
 @admin_required
 def update_exhibition_settings():
     """Update exhibition settings"""
+    try:
+        exhibition_name = request.form.get('exhibition_name')
+        exhibition_date = request.form.get('exhibition_date')
+        
+        # Update exhibition name
+        name_setting = Settings.query.filter_by(key='exhibition_name').first()
+        if name_setting:
+            name_setting.value = exhibition_name
+        else:
+            name_setting = Settings(key='exhibition_name', value=exhibition_name)
+            db.session.add(name_setting)
+        
+        # Update exhibition date
+        date_setting = Settings.query.filter_by(key='exhibition_date').first()
+        if date_setting:
+            date_setting.value = exhibition_date
+        else:
+            date_setting = Settings(key='exhibition_date', value=exhibition_date)
+            db.session.add(date_setting)
+        
+        db.session.commit()
+        flash('تم تحديث إعدادات المعرض بنجاح', 'success')
+        return redirect(url_for('admin.settings'))
+    except Exception as e:
+        db.session.rollback()
+        flash(f'حدث خطأ: {str(e)}', 'error')
+        return redirect(url_for('admin.settings'))
 
 # Video Management Routes
 @admin.route('/videos')
@@ -714,15 +840,15 @@ def manage_videos():
 def add_video():
     """Add a new video"""
     try:
-        # Get exhibitor ID
-        exhibitor_id = request.form.get('user_id')
-        if not exhibitor_id:
+        # Get user ID from form (representing the exhibitor user)
+        user_id = request.form.get('user_id')
+        if not user_id:
             flash('يجب اختيار العارض أولاً', 'error')
             return redirect(url_for('admin.manage_videos'))
 
-        # Verify exhibitor exists
-        exhibitor = User.query.filter_by(id=exhibitor_id, role='exhibitor').first()
-        if not exhibitor:
+        # Verify exhibitor user exists with role='exhibitor'
+        user = User.query.filter_by(id=user_id, role='exhibitor').first()
+        if not user:
             flash('العارض المحدد غير موجود أو ليس عارضاً', 'error')
             return redirect(url_for('admin.manage_videos'))
 
@@ -732,18 +858,19 @@ def add_video():
         is_active = 'is_active' in request.form
 
         # Handle video file upload
-        video = request.files.get('video')
+        video_file = request.files.get('video')
         video_url = None
-        if video and allowed_video_file(video.filename):
-            filename = secure_filename(f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{video.filename}")
+        if video_file and allowed_video_file(video_file.filename):
+            filename = secure_filename(f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{video_file.filename}")
             video_path = os.path.join(VIDEOS_UPLOAD_FOLDER, filename)
             os.makedirs(os.path.dirname(video_path), exist_ok=True)
-            video.save(video_path)
-            video_url = '/' + video_path
+            video_file.save(video_path)
+            # Convert backslashes to forward slashes for web URLs
+            video_url = '/' + video_path.replace('\\', '/')
 
-        # Create new video record
+        # Create new video record with user_id directly from users table
         video = Video(
-            exhibitor_id=exhibitor.id,
+            exhibitor_id=user_id,  # Use user_id directly from User table
             title=title,
             description=description,
             video_url=video_url,
@@ -802,7 +929,8 @@ def update_video(video_id):
             video_path = os.path.join(VIDEOS_UPLOAD_FOLDER, filename)
             os.makedirs(os.path.dirname(video_path), exist_ok=True)
             new_video.save(video_path)
-            video.video_url = '/' + video_path
+            # Convert backslashes to forward slashes for web URLs
+            video.video_url = '/' + video_path.replace('\\', '/')
 
         db.session.commit()
         flash('تم تحديث الفيديو بنجاح', 'success')
@@ -834,36 +962,15 @@ def delete_video(video_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)})
-    exhibition_name = request.form.get('exhibition_name')
-    exhibition_date = request.form.get('exhibition_date')
-    
-    # Update exhibition name
-    name_setting = Settings.query.filter_by(key='exhibition_name').first()
-    if name_setting:
-        name_setting.value = exhibition_name
-    else:
-        name_setting = Settings(key='exhibition_name', value=exhibition_name)
-        db.session.add(name_setting)
-    
-    # Update exhibition date
-    date_setting = Settings.query.filter_by(key='exhibition_date').first()
-    if date_setting:
-        date_setting.value = exhibition_date
-    else:
-        date_setting = Settings(key='exhibition_date', value=exhibition_date)
-        db.session.add(date_setting)
-    
-    db.session.commit()
-    flash('Exhibition settings updated successfully', 'success')
-    return redirect(url_for('admin.settings'))
-    
+
 # Exhibitor Banner Management Routes
 @admin.route('/exhibitor-banners')
 @login_required
 @admin_required
 def manage_exhibitor_banners():
     """Exhibitor banner management page"""
-    exhibitors = db.session.query(Exhibitor, User).join(User).order_by(User.company_name).all()
+    # Query User objects directly with role='exhibitor' 
+    exhibitors = User.query.filter_by(role='exhibitor').order_by(User.company_name).all()
     banners = ExhibitorBanner.query.all()
     
     return render_template('admin/exhibitor_banners.html', 
@@ -876,18 +983,18 @@ def manage_exhibitor_banners():
 def add_exhibitor_banner():
     """Add a new banner for an exhibitor"""
     try:
-        # Get exhibitor ID and title
-        exhibitor_id = request.form.get('exhibitor_id')
+        # Get user ID from form (representing the exhibitor user)
+        user_id = request.form.get('exhibitor_id')
         title = request.form.get('title')
         
-        if not exhibitor_id:
+        if not user_id:
             flash('يجب اختيار العارض أولاً', 'error')
             return redirect(url_for('admin.manage_exhibitor_banners'))
 
-        # Verify exhibitor exists
-        exhibitor = Exhibitor.query.get(exhibitor_id)
-        if not exhibitor:
-            flash('العارض المحدد غير موجود', 'error')
+        # Verify exhibitor user exists with role='exhibitor'
+        user = User.query.filter_by(id=user_id, role='exhibitor').first()
+        if not user:
+            flash('العارض المحدد غير موجود أو ليس عارضاً', 'error')
             return redirect(url_for('admin.manage_exhibitor_banners'))
 
         # Handle banner file upload
@@ -899,11 +1006,14 @@ def add_exhibitor_banner():
             os.makedirs(os.path.dirname(banner_path), exist_ok=True)
             banner.save(banner_path)
             
-            # Create new banner record
+            # Convert backslashes to forward slashes for web URLs
+            image_url = '/' + banner_path.replace('\\', '/')
+            
+            # Create new banner record with user_id directly from users table
             new_banner = ExhibitorBanner(
-                exhibitor_id=exhibitor_id,
+                exhibitor_id=user_id,  # Use user_id directly from User table
                 title=title,
-                image_path='/' + banner_path,
+                image_path=image_url,
                 is_active=True
             )
             
@@ -943,6 +1053,28 @@ def delete_exhibitor_banner(banner_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)})
 
+@admin.route('/exhibitor-banner/<int:banner_id>/toggle-status', methods=['POST'])
+@login_required
+@admin_required
+def toggle_exhibitor_banner_status(banner_id):
+    """Toggle the status of an exhibitor's banner"""
+    try:
+        banner = ExhibitorBanner.query.get_or_404(banner_id)
+        data = request.get_json()
+        banner.is_active = data.get('is_active', False)
+        
+        db.session.commit()
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})
+
+@admin.route('/visitor-data-filter')
+@login_required
+@admin_required
+def get_visitor_data_filter():
+    """API endpoint for filtered visitor data"""
     time_range = int(request.args.get('timeRange', 30))
     visitor_type = request.args.get('visitorType', 'all')
     
@@ -974,3 +1106,128 @@ def delete_exhibitor_banner(banner_id):
             'returning': returning_visitors
         }
     })
+
+
+@admin.route('/partners')
+@login_required
+@admin_required
+def manage_partners():
+    """Admin partner management page"""
+    partners = Partner.query.order_by(Partner.display_order, Partner.created_at.desc()).all()
+    return render_template('admin/partners.html', partners=partners)
+
+@admin.route('/partners/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_partner():
+    """Add new partner route"""
+    if request.method == 'POST':
+        try:
+            name = request.form.get('name')
+            description = request.form.get('description')
+            website_url = request.form.get('website_url')
+            display_order = int(request.form.get('display_order', 0))
+            is_active = 'is_active' in request.form
+
+            # Handle image file upload
+            image = request.files.get('image')
+            image_url = None
+            if image and allowed_image_file(image.filename):
+                filename = secure_filename(f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{image.filename}")
+                image_path = os.path.join('static', 'images', 'partner', filename)
+                os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                image.save(image_path)
+                # Convert backslashes to forward slashes for web URLs
+                image_url = '/' + image_path.replace('\\', '/')
+            else:
+                flash('يرجى اختيار ملف صورة صالح', 'error')
+                return render_template('admin/partner_form.html', partner=None)
+
+            # Create new partner
+            partner = Partner(
+                name=name,
+                description=description,
+                image_path=image_url,
+                website_url=website_url,
+                display_order=display_order,
+                is_active=is_active
+            )
+
+            db.session.add(partner)
+            db.session.commit()
+
+            flash('تم إضافة الراعي بنجاح', 'success')
+            return redirect(url_for('admin.manage_partners'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'حدث خطأ أثناء إضافة الراعي: {str(e)}', 'error')
+            return render_template('admin/partner_form.html', partner=None)
+            
+    return render_template('admin/partner_form.html', partner=None)
+
+@admin.route('/partners/<int:partner_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_partner(partner_id):
+    """Edit partner route"""
+    partner = Partner.query.get_or_404(partner_id)
+    
+    if request.method == 'POST':
+        try:
+            partner.name = request.form.get('name')
+            partner.description = request.form.get('description')
+            partner.website_url = request.form.get('website_url')
+            partner.display_order = int(request.form.get('display_order', 0))
+            partner.is_active = 'is_active' in request.form
+
+            # Handle new image file if provided
+            image = request.files.get('image')
+            if image and allowed_image_file(image.filename):
+                # Delete old image if exists
+                if partner.image_path:
+                    old_image_path = os.path.join('static', partner.image_path.lstrip('/'))
+                    if os.path.exists(old_image_path):
+                        os.remove(old_image_path)
+
+                # Save new image
+                filename = secure_filename(f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{image.filename}")
+                image_path = os.path.join('static', 'images', 'partner', filename)
+                os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                image.save(image_path)
+                # Convert backslashes to forward slashes for web URLs
+                partner.image_path = '/' + image_path.replace('\\', '/')
+
+            db.session.commit()
+            flash('تم تحديث الراعي بنجاح', 'success')
+            return redirect(url_for('admin.manage_partners'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'حدث خطأ أثناء تحديث الراعي: {str(e)}', 'error')
+
+    return render_template('admin/partner_form.html', partner=partner)
+
+@admin.route('/partners/<int:partner_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_partner(partner_id):
+    """Delete partner route"""
+    partner = Partner.query.get_or_404(partner_id)
+    
+    try:
+        # Delete partner image
+        if partner.image_path:
+            image_path = os.path.join('static', partner.image_path.lstrip('/'))
+            if os.path.exists(image_path):
+                os.remove(image_path)
+        
+        db.session.delete(partner)
+        db.session.commit()
+        flash('تم حذف الراعي بنجاح', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'حدث خطأ أثناء حذف الراعي: {str(e)}', 'error')
+    
+    return redirect(url_for('admin.manage_partners'))
+

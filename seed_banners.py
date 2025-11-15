@@ -1,4 +1,4 @@
-from app import app, db
+from main import app, db
 from models import Banner
 
 # Banner data to seed

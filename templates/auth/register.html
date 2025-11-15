@@ -1,72 +1,110 @@
 {% extends "base.html" %}
 
+{% block title %}
+    {% if current_language == 'en' %}
+        Register - ESCO Fairs
+    {% elif current_language == 'ar' %}
+        التسجيل - ESCO Fairs
+    {% else %}
+        S'inscrire - ESCO Fairs
+    {% endif %}
+{% endblock %}
 
 {% block extra_css %}
 <style>
-    body {
-        background-color: #fff;
-        color: #333;
-        font-family: 'Tajawal', sans-serif;
+    main {
+        padding: 0 !important;
     }
+
     .register-section {
-        position: relative;
-        min-height: 100vh;
+        background: linear-gradient(135deg, #e8f1f5 0%, #f5f5f0 100%);
+        min-height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #fff;
+        padding: 60px 40px;
+        position: relative;
         overflow: hidden;
-        padding: 60px 0;
     }
+
     .register-card {
-        background: rgba(255,255,255,0.98);
-        border-radius: 20px;
-        box-shadow: 0 0 30px rgba(0,0,0,0.08);
-        padding: 40px 30px 30px 30px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        padding: 50px;
         max-width: 520px;
         width: 100%;
+        position: relative;
         z-index: 2;
-        margin: 0 auto;
     }
+
     .register-title {
-        color: #95c11f;
-        font-size: 2.2rem;
-        font-weight: bold;
-        margin-bottom: 30px;
+        color: #1e3a5f;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
         text-align: center;
     }
-    .form-label {
-        color: #95c11f;
+
+    .register-subtitle {
+        color: #ff6b00;
+        font-size: 1rem;
+        text-align: center;
+        margin-bottom: 40px;
         font-weight: 500;
     }
+
+    .form-label {
+        color: #1e3a5f;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
     .form-control, .form-select {
         border-radius: 10px;
-        border: 1px solid #e0e0e0;
+        border: 2px solid #e0e0e0;
         font-size: 1rem;
-        padding: 10px 14px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+        font-family: inherit;
     }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #ff6b00;
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.15);
+        background-color: #fff;
+    }
+
     .cta-button {
-        background-color: #95c11f;
+        background-color: #ff6b00;
         color: white;
-        padding: 12px 0;
-        border-radius: 30px;
+        padding: 14px 0;
+        border-radius: 10px;
         font-size: 1.1rem;
+        font-weight: 600;
         border: none;
-        transition: background-color 0.3s ease;
+        transition: all 0.3s ease;
         width: 100%;
-        margin-top: 10px;
+        margin-top: 20px;
     }
+
     .cta-button:hover {
-        background-color: #7a9f19;
-        color: white;
+        background-color: #e55f00;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
     }
+
     .register-link {
-        color: #95c11f;
-        text-decoration: underline;
-        font-weight: 500;
+        color: #ff6b00;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
     }
+
     .register-link:hover {
-        color: #7a9f19;
+        color: #e55f00;
+        text-decoration: underline;
     }
     /* Decorative Circles */
     .circle-group {
@@ -105,196 +143,259 @@
         overflow-x: auto;
         padding: 10px 0;
     }
+
     .package-container {
         display: flex;
-        gap: 20px;
+        gap: 15px;
         padding: 10px;
         min-width: min-content;
     }
+
     .package-card {
-        min-width: 250px;
+        min-width: 200px;
         border: 2px solid #e0e0e0;
-        border-radius: 15px;
-        padding: 20px;
+        border-radius: 12px;
+        padding: 15px;
         text-align: center;
         transition: all 0.3s ease;
         cursor: pointer;
     }
+
     .package-card.selected {
-        border-color: #95c11f;
-        box-shadow: 0 0 15px rgba(149, 193, 31, 0.2);
+        border-color: #ff6b00;
+        background-color: rgba(255, 107, 0, 0.05);
+        box-shadow: 0 0 15px rgba(255, 107, 0, 0.2);
     }
+
     .package-name {
-        color: #95c11f;
-        font-size: 1.5rem;
-        font-weight: bold;
+        color: #1e3a5f;
+        font-size: 1.2rem;
+        font-weight: 700;
         margin-bottom: 10px;
     }
+
     .package-price {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 15px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #ff6b00;
+        margin-bottom: 10px;
     }
+
     .package-description {
         color: #666;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
     }
+
     .view-details-btn {
-        color: #95c11f;
-        text-decoration: underline;
+        color: #ff6b00;
+        text-decoration: none;
         background: none;
         border: none;
         cursor: pointer;
         padding: 5px 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
     }
+
     .view-details-btn:hover {
-        color: #7a9f19;
+        text-decoration: underline;
     }
-    .bottom-left::before { width: 200px; height: 200px; left: 120px; top: 30px; }
-    .bottom-left::after { width: 150px; height: 150px; left: 240px; top: 60px; }
-    .top-right {
-        position: absolute; top: -80px; right: -80px; width: 400px; height: 400px;
-        border-radius: 50%; background: #95c11f; opacity: 0.1; z-index: 1;
-    }
-    .top-right::before, .top-right::after {
-        content: '';
+
+    /* Decorative Elements */
+    .circle-decoration {
         position: absolute;
-        background: #95c11f;
+        width: 300px;
+        height: 300px;
         border-radius: 50%;
-        opacity: 0.1;
+        background: #ff6b00;
+        opacity: 0.05;
+        z-index: 1;
     }
-    .top-right::before { width: 300px; height: 300px; right: 60px; bottom: 40px; }
-    .top-right::after { width: 200px; height: 200px; right: 150px; bottom: 60px; }
+
+    .circle-top-right {
+        top: -150px;
+        right: -150px;
+    }
+
+    .circle-bottom-left {
+        bottom: -150px;
+        left: -150px;
+    }
+
     @media (max-width: 576px) {
-        .register-card { padding: 20px 10px; }
-        .register-title { font-size: 1.5rem; }
+        .register-card {
+            padding: 30px 20px;
+        }
+        .register-title {
+            font-size: 2rem;
+        }
+        .register-section {
+            padding: 40px 20px;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="register-section">
-    <!-- Decorative Circles -->
-    <div class="circle-group top-left">
-        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
-        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
-    </div>
-    <div class="circle-group middle-left">
-        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
-        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
-    </div>
-    <div class="circle-group middle-right">
-        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
-        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
-    </div>
-    <div class="circle-group bottom-right">
-        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
-        <div class="circle"></div><div class="circle"></div><div class="circle"></div><div class="circle"></div>
-    </div>
-    <div class="bottom-left"></div>
-    <div class="top-right"></div>
-    <div class="register-card position-relative">
-        <div class="register-title">
-            {% if current_language == 'en' %}Create New Account{% elif current_language == 'ar' %}إنشاء حساب جديد{% else %}Créer un nouveau compte{% endif %}
-        </div>
+    <div class="circle-decoration circle-top-right"></div>
+    <div class="circle-decoration circle-bottom-left"></div>
+
+    <div class="register-card">
+        <h1 class="register-title">
+            {% if current_language == 'en' %}
+                Create Account
+            {% elif current_language == 'ar' %}
+                إنشاء حساب جديد
+            {% else %}
+                Créer un Compte
+            {% endif %}
+        </h1>
+        <p class="register-subtitle">
+            {% if current_language == 'en' %}
+                Join ESCO Fairs today
+            {% elif current_language == 'ar' %}
+                انضم إلى ESCO Fairs اليوم
+            {% else %}
+                Rejoignez ESCO Fairs aujourd'hui
+            {% endif %}
+        </p>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
+
         <form method="POST" action="{{ url_for('auth.register') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Name Row -->
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="first_name" class="form-label">{% if current_language == 'ar' %}الاسم الأول{% elif current_language == 'fr' %}Prénom{% else %}First Name{% endif %}</label>
+                    <label for="first_name" class="form-label">
+                        {% if current_language == 'ar' %}الاسم الأول{% elif current_language == 'fr' %}Prénom{% else %}First Name{% endif %}
+                    </label>
                     <input type="text" class="form-control" id="first_name" name="first_name" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="last_name" class="form-label">{% if current_language == 'ar' %}اسم العائلة{% elif current_language == 'fr' %}Nom{% else %}Last Name{% endif %}</label>
+                    <label for="last_name" class="form-label">
+                        {% if current_language == 'ar' %}اسم العائلة{% elif current_language == 'fr' %}Nom{% else %}Last Name{% endif %}
+                    </label>
                     <input type="text" class="form-control" id="last_name" name="last_name" required>
                 </div>
             </div>
+
+            <!-- Email -->
             <div class="mb-3">
-                <label for="email" class="form-label">{% if current_language == 'ar' %}البريد الإلكتروني{% elif current_language == 'fr' %}E-mail{% else %}Email{% endif %}</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <label for="email" class="form-label">
+                    {% if current_language == 'ar' %}البريد الإلكتروني{% elif current_language == 'fr' %}E-mail{% else %}Email Address{% endif %}
+                </label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
             </div>
+
+            <!-- Phone -->
             <div class="mb-3">
-                <label for="password" class="form-label">{% if current_language == 'ar' %}كلمة المرور{% elif current_language == 'fr' %}Mot de passe{% else %}Password{% endif %}</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <div class="mb-3">
-                <label for="phone" class="form-label">{% if current_language == 'ar' %}رقم الهاتف{% elif current_language == 'fr' %}Téléphone{% else %}Phone Number{% endif %}</label>
+                <label for="phone" class="form-label">
+                    {% if current_language == 'ar' %}رقم الهاتف{% elif current_language == 'fr' %}Téléphone{% else %}Phone Number{% endif %}
+                </label>
                 <input type="tel" class="form-control" id="phone" name="phone" required>
             </div>
+
+            <!-- Country -->
             <div class="mb-3">
-                <label for="country" class="form-label">{% if current_language == 'ar' %}الدولة{% elif current_language == 'fr' %}Pays{% else %}Country{% endif %}</label>
+                <label for="country" class="form-label">
+                    {% if current_language == 'ar' %}الدولة{% elif current_language == 'fr' %}Pays{% else %}Country{% endif %}
+                </label>
                 <select class="form-select" id="country" name="country" required>
                     <option value="">{% if current_language == 'ar' %}اختر الدولة{% elif current_language == 'fr' %}Sélectionner le pays{% else %}Select Country{% endif %}</option>
                     <option value="Egypt">{% if current_language == 'ar' %}مصر{% elif current_language == 'fr' %}Égypte{% else %}Egypt{% endif %}</option>
-                    <option value="Saudi Arabia">{% if current_language == 'ar' %}المملكة العربية السعودية{% elif current_language == 'fr' %}Arabie Saoudite{% else %}Saudi Arabia{% endif %}</option>
                     <option value="UAE">{% if current_language == 'ar' %}الإمارات العربية المتحدة{% elif current_language == 'fr' %}Émirats Arabes Unis{% else %}UAE{% endif %}</option>
                     <option value="Kuwait">{% if current_language == 'ar' %}الكويت{% elif current_language == 'fr' %}Koweït{% else %}Kuwait{% endif %}</option>
-                    <option value="Qatar">{% if current_language == 'ar' %}قطر{% elif current_language == 'fr' %}Qatar{% else %}Qatar{% endif %}</option>
-                    <option value="Bahrain">{% if current_language == 'ar' %}البحرين{% elif current_language == 'fr' %}Bahreïn{% else %}Bahrain{% endif %}</option>
-                    <option value="Oman">{% if current_language == 'ar' %}عمان{% elif current_language == 'fr' %}Oman{% else %}Oman{% endif %}</option>
                 </select>
             </div>
+
+            <!-- Password -->
             <div class="mb-3">
-                <label for="role" class="form-label">{% if current_language == 'ar' %}التسجيل كـ{% elif current_language == 'fr' %}S'inscrire en tant que{% else %}Register as{% endif %}</label>
+                <label for="password" class="form-label">
+                    {% if current_language == 'ar' %}كلمة المرور{% elif current_language == 'fr' %}Mot de passe{% else %}Password{% endif %}
+                </label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+            </div>
+
+            <!-- Role -->
+            <div class="mb-3">
+                <label for="role" class="form-label">
+                    {% if current_language == 'ar' %}التسجيل كـ{% elif current_language == 'fr' %}S'inscrire en tant que{% else %}Register as{% endif %}
+                </label>
                 <select class="form-select" id="role" name="role" onchange="toggleExhibitorFields()" required>
                     <option value="user">{% if current_language == 'ar' %}مستخدم عادي{% elif current_language == 'fr' %}Utilisateur régulier{% else %}Regular User{% endif %}</option>
                     <option value="exhibitor">{% if current_language == 'ar' %}عارض{% elif current_language == 'fr' %}Exposant{% else %}Exhibitor{% endif %}</option>
                 </select>
             </div>
-            
+
+            <!-- Package Section -->
             <div id="packages-section" class="mb-3" style="display: none;">
-                <label class="form-label">{% if current_language == 'ar' %}اختر الباقة{% elif current_language == 'fr' %}Choisissez votre forfait{% else %}Choose Your Package{% endif %}</label>
+                <label class="form-label">
+                    {% if current_language == 'ar' %}اختر الباقة{% elif current_language == 'fr' %}Choisissez votre forfait{% else %}Choose Package{% endif %}
+                </label>
                 <div class="package-section">
                     <div class="package-container">
                         {% for package in packages %}
                         <div class="package-card" onclick="selectPackage({{ package.id }})">
                             <input type="radio" name="package_id" value="{{ package.id }}" id="package_{{ package.id }}" style="display: none;">
-                            <div class="package-name">
-                                {% if current_language == 'en' and package.name_en %}{{ package.name_en }}{% else %}{{ package.name }}{% endif %}
-                            </div>
-                            <div class="package-price">{{ "%.0f"|format(package.price) }} {% if current_language == 'ar' %}جنيه{% else %}EGP{% endif %}</div>
-                            <div class="package-description">
-                                {% if current_language == 'ar' %}{{ package.description }}{% else %}{{ package.description_en }}{% endif %}
-                            </div>
-                            <button type="button" class="view-details-btn" onclick="viewPackageDetails(event, {{ package.id }})">
-                                {% if current_language == 'ar' %}عرض التفاصيل{% elif current_language == 'fr' %}Voir les détails{% else %}View Details{% endif %}
-                            </button>
+                            <div class="package-name">{{ package.name }}</div>
+                            <div class="package-price">{{ "%.0f"|format(package.price) }}</div>
+                            <div class="package-description">{{ package.description[:50] }}...</div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
+
+            <!-- Exhibitor Fields -->
             <div id="exhibitor-fields" style="display: none;">
                 <div class="mb-3">
-                    <label for="company_name" class="form-label">{% if current_language == 'ar' %}اسم الشركة{% elif current_language == 'fr' %}Nom de l'entreprise{% else %}Company Name{% endif %}</label>
+                    <label for="company_name" class="form-label">
+                        {% if current_language == 'ar' %}اسم الشركة{% elif current_language == 'fr' %}Nom de l'entreprise{% else %}Company Name{% endif %}
+                    </label>
                     <input type="text" class="form-control" id="company_name" name="company_name">
                 </div>
                 <div class="mb-3">
-                    <label for="specialization_id" class="form-label">{% if current_language == 'ar' %}التخصص{% elif current_language == 'fr' %}Spécialisation{% else %}Specialization{% endif %}</label>
+                    <label for="specialization_id" class="form-label">
+                        {% if current_language == 'ar' %}التخصص{% elif current_language == 'fr' %}Spécialisation{% else %}Specialization{% endif %}
+                    </label>
                     <select class="form-select" id="specialization_id" name="specialization_id">
-                        <option value="">{% if current_language == 'ar' %}اختر التخصص{% elif current_language == 'fr' %}Choisir la spécialisation{% else %}Select Specialization{% endif %}</option>
+                        <option value="">{% if current_language == 'ar' %}اختر التخصص{% else %}Select Specialization{% endif %}</option>
                         {% for spec in specializations %}
                             <option value="{{ spec.id }}">{{ spec.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
-            <button type="submit" class="cta-button">{% if current_language == 'ar' %}تسجيل{% elif current_language == 'fr' %}S'inscrire{% else %}Register{% endif %}</button>
+
+            <button type="submit" class="cta-button">
+                {% if current_language == 'ar' %}تسجيل{% elif current_language == 'fr' %}S'inscrire{% else %}Register{% endif %}
+            </button>
         </form>
-        <div class="text-center mt-3">
-            <p>{% if current_language == 'ar' %}لديك حساب بالفعل؟{% elif current_language == 'fr' %}Vous avez déjà un compte?{% else %}Already have an account?{% endif %}
-                <a href="{{ url_for('auth.login') }}" class="register-link">{% if current_language == 'ar' %}تسجيل الدخول{% elif current_language == 'fr' %}Connexion{% else %}Login here{% endif %}</a></p>
+
+        <div class="text-center mt-4">
+            <p style="margin-bottom: 0; color: #666;">
+                {% if current_language == 'ar' %}لديك حساب بالفعل؟{% elif current_language == 'fr' %}Vous avez déjà un compte?{% else %}Already have an account?{% endif %}
+            </p>
+            <a href="{{ url_for('auth.login') }}" class="register-link">
+                {% if current_language == 'ar' %}تسجيل الدخول الآن{% elif current_language == 'fr' %}Connexion ici{% else %}Sign In Now{% endif %}
+            </a>
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -307,7 +408,6 @@ function toggleExhibitorFields() {
     const packageInputs = document.querySelectorAll('input[name="package_id"]');
     
     if (role === 'exhibitor') {
-        // Show fields and make them required for exhibitors
         exhibitorFields.style.display = 'block';
         packagesSection.style.display = 'block';
         companyName.required = true;
@@ -316,19 +416,16 @@ function toggleExhibitorFields() {
             input.required = true;
         });
     } else {
-        // Hide fields and make them not required for regular users
         exhibitorFields.style.display = 'none';
         packagesSection.style.display = 'none';
         companyName.required = false;
         specialization.required = false;
         packageInputs.forEach(input => {
             input.required = false;
-            input.checked = false; // Uncheck any selected package
+            input.checked = false;
         });
-        // Clear values when switching to regular user
         companyName.value = '';
         specialization.value = '';
-        // Remove selected styling from package cards
         document.querySelectorAll('.package-card').forEach(card => {
             card.classList.remove('selected');
         });
@@ -336,21 +433,13 @@ function toggleExhibitorFields() {
 }
 
 function selectPackage(packageId) {
-    // Remove selected class from all package cards
     document.querySelectorAll('.package-card').forEach(card => {
         card.classList.remove('selected');
     });
     
-    // Add selected class to clicked card and check the radio button
     const selectedCard = document.querySelector(`.package-card input[value="${packageId}"]`).closest('.package-card');
     selectedCard.classList.add('selected');
     document.getElementById(`package_${packageId}`).checked = true;
 }
-
-function viewPackageDetails(event, packageId) {
-    event.stopPropagation(); // Prevent card selection when clicking the view details button
-    window.location.href = `{{ url_for('landing') }}#packages`;
-}
 </script>
-{% endblock %}
 {% endblock %}

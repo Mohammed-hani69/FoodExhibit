@@ -7,6 +7,11 @@ import logging
 from extensions import db, migrate, socketio
 from flask_migrate import Migrate
 import socket_handlers  # Import socket handlers
+from dotenv import load_dotenv  # Load environment variables from .env file
+import socket
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize CSRF protection
 csrf = CSRFProtect()
@@ -72,10 +77,14 @@ def create_app():
         from admin_routes import admin as admin_blueprint
         from exhibitor_routes import exhibitor as exhibitor_blueprint
         from auth import auth as auth_blueprint
+        from chatbot_routes import register_chatbot_routes
         
         app.register_blueprint(admin_blueprint)
         app.register_blueprint(exhibitor_blueprint)
         app.register_blueprint(auth_blueprint)
+        
+        # Register chatbot routes
+        register_chatbot_routes(app)
 
     # Language settings
     @app.before_request
@@ -89,8 +98,26 @@ def create_app():
 
     return app
 
-# Create the app instance for direct running
+# Create the app instance
 app = create_app()
 
+# Import routes AFTER app is created to avoid circular imports
+import routes  # noqa: F401
+
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # نتصل بعنوان خارجي عشان يجيب الـ IP الصحيح
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+    return ip
+
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    host = "0.0.0.0"
+    port = 5000
+    print(f"\n✅ Server running at: http://{get_ip()}:{port}\n")
+    socketio.run(app, host=host, port=port, debug=True)

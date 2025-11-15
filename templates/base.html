@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}ESCO FOOD FAIR{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
@@ -13,72 +14,245 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Cairo', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Cairo', Arial, sans-serif;
             min-height: 100vh;
+            background: linear-gradient(135deg, #f5f5f0 0%, #ffffff 100%);
+            color: #333;
+        }
+
+        main {
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Header Navigation */
+        .navbar {
+            background: linear-gradient(135deg, #e8f1f5 0%, #f0f7fb 100%) !important;
+            padding: 0 0 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+            transition: all 0.3s ease;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .navbar > .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            order: 1;
+        }
+
+        .navbar-center {
+            order: 2;
+            display: flex;
+            justify-content: center;
+            flex: 1;
+            width: 100%;
+        }
+
+        .navbar-toggler {
+            order: 3;
+        }
+
+        .navbar:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12) !important;
         }
 
         .navbar-brand {
-            font-weight: 700;
-            color: #fff !important;
+            font-weight: 800;
+            color: #1e3a5f !important;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 12px !important;
+            font-size: 24px !important;
+            text-decoration: none !important;
+            transition: all 0.3s ease !important;
+            letter-spacing: -0.5px !important;
+        }
+
+        .navbar-brand,
+        .navbar-brand * {
+            color: inherit !important;
+        }
+
+        .navbar-brand-main {
+            font-size: 14px !important;
+            font-weight: 800 !important;
+            color: #1e3a5f !important;
+            letter-spacing: 0.5px !important;
+            line-height: 1.1;
+        }
+
+        .navbar-brand-sub {
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            color: #ff6b00 !important;
+            letter-spacing: 0.3px !important;
+            display: none;
+        }
+
+        .navbar-brand:hover {
+            color: #ff6b00 !important;
+            transform: scale(1.02) !important;
+        }
+
+        .navbar-brand:hover .navbar-brand-main {
+            color: #ff6b00 !important;
+        }
+
+        .navbar-brand-logo {
+            height: auto !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 8px !important;
+            flex-shrink: 0;
+        }
+
+        .navbar-brand-logo img {
+            height: 80px !important;
+            width: auto !important;
+            transition: all 0.3s ease !important;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)) !important;
+        }
+
+        .navbar-brand-logo img:hover {
+            transform: scale(1.1) !important;
+        }
+
+        .navbar-brand-text {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 0px !important;
+            text-align: center;
+        }
+
+        .nav-link {
+            color: #1a1a1a !important;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease !important;
+            margin: 0 12px;
+            position: relative;
+            padding: 8px 0 !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b00, #e55f00);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #ff6b00 !important;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .nav-link.active {
+            color: #ff6b00 !important;
+        }
+
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .navbar-right {
             display: flex;
+            gap: 0;
             align-items: center;
-            gap: 10px;
         }
 
-        .navbar-brand img {
-            height: 60px;
-            width: auto;
-            transition: transform 0.3s ease;
+        .navbar-toggler {
+            border-color: #1a1a1a !important;
+            transition: all 0.3s ease;
         }
 
-        .navbar-brand:hover img {
-            transform: scale(1.05);
+        .navbar-toggler:hover {
+            border-color: #ff6b00 !important;
         }
 
-        .logo-footer {
-            height: 80px;
-            width: auto;
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
+        .navbar-collapse {
+            width: 100%;
+            order: 999;
         }
 
-        .logo-footer:hover {
-            transform: scale(1.05);
-        }
-
-        @media (max-width: 576px) {
-            .navbar-brand img {
-                height: 60px;
-            }
-            
-            .logo-footer {
-                height: 70px;
-                margin-bottom: 15px;
-            }
-        }
-
-        @media (max-width: 380px) {
-            .navbar-brand img {
-                height: 45px;
-            }
-            
-            .logo-footer {
-                height: 60px;
-                margin-bottom: 12px;
-            }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%231a1a1a' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
         }
 
         .card {
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 107, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
         }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 40px rgba(255, 107, 0, 0.2);
+            border-color: #ff6b00;
+        }
+
         .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8a2e 100%);
             border: none;
-            border-radius: 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+            overflow: hidden;
+            position: relative;
         }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.4);
+            background: linear-gradient(135deg, #ff8a2e 0%, #ff6b00 100%);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
         .gallery-3d {
             perspective: 1000px;
             transform-style: preserve-3d;
@@ -86,33 +260,47 @@
 
         /* Footer Styles */
         .footer-section {
-            background-color: #1a1a1a;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d4f7a 100%);
             color: #ffffff;
             position: relative;
+            margin-top: 80px;
+        }
+
+        .footer-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #ff6b00, transparent);
         }
 
         .footer-top {
             position: relative;
-            background: linear-gradient(45deg, rgba(149, 193, 31, 0.1), rgba(0, 0, 0, 0));
+            background: linear-gradient(45deg, rgba(255, 107, 0, 0.05), rgba(30, 58, 95, 0));
+            padding: 60px 0 !important;
         }
 
         .footer-heading {
-            color: #95c11f;
+            color: #ff6b00;
             font-size: 1.3rem;
             margin-bottom: 1.5rem;
-            font-weight: 600;
+            font-weight: 700;
             position: relative;
             padding-bottom: 10px;
+            letter-spacing: -0.5px;
         }
 
         .footer-heading::after {
             content: '';
             position: absolute;
-            right: 0;
+            left: 0;
             bottom: 0;
             width: 50px;
-            height: 2px;
-            background-color: #95c11f;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b00, #ff8a2e);
+            border-radius: 2px;
         }
 
         .footer-links {
@@ -122,20 +310,36 @@
         }
 
         .footer-links li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .footer-links a {
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
             display: block;
             padding: 5px 0;
+            position: relative;
+        }
+
+        .footer-links a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 2px;
+            background: #ff6b00;
+            transition: width 0.3s ease;
         }
 
         .footer-links a:hover {
-            color: #95c11f;
-            padding-right: 10px;
+            color: #ff6b00;
+            padding-left: 10px;
+        }
+
+        .footer-links a:hover::before {
+            width: 100%;
         }
 
         .footer-contact {
@@ -148,61 +352,814 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .footer-contact li:hover {
+            padding-left: 8px;
         }
 
         .footer-contact i {
-            color: #95c11f;
-            margin-left: 10px;
+            color: #ff6b00;
+            margin-right: 12px;
             font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-contact li:hover i {
+            transform: scale(1.2);
         }
 
         .social-links {
             display: flex;
-            gap: 15px;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .social-link {
-            width: 40px;
-            height: 40px;
-            background-color: rgba(149, 193, 31, 0.1);
-            color: #95c11f;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(255, 107, 0, 0.1));
+            color: #ff6b00;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none;
+            border: 1px solid rgba(255, 107, 0, 0.3);
+            font-size: 1.1rem;
         }
 
         .social-link:hover {
-            background-color: #95c11f;
+            background: linear-gradient(135deg, #ff6b00, #ff8a2e);
             color: white;
-            transform: translateY(-3px);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.3);
+            border-color: #ff6b00;
         }
 
         .footer-bottom {
-            background-color: #111111;
+            background-color: rgba(26, 46, 71, 0.9);
             font-size: 0.9rem;
+            padding: 25px 0 !important;
+            border-top: 1px solid rgba(255, 107, 0, 0.2);
         }
 
         .footer-bottom-links {
             display: flex;
-            gap: 20px;
+            gap: 25px;
             justify-content: flex-start;
+            flex-wrap: wrap;
         }
 
         .footer-bottom-links a {
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.85);
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-bottom-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #ff6b00;
+            transition: width 0.3s ease;
         }
 
         .footer-bottom-links a:hover {
-            color: #95c11f;
+            color: #ff6b00;
+        }
+
+        .footer-bottom-links a:hover::after {
+            width: 100%;
         }
 
         .logo-footer {
-            height: 80px;
+            height: 50px;
             width: auto;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .logo-footer:hover {
+            transform: scale(1.08);
+            filter: drop-shadow(0 4px 8px rgba(255, 107, 0, 0.2));
+        }
+
+        .footer-about p {
+            color: #e8f1f5;
+            line-height: 1.6;
+        }
+
+        .footer-map-container {
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .footer-map-container:hover {
+            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.3);
+        }
+
+        .footer-map-container iframe {
+            border-radius: 8px;
+        }
+
+        #footer-map {
+            border-radius: 8px;
+        }
+
+        #footer-map .leaflet-container {
+            border-radius: 8px;
+        }
+
+        /* Responsive - Tablets (768px) */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 8px 0 !important;
+                flex-wrap: wrap;
+            }
+
+            .navbar > .container {
+                flex-wrap: wrap;
+                gap: 8px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .navbar-left {
+                order: 1;
+                width: auto;
+            }
+
+            .navbar-brand {
+                font-size: 14px;
+                gap: 8px;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .navbar-brand-main {
+                font-size: 13px;
+            }
+
+            .navbar-brand-sub {
+                font-size: 10px;
+            }
+
+            .navbar-brand-logo img {
+                height: 50px;
+            }
+
+            .navbar-brand-text {
+                text-align: center;
+                gap: 0px !important;
+            }
+
+            .navbar-toggler {
+                padding: 0.2rem 0.4rem;
+                order: 2;
+                position: static;
+                margin-left: 10px;
+            }
+
+            .navbar-center {
+                width: 100% !important;
+                order: 3;
+                display: flex !important;
+                justify-content: center;
+                margin-top: 0;
+            }
+
+            .nav-link {
+                font-size: 14px;
+                margin: 0 8px;
+                padding: 6px 0 !important;
+            }
+
+            .footer-heading {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+
+            .footer-heading::after {
+                width: 40px;
+            }
+
+            .logo-footer {
+                height: 70px;
+                margin-bottom: 15px;
+            }
+        }
+
+        /* Responsive - Small Devices (576px) */
+        @media (max-width: 576px) {
+            .navbar {
+                padding: 6px 0 !important;
+                flex-wrap: nowrap;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .navbar > .container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                flex-wrap: nowrap;
+                gap: 0;
+                padding-left: 8px !important;
+                padding-right: 8px !important;
+            }
+
+            .navbar-left {
+                order: 2;
+                width: auto;
+                justify-content: flex-end;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .navbar-brand {
+                gap: 6px;
+                font-size: 12px;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .navbar-brand-main {
+                font-size: 11px;
+                white-space: nowrap;
+            }
+
+            .navbar-brand-sub {
+                font-size: 8px;
+                display: none;
+            }
+
+            .navbar-brand-logo img {
+                height: 32px;
+            }
+
+            .navbar-brand-logo {
+                padding: 2px !important;
+                margin: 0;
+            }
+
+            .navbar-brand-text {
+                gap: 0px !important;
+                width: auto;
+                text-align: center;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .nav-link {
+                font-size: 12px;
+                margin: 0 6px;
+                padding: 5px 0 !important;
+            }
+
+            .nav-link::after {
+                height: 1px;
+            }
+
+            .navbar-toggler {
+                padding: 0.12rem 0.25rem;
+                border-width: 1px;
+                position: static;
+                order: 1;
+                margin: 0;
+                margin-right: 8px;
+            }
+
+            .navbar-toggler-icon {
+                background-size: 18px;
+            }
+
+            .navbar-center {
+                display: none !important;
+                width: 100% !important;
+                order: 4 !important;
+            }
+
+            .navbar-center.show {
+                display: flex !important;
+                flex-direction: column;
+            }
+
+            .navbar-collapse {
+                position: static !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                background: linear-gradient(135deg, #e8f1f5 0%, #f0f7fb 100%);
+                width: 100% !important;
+                margin-top: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding: 8px !important;
+                border-top: 1px solid rgba(30, 58, 95, 0.1);
+            }
+
+            .navbar-nav {
+                flex-direction: column;
+                width: 100%;
+                margin-top: 8px;
+                padding: 8px 0;
+                gap: 0;
+            }
+
+            .nav-link {
+                font-size: 12px;
+                margin: 0 !important;
+                padding: 8px 12px !important;
+                display: block;
+            }
+
+            .footer-heading {
+                font-size: 0.95rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .footer-heading::after {
+                width: 30px;
+                height: 2px;
+            }
+
+            .logo-footer {
+                height: 45px;
+                margin-bottom: 12px;
+            }
+
+            .footer-links li {
+                margin-bottom: 10px;
+            }
+
+            .footer-contact li {
+                margin-bottom: 12px;
+                font-size: 12px;
+            }
+
+            .social-link {
+                width: 36px;
+                height: 36px;
+                font-size: 0.85rem;
+            }
+        }
+                height: 2px;
+            }
+
+            .logo-footer {
+                height: 45px;
+                margin-bottom: 12px;
+            }
+
+            .footer-links li {
+                margin-bottom: 10px;
+            }
+
+            .footer-contact li {
+                margin-bottom: 12px;
+                font-size: 12px;
+            }
+
+            .social-link {
+                width: 36px;
+                height: 36px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Extra Small Devices (480px) */
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 5px 0 !important;
+                flex-wrap: nowrap;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .container {
+                padding-left: 10px !important;
+                padding-right: 10px !important;
+            }
+
+            .navbar > .container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                flex-wrap: nowrap;
+                gap: 0;
+            }
+
+            .navbar-left {
+                order: 2;
+                width: auto;
+                justify-content: flex-end;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .navbar-brand {
+                gap: 5px;
+                font-size: 11px;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .navbar-brand-main {
+                font-size: 10px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+
+            .navbar-brand-sub {
+                font-size: 7px;
+                display: none;
+            }
+
+            .navbar-brand-logo img {
+                height: 28px;
+            }
+
+            .navbar-brand-logo {
+                padding: 2px !important;
+                margin: 0;
+            }
+
+            .navbar-brand-text {
+                gap: 0px !important;
+                width: auto;
+                text-align: center;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .navbar-nav {
+                margin-right: auto !important;
+                margin-left: auto !important;
+            }
+
+            .nav-link {
+                font-size: 11px;
+                margin: 0 3px;
+                padding: 3px 0 !important;
+            }
+
+            .nav-link::after {
+                height: 1px;
+            }
+
+            .navbar-toggler {
+                padding: 0.08rem 0.2rem;
+                border-width: 1px;
+                border-radius: 3px;
+                position: static;
+                order: 1;
+                margin: 0;
+                margin-right: 6px;
+            }
+
+            .navbar-toggler-icon {
+                width: 18px;
+                height: 18px;
+                background-size: 16px;
+            }
+
+            .navbar-center {
+                display: none !important;
+                width: 100% !important;
+                order: 4 !important;
+            }
+
+            .navbar-center.show {
+                display: flex !important;
+                flex-direction: column;
+            }
+
+            .navbar-collapse {
+                position: static !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                background: linear-gradient(135deg, #e8f1f5 0%, #f0f7fb 100%);
+                width: 100% !important;
+                margin-top: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding: 10px !important;
+                border-top: 1px solid rgba(30, 58, 95, 0.1);
+            }
+
+            .navbar-nav {
+                flex-direction: column;
+                width: 100%;
+                margin-top: 5px;
+                padding: 5px 0;
+                gap: 0;
+            }
+
+            .nav-link {
+                font-size: 11px;
+                margin: 0 !important;
+                padding: 6px 12px !important;
+                display: block;
+            }
+
+            .dropdown-item {
+                padding: 0.3rem 0.8rem;
+            }
+
+            .footer-heading {
+                font-size: 0.9rem;
+                margin-bottom: 0.6rem;
+            }
+
+            .footer-heading::after {
+                width: 25px;
+                height: 2px;
+            }
+
+            .logo-footer {
+                height: 38px;
+                margin-bottom: 10px;
+            }
+
+            .footer-about p {
+                font-size: 11px;
+                line-height: 1.4;
+            }
+
+            .footer-links li {
+                margin-bottom: 8px;
+            }
+
+            .footer-links a {
+                font-size: 11px;
+                padding: 2px 0;
+            }
+
+            .footer-contact li {
+                margin-bottom: 10px;
+                font-size: 11px;
+            }
+
+            .footer-contact i {
+                margin-right: 8px;
+                font-size: 0.95rem;
+            }
+
+            .social-links {
+                gap: 8px;
+                margin-top: 12px;
+            }
+
+            .social-link {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            .footer-bottom {
+                padding: 15px 0 !important;
+                font-size: 0.75rem;
+            }
+
+            .footer-bottom-links {
+                gap: 12px;
+                justify-content: center;
+                margin-top: 8px;
+            }
+
+            .footer-bottom-links a {
+                font-size: 10px;
+            }
+
+            .footer-bottom p {
+                font-size: 10px;
+            }
+        }
+
+        /* Very Small Devices (360px and below) */
+        @media (max-width: 360px) {
+            .navbar {
+                padding: 4px 0 !important;
+                flex-wrap: nowrap;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .container {
+                padding-left: 8px !important;
+                padding-right: 8px !important;
+            }
+
+            .navbar > .container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                flex-wrap: nowrap;
+                gap: 0;
+            }
+
+            .navbar-left {
+                order: 2;
+                width: auto;
+                justify-content: flex-end;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .navbar-brand {
+                gap: 4px;
+                font-size: 10px;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .navbar-brand-main {
+                font-size: 9px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+
+            .navbar-brand-sub {
+                font-size: 6px;
+                display: none;
+            }
+
+            .navbar-brand-logo img {
+                height: 24px;
+            }
+
+            .navbar-brand-logo {
+                padding: 1px !important;
+                margin: 0;
+            }
+
+            .navbar-brand-text {
+                gap: 0px !important;
+                width: auto;
+                text-align: center;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .nav-link {
+                font-size: 10px;
+                margin: 0 2px;
+                padding: 2px 0 !important;
+            }
+
+            .navbar-toggler {
+                padding: 0.06rem 0.15rem;
+                border-width: 1px;
+                top: auto;
+                transform: none;
+                left: auto;
+                order: 1;
+                position: static;
+                margin: 0;
+                margin-right: 4px;
+            }
+
+            .navbar-toggler-icon {
+                width: 16px;
+                height: 16px;
+                background-size: 14px;
+            }
+
+            .navbar-center {
+                display: none !important;
+                width: 100% !important;
+                order: 4 !important;
+            }
+
+            .navbar-center.show {
+                display: flex !important;
+                flex-direction: column;
+            }
+
+            .navbar-collapse {
+                position: static !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                background: linear-gradient(135deg, #e8f1f5 0%, #f0f7fb 100%);
+                width: 100% !important;
+                margin-top: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding: 8px !important;
+                border-top: 1px solid rgba(30, 58, 95, 0.1);
+            }
+
+            .navbar-nav {
+                flex-direction: column;
+                width: 100%;
+                margin-top: 3px;
+                padding: 3px 0;
+                gap: 0;
+            }
+
+            .nav-link {
+                font-size: 10px;
+                margin: 0 !important;
+                padding: 5px 12px !important;
+                display: block;
+            }
+
+            .dropdown-menu {
+                font-size: 10px;
+            }
+
+            .dropdown-item {
+                padding: 0.25rem 0.6rem;
+            }
+
+            .footer-heading {
+                font-size: 0.8rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .footer-heading::after {
+                width: 18px;
+                height: 2px;
+            }
+
+            .logo-footer {
+                height: 32px;
+                margin-bottom: 8px;
+            }
+
+            .footer-about p {
+                font-size: 10px;
+                line-height: 1.3;
+            }
+
+            .footer-links li {
+                margin-bottom: 5px;
+            }
+
+            .footer-links a {
+                font-size: 10px;
+                padding: 1px 0;
+            }
+
+            .footer-contact li {
+                margin-bottom: 6px;
+                font-size: 10px;
+            }
+
+            .footer-contact i {
+                margin-right: 5px;
+                font-size: 0.85rem;
+            }
+
+            .social-links {
+                gap: 6px;
+                margin-top: 10px;
+            }
+
+            .social-link {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+
+            .footer-bottom {
+                padding: 12px 0 !important;
+            }
+
+            .footer-bottom-links {
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .footer-bottom-links a {
+                font-size: 9px;
+            }
+
+            .footer-bottom p {
+                font-size: 9px;
+            }
         }
     </style>
     
@@ -210,22 +1167,28 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: #95c11f;">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="ESCO FOOD FAIR Logo">
-                <span>ESCO FOOD FAIR</span>
-            </a>
+            <div class="navbar-left">
+                <a class="navbar-brand" href="{{ url_for('index') }}">
+                    <div class="navbar-brand-logo">
+                        <img src="/static/images/logo.png" alt="ESCO Logistics">
+                    </div>
+                    <div class="navbar-brand-text">
+                        <div class="navbar-brand-main">ESCO Fairs</div>
+                    </div>
+                </a>
+            </div>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+        </div>
+        
+        <div class="collapse navbar-collapse navbar-center" id="navbarNav">
+                <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="fas fa-home"></i> 
                             {% if current_language == 'en' %}
                                 Home
                             {% elif current_language == 'ar' %}
@@ -235,22 +1198,32 @@
                             {% endif %}
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('chatbot_bp.get_chatbot_info') if 'chatbot_bp' in config.blueprints else '#' }}" title="AI Chatbot">
+                            <i class="fas fa-robot me-2"></i>
+                            {% if current_language == 'en' %}
+                                AI Assistant
+                            {% elif current_language == 'ar' %}
+                                مساعد ذكي
+                            {% else %}
+                                Assistant IA
+                            {% endif %}
+                        </a>
+                    </li>
                     {% if current_user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('gallery') }}">
-                                <i class="fas fa-building"></i>
                                 {% if current_language == 'en' %}
-                                    Halls
+                                    Exhibitors
                                 {% elif current_language == 'ar' %}
-                                    القاعات
+                                    العارضون
                                 {% else %}
-                                    Salles
+                                    Exposants
                                 {% endif %}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('my_box') }}">
-                                <i class="fas fa-box"></i>
                                 {% if current_language == 'en' %}
                                     My Box
                                 {% elif current_language == 'ar' %}
@@ -263,60 +1236,31 @@
                     {% endif %}
                 </ul>
 
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav navbar-right">
                     {% if current_user.is_authenticated %}
                         {% if current_user.role == 'admin' %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('manage_specializations') }}">
-                                    <i class="fas fa-tags"></i>
-                                    {% if current_language == 'en' %}
-                                        Specializations
-                                    {% elif current_language == 'ar' %}
-                                        التخصصات
-                                    {% else %}
-                                        Spécialisations
-                                    {% endif %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-crown"></i> Admin
                                 </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('pending_exhibitors') }}">
-                                    <i class="fas fa-user-clock"></i>
-                                    {% if current_language == 'en' %}
-                                        Exhibitor Requests
-                                    {% elif current_language == 'ar' %}
-                                        طلبات العارضين
-                                    {% else %}
-                                        Demandes d'Exposants
-                                    {% endif %}
-                                </a>
-                            </li>
-                        {% endif %}
-                        
-                        {% if current_user.role == 'admin' %}
-                            <li class="nav-item">
-                                <a class="nav-link dashboard-link admin" href="{{ url_for('admin.dashboard') }}">
-                                    <i class="fas fa-crown"></i>
-                                    {% if current_language == 'en' %}
-                                        Admin Dashboard
-                                    {% elif current_language == 'ar' %}
-                                        لوحة تحكم المشرف
-                                    {% else %}
-                                        Tableau Admin
-                                    {% endif %}
-                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('manage_specializations') }}">Specializations</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('pending_exhibitors') }}">Exhibitor Requests</a></li>
+                                </ul>
                             </li>
                         {% endif %}
                         
                         {% if current_user.role == 'exhibitor' %}
                             <li class="nav-item">
-                                <a class="nav-link dashboard-link exhibitor" href="{{ url_for('exhibitor.dashboard') }}">
+                                <a class="nav-link" href="{{ url_for('exhibitor.dashboard') }}">
                                     <i class="fas fa-store"></i>
                                     {% if current_language == 'en' %}
-                                        Exhibitor Dashboard
+                                        Dashboard
                                     {% elif current_language == 'ar' %}
-                                        لوحة تحكم العارض
+                                        لوحة التحكم
                                     {% else %}
-                                        Tableau Exposant
+                                        Tableau
                                     {% endif %}
                                 </a>
                             </li>
@@ -324,7 +1268,6 @@
                         
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.logout') }}">
-                                <i class="fas fa-sign-out-alt"></i>
                                 {% if current_language == 'en' %}
                                     Logout
                                 {% elif current_language == 'ar' %}
@@ -337,7 +1280,6 @@
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.login') }}">
-                                <i class="fas fa-sign-in-alt"></i>
                                 {% if current_language == 'en' %}
                                     Login
                                 {% elif current_language == 'ar' %}
@@ -349,7 +1291,6 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.register') }}">
-                                <i class="fas fa-user-plus"></i>
                                 {% if current_language == 'en' %}
                                     Register
                                 {% elif current_language == 'ar' %}
@@ -362,7 +1303,6 @@
                     {% endif %}
                 </ul>
             </div>
-        </div>
     </nav>
 
     <!-- Flash Messages -->
@@ -385,30 +1325,27 @@
     </main>
 
     <!-- Footer -->
-        <!-- Footer -->
-    <footer class="footer-section mt-5">
-        <div class="footer-top py-5">
+    <footer class="footer-section">
+        <div class="footer-top">
             <div class="container">
                 <div class="row g-4">
                     <!-- About Section -->
-                    <div class="col-lg-4 col-md-6">
-                        <div class="footer-about">
-                            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="ESCO FOOD FAIR Logo" class="logo-footer mb-4">
-                            <p class="mb-4">
-                                {% if current_language == 'en' %}
-                                    The leading exhibition in the food industry, bringing together the best companies and products under one roof
-                                {% elif current_language == 'ar' %}
-                                    المعرض الرائد في مجال الصناعات الغذائية، نجمع أفضل الشركات والمنتجات تحت سقف واحد
-                                {% else %}
-                                    L'exposition leader dans l'industrie alimentaire, rassemblant les meilleures entreprises et produits sous un même toit
-                                {% endif %}
-                            </p>
-                            <div class="social-links">
-                                <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                                <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                            </div>
+                    <div class="col-lg-4 col-md-6 footer-about">
+                        <h4 class="footer-heading">ESCO Fairs</h4>
+                        <p class="mb-4">
+                            {% if current_language == 'en' %}
+                                Virtual space for real business. Connect with global exhibitors and explore innovative food industry solutions.
+                            {% elif current_language == 'ar' %}
+                                فضاء افتراضي للأعمال الحقيقية. تواصل مع العارضين العالميين واستكشف الحلول المبتكرة في صناعة الأغذية.
+                            {% else %}
+                                Espace virtuel pour les affaires réelles. Connectez-vous avec les exposants mondiaux et explorez les solutions innovantes de l'industrie alimentaire.
+                            {% endif %}
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-link" title="Twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-link" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-link" title="Instagram"><i class="fab fa-instagram"></i></a>
                         </div>
                     </div>
 
@@ -433,15 +1370,17 @@
                                     Accueil
                                 {% endif %}
                             </a></li>
-                            <li><a href="{{ url_for('gallery') }}">
-                                {% if current_language == 'en' %}
-                                    Halls
-                                {% elif current_language == 'ar' %}
-                                    القاعات
-                                {% else %}
-                                    Salles
-                                {% endif %}
-                            </a></li>
+                            {% if current_user.is_authenticated %}
+                                <li><a href="{{ url_for('gallery') }}">
+                                    {% if current_language == 'en' %}
+                                        Exhibitors
+                                    {% elif current_language == 'ar' %}
+                                        العارضون
+                                    {% else %}
+                                        Exposants
+                                    {% endif %}
+                                </a></li>
+                            {% endif %}
                             <li><a href="#about">
                                 {% if current_language == 'en' %}
                                     About Us
@@ -453,11 +1392,11 @@
                             </a></li>
                             <li><a href="#contact">
                                 {% if current_language == 'en' %}
-                                    Contact Us
+                                    Contact
                                 {% elif current_language == 'ar' %}
                                     اتصل بنا
                                 {% else %}
-                                    Contactez-nous
+                                    Contact
                                 {% endif %}
                             </a></li>
                         </ul>
@@ -477,20 +1416,20 @@
                         <ul class="footer-links">
                             <li><a href="{{ url_for('auth.register') }}">
                                 {% if current_language == 'en' %}
-                                    Register as Exhibitor
+                                    Register Now
                                 {% elif current_language == 'ar' %}
-                                    التسجيل كعارض
+                                    سجل الآن
                                 {% else %}
-                                    S'inscrire comme Exposant
+                                    S'inscrire Maintenant
                                 {% endif %}
                             </a></li>
-                            <li><a href="#">
+                            <li><a href="#pricing">
                                 {% if current_language == 'en' %}
-                                    Packages & Pricing
+                                    Pricing Plans
                                 {% elif current_language == 'ar' %}
-                                    الباقات والأسعار
+                                    خطط التسعير
                                 {% else %}
-                                    Forfaits et Prix
+                                    Plans de Tarification
                                 {% endif %}
                             </a></li>
                             <li><a href="#">
@@ -515,24 +1454,24 @@
                     </div>
 
                     <!-- Contact Info -->
-                    <div class="col-lg-3 col-md-6">
+                    <div class="col-lg-2 col-md-6">
                         <h4 class="footer-heading">
                             {% if current_language == 'en' %}
-                                Contact Information
+                                Contact Us
                             {% elif current_language == 'ar' %}
-                                معلومات التواصل
+                                اتصل بنا
                             {% else %}
-                                Informations de Contact
+                                Contactez-nous
                             {% endif %}
                         </h4>
                         <ul class="footer-contact">
                             <li>
                                 <i class="fas fa-phone-alt"></i>
-                                <span>+20 123 456 7890</span>
+                                <span>01277702135</span>
                             </li>
                             <li>
                                 <i class="fas fa-envelope"></i>
-                                <span>info@escofoodfair.com</span>
+                                <span>info@escofairs.com</span>
                             </li>
                             <li>
                                 <i class="fas fa-map-marker-alt"></i>
@@ -548,16 +1487,32 @@
                             </li>
                         </ul>
                     </div>
+
+                    <!-- Location Map -->
+                    <div class="col-lg-2 col-md-6">
+                        <h4 class="footer-heading">
+                            {% if current_language == 'en' %}
+                                Location
+                            {% elif current_language == 'ar' %}
+                                الموقع
+                            {% else %}
+                                Localisation
+                            {% endif %}
+                        </h4>
+                        <div class="footer-map-container">
+                            <div id="footer-map" style="width: 100%; height: 200px; border-radius: 8px;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Footer Bottom -->
-        <div class="footer-bottom py-3">
+        <div class="footer-bottom">
             <div class="container">
                 <div class="row align-items-center">
-                    <div class="col-md-6 text-center text-md-end">
-                        <p class="mb-0">&copy; 2025 ESCO FOOD FAIR. 
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        <p class="mb-0">&copy; 2025 ESCO Fairs. 
                             {% if current_language == 'en' %}
                                 All rights reserved.
                             {% elif current_language == 'ar' %}
@@ -567,7 +1522,7 @@
                             {% endif %}
                         </p>
                     </div>
-                    <div class="col-md-6 text-center text-md-start">
+                    <div class="col-md-6 text-center text-md-end">
                         <div class="footer-bottom-links">
                             <a href="#">
                                 {% if current_language == 'en' %}
@@ -584,7 +1539,7 @@
                                 {% elif current_language == 'ar' %}
                                     الشروط والأحكام
                                 {% else %}
-                                    Termes et Conditions
+                                    Conditions Générales
                                 {% endif %}
                             </a>
                         </div>
@@ -595,13 +1550,319 @@
     </footer>
 
     <!-- Bootstrap JS -->
-
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Socket.IO -->
     <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <!-- Leaflet JS & CSS for Map -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    
+    <!-- Global CSRF Token Setup -->
+    <script>
+        // Get CSRF Token
+        function getCsrfToken() {
+            const token = document.querySelector('meta[name="csrf-token"]')?.content;
+            return token || '';
+        }
+
+        // Configure fetch to include CSRF token by default for all POST/PUT/DELETE/PATCH requests
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            const [resource, config] = args;
+            const method = (config?.method || 'GET').toUpperCase();
+            
+            if (method === 'POST' || method === 'PUT' || method === 'DELETE' || method === 'PATCH') {
+                if (!config) args[1] = {};
+                if (!args[1].headers) args[1].headers = {};
+                
+                // Add CSRF token to all non-GET requests
+                args[1].headers['X-CSRFToken'] = getCsrfToken();
+            }
+            
+            return originalFetch.apply(this, args);
+        };
+
+        // Initialize Map
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cairo, Egypt coordinates
+            const lat = 30.0333;
+            const lng = 31.2357;
+            
+            // Create map
+            const map = L.map('footer-map').setView([lat, lng], 13);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Add red marker at ESCO location
+            const redIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+            
+            L.marker([lat, lng], {icon: redIcon})
+                .addTo(map)
+                .bindPopup('ESCO Fairs<br>Cairo, Egypt')
+                .openPopup();
+        });
+    </script>
+    
+    <!-- Floating Chatbot Button -->
+    <div id="chatbot-floating-btn" class="chatbot-floating-btn" title="AI Assistant">
+        <div class="chatbot-icon-wrapper">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="chatbot-label">
+            {% if current_language == 'ar' %}
+                مساعد ذكي
+            {% elif current_language == 'en' %}
+                AI Assistant
+            {% else %}
+                Assistant IA
+            {% endif %}
+        </div>
+        <span class="chatbot-pulse"></span>
+    </div>
+
     <!-- Main JavaScript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Chatbot Floating Button Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatbotBtn = document.getElementById('chatbot-floating-btn');
+            
+            // Navigate to chatbot page
+            chatbotBtn.addEventListener('click', function() {
+                // Navigate to the chatbot page
+                window.location.href = '/ai-chatbot';
+            });
+
+            // Add hover effect
+            chatbotBtn.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+            });
+
+            chatbotBtn.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+
+    <!-- Floating Chatbot Styles -->
+    <style>
+        /* Floating Chatbot Button */
+        .chatbot-floating-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4), 
+                        0 0 0 0 rgba(102, 126, 234, 0.7);
+            z-index: 9999;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: none;
+            color: white;
+            font-size: 32px;
+            overflow: visible;
+            position: fixed;
+            animation: floatMove 3s ease-in-out infinite;
+        }
+
+        /* Floating Animation */
+        @keyframes floatMove {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .chatbot-floating-btn:hover {
+            transform: scale(1.15) translateY(0px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5),
+                        0 0 0 8px rgba(102, 126, 234, 0.1);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .chatbot-floating-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Icon Wrapper */
+        .chatbot-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            position: relative;
+        }
+
+        .chatbot-icon-wrapper i {
+            font-size: 36px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Label */
+        .chatbot-label {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.98);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chatbot-floating-btn:hover .chatbot-label {
+            opacity: 1;
+            bottom: -50px;
+            animation: labelBounce 0.5s ease-out;
+        }
+
+        @keyframes labelBounce {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-5px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* Pulse Animation */
+        .chatbot-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.6);
+            animation: pulse 2.5s ease-out infinite;
+            z-index: 1;
+            top: 0;
+            left: 0;
+        }
+
+        @keyframes pulse {
+            0% {
+                width: 100%;
+                height: 100%;
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                width: 140%;
+                height: 140%;
+                opacity: 0;
+                transform: scale(1.4);
+            }
+        }
+
+        /* Responsive - Small Screens */
+        @media (max-width: 576px) {
+            .chatbot-floating-btn {
+                bottom: 25px;
+                left: 25px;
+                width: 65px;
+                height: 65px;
+                font-size: 30px;
+            }
+
+            .chatbot-icon-wrapper i {
+                font-size: 32px;
+            }
+
+            .chatbot-label {
+                font-size: 11px;
+                bottom: -38px;
+                padding: 8px 12px;
+            }
+
+            .chatbot-floating-btn:hover .chatbot-label {
+                bottom: -48px;
+            }
+        }
+
+        /* Extra Small Screens */
+        @media (max-width: 480px) {
+            .chatbot-floating-btn {
+                bottom: 20px;
+                left: 20px;
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+
+            .chatbot-icon-wrapper i {
+                font-size: 28px;
+            }
+
+            .chatbot-label {
+                font-size: 10px;
+                bottom: -35px;
+                padding: 7px 10px;
+            }
+
+            .chatbot-floating-btn:hover .chatbot-label {
+                bottom: -45px;
+            }
+        }
+
+        /* Very Small Screens */
+        @media (max-width: 360px) {
+            .chatbot-floating-btn {
+                bottom: 15px;
+                left: 15px;
+                width: 55px;
+                height: 55px;
+                font-size: 26px;
+            }
+
+            .chatbot-icon-wrapper i {
+                font-size: 26px;
+            }
+
+            .chatbot-label {
+                font-size: 9px;
+                bottom: -32px;
+                padding: 6px 9px;
+            }
+
+            .chatbot-floating-btn:hover .chatbot-label {
+                bottom: -42px;
+            }
+        }
+    </style>
     
     {% block extra_js %}{% endblock %}
 </body>

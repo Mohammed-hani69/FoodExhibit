@@ -1,4 +1,4 @@
-from app import create_app
+from main import create_app
 from extensions import db
 from models import User, Product, Package, Specialization
 from werkzeug.security import generate_password_hash
